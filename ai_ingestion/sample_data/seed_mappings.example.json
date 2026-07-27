@@ -1,0 +1,14 @@
+[
+  {
+    "raw_columns": ["Trans Date", "Details", "Debit Amount", "Credit Amount", "Running Balance"],
+    "mapping": {
+      "Trans Date": "Date",
+      "Details": "Description",
+      "Debit Amount": "Debit",
+      "Credit Amount": "Credit",
+      "Running Balance": "Balance"
+    },
+    "confidence_score": 100,
+    "reasoning": "Manually authored seed mapping for our standard checking account export format."
+  }
+]

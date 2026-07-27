@@ -1,0 +1,15 @@
+Account_Code,Account_Name,Account_Type,Aliases
+1000,Cash,Asset,cash|bank|checking account|operating account
+1100,Accounts Receivable,Asset,accounts receivable|ar
+1500,Equipment,Asset,equipment|capital expenditure|capex|machinery
+2000,Accounts Payable,Liability,accounts payable|ap
+2500,Loans Payable,Liability,loans payable|loan|bank loan|notes payable
+3000,Common Stock,Equity,common stock|owner investment|owners investment|capital contribution|paid-in capital
+3900,Retained Earnings,Equity,retained earnings
+4000,Sales Revenue,Revenue,sales revenue|sales|product sales
+4100,Service Revenue,Revenue,service revenue|service|consulting revenue
+5000,Cost of Goods Sold,Expense,cogs|cost of goods sold|cost of sales
+5100,Rent Expense,Expense,rent|rent expense|office rent
+5200,Salaries Expense,Expense,salaries|salary|payroll|wages
+5300,Utilities Expense,Expense,utilities|utility|electricity|water bill
+5400,Marketing Expense,Expense,marketing|advertising|marketing expense

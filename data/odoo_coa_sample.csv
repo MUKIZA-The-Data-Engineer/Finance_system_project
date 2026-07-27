@@ -1,0 +1,15 @@
+code,name,account_type
+101000,Cash,Asset
+101200,Accounts Receivable,Asset
+102100,Equipment,Asset
+201000,Accounts Payable,Liability
+201500,Loans Payable,Liability
+301000,Common Stock,Equity
+399000,Retained Earnings,Equity
+400000,Sales Revenue,Revenue
+400100,Service Revenue,Revenue
+500000,Cost of Goods Sold,Expense
+610000,Rent Expense,Expense
+620000,Salaries Expense,Expense
+630000,Utilities Expense,Expense
+640000,Marketing Expense,Expense
