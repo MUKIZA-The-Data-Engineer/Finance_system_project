@@ -12,3 +12,25 @@ venv/
 .DS_Store
 .idea/
 .vscode/
+
+# Packaging / tooling
+*.egg-info/
+dist/
+build/
+.pytest_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# ReconPipe generated artifacts (regenerated on every run)
+*.duckdb
+*.duckdb.wal
+data/staging/*
+data/quarantine/*
+reports/*
+!**/.gitkeep
+
+# dbt
+dbt/target/
+dbt/logs/
+dbt/dbt_packages/
