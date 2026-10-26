@@ -2,7 +2,7 @@
 
 Bank statement → ledger reconciliation pipeline.
 
-> Work in progress: day 5 of a 16-day build (26 Oct – 10 Nov 2026).
+> Work in progress: day 6 of a 16-day build (26 Oct – 10 Nov 2026).
 > The full README with the architecture, metrics and design decisions lands on day 15.
 
 ## Architecture

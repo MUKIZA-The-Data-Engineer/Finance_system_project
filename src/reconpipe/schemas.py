@@ -132,7 +132,10 @@ class CleanTransaction(BaseModel):
     row_number: RowNumber
     txn_hash: str = Field(
         pattern=r"^[0-9a-f]{64}$",
-        description="SHA-256 of date + amount + description_clean + account_id.",
+        description=(
+            "SHA-256 of account_id + date + amount + description_clean + balance "
+            "(balance only when the statement prints one)."
+        ),
     )
 
     @model_validator(mode="after")
