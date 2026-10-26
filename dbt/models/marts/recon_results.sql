@@ -17,7 +17,8 @@ matched_ledger as (
         sum(l.amount)                                            as ledger_amount,
         min(l.txn_date)                                          as ledger_date,
         string_agg(l.description_raw, ' | ' order by l.ledger_entry_id) as ledger_description,
-        string_agg(l.source_row::varchar, ',' order by l.ledger_entry_id) as ledger_source_rows
+        string_agg(l.source_row::varchar, ',' order by l.ledger_entry_id) as ledger_source_rows,
+        min(l.source_file)                                       as ledger_source_file
     from matched as m, unnest(m.ledger_entry_ids) as u(ledger_entry_id)
     join ledger as l on l.ledger_entry_id = u.ledger_entry_id
     group by m.bank_txn_id
@@ -44,6 +45,7 @@ bank_items as (
         ml.ledger_date,
         ml.ledger_amount,
         ml.ledger_description,
+        ml.ledger_source_file,
         ml.ledger_source_rows
     from {{ ref('stg_bank_transactions') }} as b
     left join matched as m using (bank_txn_id)
@@ -69,6 +71,7 @@ ledger_items as (
         l.txn_date                                      as ledger_date,
         l.amount                                        as ledger_amount,
         l.description_raw                               as ledger_description,
+        l.source_file                                   as ledger_source_file,
         l.source_row::varchar                           as ledger_source_rows
     from ledger as l
     where l.ledger_entry_id not in (select ledger_entry_id from consumed)

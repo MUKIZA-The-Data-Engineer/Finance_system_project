@@ -1,15 +1,18 @@
-"""The pipeline so far: raw files -> parsed -> standardised -> validated -> warehouse.
+"""The whole pipeline: raw files -> parsed -> standardised -> validated ->
+warehouse -> dbt matching cascade -> exception report.
 
-    python -m reconpipe            # run on data/raw/, print the one-line result
+    python -m reconpipe            # run end to end on data/raw/
 
-Writes data/quarantine/quarantine_<run_id>.csv, reports/run_summary.json and
-loads warehouse.duckdb. Each stage reads only what the stage before it produced.
+Writes data/quarantine/quarantine_<run_id>.csv, loads warehouse.duckdb, runs
+`dbt build`, and writes reports/exceptions.csv, matched.csv and run_summary.json.
+Each stage reads only what the stage before it produced.
 """
 
 from __future__ import annotations
 
 import json
 import logging
+import os
 import time
 from collections import Counter
 from contextlib import closing
@@ -20,6 +23,7 @@ from pathlib import Path
 from reconpipe.extract import default_registry
 from reconpipe.extract.ledger import read_ledger
 from reconpipe.load import LoadResult, RunInfo, connect, load_warehouse
+from reconpipe.report import ReportResult, build_reports
 from reconpipe.schemas import CleanTransaction
 from reconpipe.transform import standardize
 from reconpipe.validate import CONTRACT, QuarantinedRow, Violation, validate, write_quarantine
@@ -146,6 +150,61 @@ def run_pipeline(
     return PipelineResult(ingestion, loaded, Path(db_path))
 
 
+class DbtBuildError(RuntimeError):
+    """dbt build failed: a model errored or a data test found bad rows."""
+
+
+def run_dbt(db_path: Path, project_dir: Path = Path("dbt")) -> None:
+    """`dbt build` (models + data tests) against db_path, in this process."""
+    from dbt.cli.main import dbtRunner
+
+    previous = os.environ.get("RECONPIPE_DB")
+    os.environ["RECONPIPE_DB"] = str(Path(db_path).resolve())
+    try:
+        args = ["build", "--project-dir", str(project_dir), "--profiles-dir", str(project_dir)]
+        result = dbtRunner().invoke([*args, "--quiet"])
+    finally:
+        if previous is None:
+            os.environ.pop("RECONPIPE_DB", None)
+        else:
+            os.environ["RECONPIPE_DB"] = previous
+    if result.exception is not None:
+        raise DbtBuildError(f"dbt build could not run: {result.exception}")
+    if not result.success:
+        failed = [r.node.name for r in result.result if r.status not in ("pass", "success")]
+        raise DbtBuildError(f"dbt build failed: {', '.join(failed)}")
+
+
+@dataclass
+class RunAllResult:
+    pipeline: PipelineResult
+    report: ReportResult
+
+
+def run_all(
+    raw_dir: Path = Path("data/raw"),
+    quarantine_dir: Path = Path("data/quarantine"),
+    reports_dir: Path = Path("reports"),
+    db_path: Path = Path("warehouse.duckdb"),
+    dbt_dir: Path = Path("dbt"),
+    expected_path: Path | None = Path("tests/expected_results.json"),
+    today: date | None = None,
+    run_id: str | None = None,
+) -> RunAllResult:
+    """Everything, end to end. expected_path, if it exists, adds an accuracy check."""
+    started = time.perf_counter()
+    pipeline = run_pipeline(raw_dir, quarantine_dir, reports_dir, db_path, None, today, run_id)
+    run_dbt(db_path, dbt_dir)
+    report = build_reports(
+        db_path,
+        reports_dir,
+        pipeline.ingestion.summary,
+        expected_path,
+        duration_seconds=time.perf_counter() - started,
+    )
+    return RunAllResult(pipeline, report)
+
+
 def describe(summary: dict) -> str:
     """'Of N rows, M passed, D duplicates were removed and K were quarantined (...)'."""
     reasons = summary["quarantine_reasons"]
@@ -159,12 +218,18 @@ def describe(summary: dict) -> str:
 
 def main() -> int:
     logging.basicConfig(level=logging.INFO, format="%(levelname)s %(message)s")
-    result = run_pipeline()
-    print(describe(result.ingestion.summary))
-    print(
-        f"Warehouse:  {result.db_path} ({result.load.bank_rows} bank rows, "
-        f"{result.load.ledger_rows} ledger entries)"
-    )
-    print(f"Summary:    {result.ingestion.summary_file}")
-    print(f"Quarantine: {result.ingestion.quarantine_file}")
+    result = run_all()
+    summary = result.report.summary
+    print(describe(summary))
+    print(summary["headline"])
+    if "accuracy" in summary:
+        acc = summary["accuracy"]
+        print(
+            f"Accuracy vs ground truth: {acc['items_correct']}/{acc['items_checked']} "
+            f"items ({acc['accuracy']:.1%})"
+        )
+    print(f"Exceptions: {result.report.exceptions_file}")
+    print(f"Summary:    {result.report.summary_file}")
+    print(f"Quarantine: {result.pipeline.ingestion.quarantine_file}")
+    print(f"Warehouse:  {result.pipeline.db_path}")
     return 0

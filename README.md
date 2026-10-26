@@ -2,7 +2,7 @@
 
 Bank statement → ledger reconciliation pipeline.
 
-> Work in progress: day 10 of a 16-day build (26 Oct – 10 Nov 2026).
+> Work in progress: day 11 of a 16-day build (26 Oct – 10 Nov 2026).
 > The full README with the architecture, metrics and design decisions lands on day 15.
 
 ## Architecture
@@ -34,9 +34,23 @@ source .venv/bin/activate        # Windows Git Bash: source .venv/Scripts/activa
 pip install -e ".[dev]"
 python scripts/generate_statements.py   # writes data/raw/ + tests/expected_results.json
 pytest
-python -m reconpipe                     # parse, standardise, validate, load warehouse.duckdb
-dbt build --project-dir dbt --profiles-dir dbt   # staging models + data tests
+python -m reconpipe                     # everything: parse -> validate -> load -> dbt -> reports
 ```
+
+`python -m reconpipe` prints the headline and writes `reports/exceptions.csv` (what a
+person must look at, with the file and row on both sides), `reports/matched.csv` and
+`reports/run_summary.json`. To run only the dbt part again:
+`dbt build --project-dir dbt --profiles-dir dbt`.
+
+## Result
+
+> Reconciles 288 bank transactions across 3 bank formats in about 9 s, auto-matching
+> 96.5%, and surfaces the other 16 items as a reviewable exception report.
+
+Checked against the generator's ground truth, every item is classified correctly
+(294/294): 219 exact-reference matches, 53 amount + date, 6 fuzzy, and the 16 planted
+exceptions (6 amount mismatches, 4 missing in the books, 3 missing on the statement,
+3 double postings). 3 malformed statement lines are quarantined before matching.
 
 Then ask the warehouse a question, for example total debits per account per month:
 
