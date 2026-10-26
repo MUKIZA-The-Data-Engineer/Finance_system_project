@@ -153,7 +153,7 @@ def _signed_amount(raw: RawTransaction) -> tuple[Decimal | None, Decimal | None,
         return debit, credit, amount
     if debit is None and credit is None:
         raise StandardizeError("no amount: debit, credit and amount are all empty")
-    return debit, credit, (credit or Decimal("0")) - (debit or Decimal("0"))
+    return debit, credit, ((credit or Decimal("0")) - (debit or Decimal("0"))).quantize(CENT)
 
 
 def standardize_row(raw: RawTransaction, date_format: str) -> CleanTransaction:

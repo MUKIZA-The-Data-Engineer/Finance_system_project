@@ -76,3 +76,18 @@ CREATE TABLE IF NOT EXISTS pipeline_runs (
     bank_rows_loaded    INTEGER NOT NULL,
     ledger_rows_loaded  INTEGER NOT NULL
 );
+
+-- Rows the validate layer quarantined in the latest run (replaced every load),
+-- so the review app can show data quality next to the reconciliation.
+CREATE TABLE IF NOT EXISTS quarantined_rows (
+    run_id        VARCHAR NOT NULL,
+    rules         VARCHAR NOT NULL,   -- ';'-separated rule names
+    reasons       VARCHAR NOT NULL,
+    source_file   VARCHAR NOT NULL,
+    row_number    INTEGER NOT NULL,
+    account_id    VARCHAR NOT NULL,
+    date          VARCHAR,            -- as read: a quarantined date may be invalid
+    description   VARCHAR,
+    amount        VARCHAR,
+    balance       VARCHAR
+);

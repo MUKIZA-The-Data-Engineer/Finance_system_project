@@ -2,7 +2,7 @@
 
 Bank statement → ledger reconciliation pipeline.
 
-> Work in progress: day 12 of a 16-day build (26 Oct – 10 Nov 2026).
+> Work in progress: day 13 of a 16-day build (26 Oct – 10 Nov 2026).
 > The full README with the architecture, metrics and design decisions lands on day 15.
 
 ## Architecture
@@ -54,6 +54,18 @@ dagster asset materialize -m orchestration.definitions --select "*"   # one comm
 ```
 
 ![Dagster asset graph](docs/img/dagster_graph.png)
+
+## Review app
+
+```bash
+streamlit run app/dashboard.py        # after python -m reconpipe
+```
+
+Four things, read straight from DuckDB: the run's headline numbers, a filterable
+exceptions table that downloads as CSV (the handoff to an accountant), the match
+rate by tier, and the rows quarantined for data quality.
+
+![Review app demo](docs/img/demo.gif)
 
 ## Result
 

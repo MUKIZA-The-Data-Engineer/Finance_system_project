@@ -24,6 +24,7 @@ dev = [
     "reportlab>=4.0",
     "dagster>=1.8",
     "dagster-webserver>=1.8",
+    "streamlit>=1.38",
 ]
 
 [build-system]
@@ -44,7 +45,7 @@ addopts = "-q"
 [tool.ruff]
 line-length = 100
 target-version = "py311"
-src = ["src", "tests", "orchestration"]
+src = ["src", "tests", "orchestration", "app"]
 
 [tool.ruff.lint]
 select = ["E", "F", "I", "B", "UP"]

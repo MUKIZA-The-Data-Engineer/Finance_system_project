@@ -18,6 +18,7 @@ import duckdb
 
 from reconpipe.schemas import CleanTransaction, LedgerEntry
 from reconpipe.transform import clean_description
+from reconpipe.validate import QuarantinedRow
 
 SCHEMA_SQL = Path(__file__).with_name("schema.sql").read_text(encoding="utf-8")
 
@@ -62,6 +63,11 @@ def find_counterparty(description_clean: str, keys: list[str]) -> str | None:
     return max(hits, key=len) if hits else None
 
 
+def _text(value: object) -> str:
+    """'' for missing; never treat Decimal('0.00') as missing."""
+    return "" if value is None else str(value)
+
+
 def _replace_rows(con, table: str, files: set[str]) -> None:
     for name in sorted(files):
         con.execute(f"DELETE FROM {table} WHERE source_file = ?", [name])
@@ -88,6 +94,7 @@ def load_warehouse(
     bank_rows: list[CleanTransaction],
     ledger_rows: list[LedgerEntry],
     run: RunInfo,
+    quarantined: list[QuarantinedRow] | None = None,
 ) -> LoadResult:
     names = {
         counterparty_key(e.counterparty): e.counterparty for e in ledger_rows if e.counterparty
@@ -157,6 +164,28 @@ def load_warehouse(
                         run.run_id,
                     ]
                     for e in ledger_rows
+                ],
+            )
+
+        con.execute("DELETE FROM quarantined_rows")  # always the latest run's view
+        if quarantined:
+            con.executemany(
+                "INSERT INTO quarantined_rows VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                [
+                    [
+                        run.run_id,
+                        ";".join(q.rules),
+                        "; ".join(v.message for v in q.violations),
+                        q.row.source_file,
+                        q.row.row_number,
+                        q.row.account_id,
+                        str(q.row.date),
+                        getattr(q.row, "description_raw", None)
+                        or getattr(q.row, "description", None),
+                        _text(getattr(q.row, "amount", None)),
+                        _text(q.row.balance),
+                    ]
+                    for q in quarantined
                 ],
             )
 

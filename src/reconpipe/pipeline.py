@@ -166,7 +166,7 @@ def load_ingestion(
         rows_quarantined=s["rows_quarantined"],
     )
     with closing(connect(db_path)) as con:
-        loaded = load_warehouse(con, ingestion.rows, ledger, run)
+        loaded = load_warehouse(con, ingestion.rows, ledger, run, ingestion.quarantined)
 
     s["warehouse"] = {
         "db_path": Path(db_path).as_posix(),
