@@ -39,7 +39,7 @@ def test_one_loop_combines_all_three_formats():
         "bank_b_statement_2026Q1.pdf": BankBPdfParser.name,
         "bank_c_statement_2026Q1.xlsx": ExcelStatementParser.name,
     }
-    assert len(result.transactions) == sum(PRINTED.values()) == 291
+    assert len(result.transactions) == sum(PRINTED.values()) == 292
     for name, count in PRINTED.items():
         assert sum(r.source_file == name for r in result.transactions) == count
     assert {r.account_id for r in result.transactions} == {

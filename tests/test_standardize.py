@@ -198,23 +198,27 @@ def result():
     return standardize(raw_rows)
 
 
-def test_one_clean_row_per_real_transaction(result):
+def test_one_clean_row_per_printed_line_except_the_reprint(result):
+    # Standardising only removes the reprint; the planted defects are the
+    # validate layer's job, so the 0.00 line is still here.
+    extra_lines = [d for d in EXPECTED["quality_defects"] if d["seq"] is None]
     assert result.failed == []
-    assert len(result.clean) == EXPECTED["totals"]["bank_transactions"] == 290
+    assert len(result.clean) == EXPECTED["totals"]["bank_transactions"] + len(extra_lines) == 291
     (dup,) = result.duplicates
     statement_b = next(s for s in EXPECTED["statements"] if s["duplicate_printed_seqs"])
     (seq,) = statement_b["duplicate_printed_seqs"]
-    assert dup.duplicate_of.row_number == seq and dup.row.row_number == seq + 1
+    first, second = [i for i, s in enumerate(statement_b["printed_seqs"], 1) if s == seq]
+    assert (dup.duplicate_of.row_number, dup.row.row_number) == (first, second)
 
 
 def test_clean_rows_match_ground_truth(result):
-    truth = {
-        (t["account_id"], t["date"], Decimal(t["amount"])): t for t in EXPECTED["bank_transactions"]
-    }
+    lines = {(t["file"], t["row_number"]): t for t in EXPECTED["bank_transactions"]}
+    lines |= {(d["file"], d["row_number"]): d for d in EXPECTED["quality_defects"]}
     for row in result.clean:
-        t = truth[(row.account_id, row.date.isoformat(), row.amount)]
-        assert row.balance == Decimal(t["balance"])
-        assert row.ref_id == t["ref_id"]
+        t = lines[(row.source_file, row.row_number)]
+        assert row.date.isoformat() == (t.get("printed_date") or t["date"])
+        assert row.amount == Decimal(t["amount"])
+        assert row.balance == Decimal(t.get("printed_balance") or t["balance"])
         assert row.description_raw == t["description"]
 
 

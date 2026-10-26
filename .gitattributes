@@ -1,0 +1,5 @@
+# Generated statements are binary: never diff them as text or convert line endings.
+*.pdf binary
+*.xlsx binary
+*.png binary
+*.jpeg binary

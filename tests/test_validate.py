@@ -20,6 +20,7 @@ from reconpipe.validate import (
 )
 
 ROOT = Path(__file__).resolve().parent.parent
+EXPECTED = json.loads((ROOT / "tests" / "expected_results.json").read_text(encoding="utf-8"))
 RAW = ROOT / "data" / "raw"
 TODAY = date(2026, 10, 26)
 
@@ -133,21 +134,25 @@ def run(tmp_path, raw_dir):
     )
 
 
-def test_generated_data_passes_end_to_end(tmp_path):
+def test_generated_data_end_to_end(tmp_path):
     result = run(tmp_path, RAW)
     s = result.summary
     assert (s["rows_in"], s["duplicates_removed"], s["rows_quarantined"], s["rows_out"]) == (
-        291,
+        292,
         1,
-        0,
-        290,
+        3,
+        288,
     )
+    assert s["quarantine_reasons"] == EXPECTED["expected_quarantine"]["by_rule"]
+    assert {(q.row.source_file, q.row.row_number, q.rules) for q in result.quarantined} == {
+        (d["file"], d["row_number"], (d["rule"],)) for d in EXPECTED["quality_defects"]
+    }
     assert [f["file"] for f in s["files_skipped"]] == ["ledger.xlsx"]
     assert s["per_file"]["bank_b_statement_2026Q1.pdf"]["duplicates_removed"] == 1
     assert json.loads(result.summary_file.read_text(encoding="utf-8")) == s
     assert describe(s) == (
-        "Of 291 rows, 290 passed, 1 duplicate(s) were removed "
-        "and 0 were quarantined (no rule broken)."
+        "Of 292 rows, 288 passed, 1 duplicate(s) were removed and 3 were quarantined "
+        "(1 amount_non_zero, 1 balance_continuity, 1 date_not_in_future)."
     )
 
 
@@ -171,28 +176,31 @@ def damaged_raw(tmp_path):
     return raw
 
 
-def test_planted_defects_are_quarantined_for_the_right_reasons(tmp_path, damaged_raw):
+def test_extra_defects_are_quarantined_for_the_right_reasons(tmp_path, damaged_raw):
+    # Three more defects on top of the three the generator plants.
     result = run(tmp_path, damaged_raw)
     s = result.summary
-    assert s["rows_in"] == 292
-    assert s["rows_quarantined"] == 3
-    assert s["rows_out"] == 292 - 1 - 3
+    assert s["rows_in"] == 293
+    assert s["rows_quarantined"] == 6
+    assert s["rows_out"] == 293 - 1 - 6
     assert s["quarantine_reasons"] == {
-        AMOUNT_NON_ZERO: 1,
-        BALANCE_CONTINUITY: 1,
-        DATE_NOT_IN_FUTURE: 1,
+        AMOUNT_NON_ZERO: 2,
+        BALANCE_CONTINUITY: 2,
+        DATE_NOT_IN_FUTURE: 2,
     }
-    found = {(q.row.row_number, q.rules) for q in result.quarantined}
-    assert found == {
+    bank_c = {
+        (q.row.row_number, q.rules)
+        for q in result.quarantined
+        if q.row.source_file == "bank_c_statement_2026Q1.xlsx"
+    }
+    assert {
         (10, (BALANCE_CONTINUITY,)),
         (20, (DATE_NOT_IN_FUTURE,)),
         (31, (AMOUNT_NON_ZERO,)),
-    }
+    } <= bank_c
     lines = list(csv.DictReader(result.quarantine_file.open(encoding="utf-8")))
-    assert len(lines) == 3 and {ln["source_file"] for ln in lines} == {
-        "bank_c_statement_2026Q1.xlsx"
-    }
-    assert describe(s).startswith("Of 292 rows, 288 passed")
+    assert len(lines) == 6
+    assert describe(s).startswith("Of 293 rows, 286 passed")
 
 
 def test_unreadable_amount_is_quarantined_as_contract_failure(tmp_path):

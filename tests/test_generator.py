@@ -78,7 +78,7 @@ def test_ledger_entries_agree_with_ground_truth(run, ledger):
         bank_date = date.fromisoformat(t["date"])
         entries = [ledger[i] for i in t["ledger_entry_ids"]]
         status, tier = t["expected_status"], t["expected_tier"]
-        if status == "missing_in_ledger":
+        if status in ("missing_in_ledger", "quarantined"):  # quarantined lines have no entry
             assert entries == []
             continue
         total = sum(Decimal(str(e["amount"])) for e in entries)
@@ -136,5 +136,25 @@ def test_excel_rows_are_where_ground_truth_says(run):
     rows = [t for t in expected["bank_transactions"] if t["file"].endswith(".xlsx")]
     assert rows
     for t in rows:
-        assert ws.cell(row=t["excel_row"], column=1).value == t["date"]
+        assert ws.cell(row=t["excel_row"], column=1).value == (t["printed_date"] or t["date"])
         assert ws.cell(row=t["excel_row"], column=3).value == t["ref_id"]
+
+
+def test_one_statement_defect_per_business_rule(run):
+    _, expected = run
+    defects = expected["quality_defects"]
+    assert sorted(d["rule"] for d in defects) == [
+        "amount_non_zero",
+        "balance_continuity",
+        "date_not_in_future",
+    ]
+    assert expected["expected_quarantine"]["rows"] == len(defects) == 3
+    assert len({d["file"] for d in defects}) == 3  # one per bank
+    for d in defects:
+        if d["seq"] is not None:  # a misprint on a real line with no ledger entry
+            (t,) = [
+                t
+                for t in expected["bank_transactions"]
+                if t["file"] == d["file"] and t["seq"] == d["seq"]
+            ]
+            assert t["expected_status"] == "quarantined" and t["ledger_entry_ids"] == []

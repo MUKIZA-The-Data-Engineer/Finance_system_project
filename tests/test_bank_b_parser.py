@@ -1,4 +1,3 @@
-import json
 from datetime import date
 from decimal import Decimal
 from pathlib import Path
@@ -7,25 +6,14 @@ import pytest
 from reportlab.lib.pagesizes import A4
 from reportlab.pdfgen.canvas import Canvas
 
+import truth
 from reconpipe.extract import BankBPdfParser, ParseError
 
 ROOT = Path(__file__).resolve().parent.parent
 RAW = ROOT / "data" / "raw"
 BANK_B = RAW / "bank_b_statement_2026Q1.pdf"
-EXPECTED = json.loads((ROOT / "tests" / "expected_results.json").read_text(encoding="utf-8"))
-STATEMENT_B = next(s for s in EXPECTED["statements"] if s["file"].endswith(BANK_B.name))
-EXPECTED_B = [t for t in EXPECTED["bank_transactions"] if t["file"] == BANK_B.name]
-
-
-def printed_order():
-    """Ground truth in the order it is printed: duplicated rows appear twice."""
-    dupes = set(STATEMENT_B["duplicate_printed_seqs"])
-    out = []
-    for t in EXPECTED_B:
-        out.append(t)
-        if t["seq"] in dupes:
-            out.append(t)
-    return out
+STATEMENT_B = truth.statement(BANK_B.name)
+EXPECTED_B = truth.transactions(BANK_B.name)
 
 
 def amount_text(amount: str) -> str:
@@ -43,12 +31,12 @@ def test_every_printed_row_is_read(rows):
 
 
 def test_rows_match_ground_truth_in_printed_order(rows):
-    for row, truth in zip(rows, printed_order(), strict=True):
-        assert row.date == date.fromisoformat(truth["date"]).strftime("%d %b %Y")
-        assert row.ref_id == truth["ref_id"]
-        assert row.description == truth["description"]
-        assert row.amount == amount_text(truth["amount"])
-        assert row.balance == f"{Decimal(truth['balance']):,.2f} CR"
+    for row, line in zip(rows, truth.printed(BANK_B.name), strict=True):
+        assert row.date == date.fromisoformat(line["date"]).strftime("%d %b %Y")
+        assert row.ref_id == line["ref_id"]
+        assert row.description == line["description"]
+        assert row.amount == amount_text(line["amount"])
+        assert row.balance == f"{Decimal(line['balance']):,.2f} CR"
         assert row.debit is None and row.credit is None
     assert [r.row_number for r in rows] == list(range(1, 97))
 

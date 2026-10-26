@@ -1,18 +1,18 @@
-import json
+from decimal import Decimal
 from pathlib import Path
 
 import pytest
 from reportlab.lib.pagesizes import A4
 from reportlab.pdfgen.canvas import Canvas
 
+import truth
 from reconpipe.extract import BankAPdfParser, ParseError, default_registry
 
 ROOT = Path(__file__).resolve().parent.parent
 RAW = ROOT / "data" / "raw"
 BANK_A = RAW / "bank_a_statement_2026Q1.pdf"
-EXPECTED = json.loads((ROOT / "tests" / "expected_results.json").read_text(encoding="utf-8"))
-STATEMENT_A = next(s for s in EXPECTED["statements"] if s["file"].endswith(BANK_A.name))
-EXPECTED_A = [t for t in EXPECTED["bank_transactions"] if t["file"] == BANK_A.name]
+STATEMENT_A = truth.statement(BANK_A.name)
+PRINTED_A = truth.printed(BANK_A.name)
 
 
 @pytest.fixture(scope="module")
@@ -21,11 +21,12 @@ def rows():
 
 
 def money_text(amount: str) -> str:
-    return f"{abs(float(amount)):,.2f}"
+    return f"{abs(Decimal(amount)):,.2f}"
 
 
 def test_row_count_matches_the_generator(rows):
-    assert len(rows) == STATEMENT_A["transactions"] == 110
+    # 110 transactions plus the planted 0.00 reversal line
+    assert len(rows) == STATEMENT_A["printed_rows"] == STATEMENT_A["transactions"] + 1 == 111
     assert STATEMENT_A["pages"] > 1  # the count spans a multi-page statement
 
 
@@ -46,18 +47,24 @@ def test_first_row_values(rows):
 
 def test_wrapped_descriptions_are_joined(rows):
     assert STATEMENT_A["wrapped_descriptions"] > 0
-    assert [r.description for r in rows] == [t["description"] for t in EXPECTED_A]
+    assert [r.description for r in rows] == [t["description"] for t in PRINTED_A]
     assert rows[1].description == "TRF TO AKAGERA OFFICE SUPPLIES LTD INV 1041"
 
 
 def test_every_row_matches_ground_truth(rows):
-    for row, truth in zip(rows, EXPECTED_A, strict=True):
-        assert row.row_number == truth["seq"]
-        assert row.ref_id == truth["ref_id"]
-        assert row.balance == money_text(truth["balance"])
-        amount = row.credit if float(truth["amount"]) > 0 else row.debit
-        assert amount == money_text(truth["amount"])
+    for position, (row, line) in enumerate(zip(rows, PRINTED_A, strict=True), start=1):
+        assert row.row_number == position
+        assert row.ref_id == line["ref_id"]
+        assert row.balance == money_text(line["balance"])
+        amount = row.credit if Decimal(line["amount"]) > 0 else row.debit
+        assert amount == money_text(line["amount"])
         assert (row.debit is None) != (row.credit is None)
+
+
+def test_planted_zero_line_is_read_as_printed(rows):
+    (defect,) = truth.defects(BANK_A.name)
+    row = rows[defect["row_number"] - 1]
+    assert (row.description, row.debit, row.credit) == ("CARD AUTHORISATION REVERSAL", "0.00", None)
 
 
 def test_last_row_on_the_last_page_is_read(rows):
@@ -67,7 +74,7 @@ def test_last_row_on_the_last_page_is_read(rows):
 def test_registry_dispatches_bank_a():
     registry = default_registry()
     assert registry.parser_for(BANK_A).name == BankAPdfParser.name
-    assert len(registry.parse(BANK_A)) == 110
+    assert len(registry.parse(BANK_A)) == STATEMENT_A["printed_rows"]
 
 
 def test_only_bank_a_is_claimed(tmp_path):

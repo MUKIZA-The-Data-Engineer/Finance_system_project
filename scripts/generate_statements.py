@@ -24,6 +24,16 @@ Planted in the ledger (rates are per bank transaction, per account):
                             fuzzy-description tier can match these
     one-to-many         1 per account: one bank transfer settles 2-3 ledger entries
 
+Planted in the bank statements (data-quality defects the validate layer must
+quarantine, one per business rule):
+    Bank A  an extra "card authorisation reversal" line for 0.00   amount_non_zero
+    Bank B  one line's balance misprinted                       balance_continuity
+    Bank C  one line's year misprinted as 2027                  date_not_in_future
+The B and C defects sit on lines that have no ledger entry anyway, so
+quarantining them removes a missing-in-ledger exception rather than inventing
+a new one. They are drawn after everything else, so planting them changes no
+other transaction.
+
 Everything is driven by one seeded random.Random, so the same seed always
 produces the same transactions and the same expected_results.json.
 
@@ -181,6 +191,11 @@ class BankTxn:
     page: int | None = None
     excel_row: int | None = None
     wrapped: bool = False
+    row_number: int | None = None  # what a parser emits: printed position or Excel row
+    printed_date: date | None = None  # set only where the statement misprints the date
+    printed_balance: Decimal | None = None  # set only where it misprints the balance
+    quality: str | None = None  # the business rule a planted defect breaks
+    extra: bool = False  # printed on the statement but not a real transaction
 
 
 @dataclass
@@ -500,6 +515,51 @@ def number_ledger(entries: list[LedgerEntry], txns: list[BankTxn]) -> None:
         t.ledger_ids = [real_id[x] for x in t.ledger_ids]
 
 
+REVERSAL = Counterparty("Card authorisation reversal", "reversal", "", "", 0, 0)
+
+
+def plant_quality_defects(
+    all_txns: dict[str, list[BankTxn]], rng: random.Random
+) -> dict[str, list[BankTxn]]:
+    """Plant one statement defect per bank; return each bank's lines in printed order."""
+    printed = {key: list(txns) for key, txns in all_txns.items()}
+
+    a = all_txns["A"]
+    k = rng.randrange(5, len(a) - 5)
+    reversal = BankTxn(
+        bank=a[k].bank,
+        seq=0,
+        date=a[k].date,
+        cp=REVERSAL,
+        amount=Decimal("0.00"),
+        ref=None,
+        description="CARD AUTHORISATION REVERSAL",
+        invoice=None,
+        balance=a[k].balance,
+        status="quarantined",
+        quality="amount_non_zero",
+        extra=True,
+    )
+    printed["A"].insert(k + 1, reversal)
+
+    def unmatched(txns: list[BankTxn], avoid: set[int]) -> BankTxn:
+        pool = [t for t in txns if t.status == "missing_in_ledger" and t.seq not in avoid]
+        if not pool:
+            raise RuntimeError(f"no missing-in-ledger line to plant a defect on in {txns[0].bank}")
+        return rng.choice(pool)
+
+    b = all_txns["B"]
+    page_break = paginate(b, B_WRAP, B_LINES_PER_PAGE)[0][-1].seq  # reprinted line
+    t = unmatched(b, {1, page_break, len(b)})
+    t.printed_balance = t.balance + Decimal("9000.00")
+    t.status, t.quality = "quarantined", "balance_continuity"
+
+    t = unmatched(all_txns["C"], set())
+    t.printed_date = t.date.replace(year=PERIOD_END.year + 1)
+    t.status, t.quality = "quarantined", "date_not_in_future"
+    return printed
+
+
 # --------------------------------------------------------------------------- #
 # Rendering: Bank A, ruled PDF table with debit and credit columns
 # --------------------------------------------------------------------------- #
@@ -583,7 +643,7 @@ def render_bank_a(bank: Bank, txns: list[BankTxn], path: Path) -> None:
             t.page = page_no
             first, *rest = wrap(t.description, A_WRAP)
             t.wrapped = bool(rest)
-            debit = fmt(t.amount) if t.amount < 0 else ""
+            debit = fmt(t.amount) if t.amount <= 0 else ""  # a 0.00 line prints as a debit
             credit = fmt(t.amount) if t.amount > 0 else ""
             lines.append(
                 (
@@ -702,7 +762,8 @@ def render_bank_b(bank: Bank, txns: list[BankTxn], path: Path) -> list[int]:
             c.drawString(B_X["ref"], y, t.ref or "")
             c.drawString(B_X["details"], y, first)
             c.drawRightString(B_X["amount_r"], y, signed(t.amount))
-            c.drawRightString(B_X["balance_r"], y, f"{fmt(t.balance)} CR")
+            shown = t.balance if t.printed_balance is None else t.printed_balance
+            c.drawRightString(B_X["balance_r"], y, f"{fmt(shown)} CR")
             y -= B_LINE_H
             for extra in rest:
                 c.drawString(B_X["details"], y, extra)
@@ -766,7 +827,7 @@ def render_bank_c(bank: Bank, txns: list[BankTxn], path: Path) -> None:
     for t in txns:
         ws.append(
             [
-                t.date.isoformat(),
+                (t.printed_date or t.date).isoformat(),
                 t.description,
                 t.ref,
                 abs(t.amount) if t.amount < 0 else None,
@@ -834,9 +895,11 @@ def build_expected(
     all_txns: dict[str, list[BankTxn]],
     entries: list[LedgerEntry],
     bank_dupes: dict[str, list[int]],
+    printed: dict[str, list[BankTxn]],
     out_dir: Path,
 ) -> dict:
     txns = [t for ts in all_txns.values() for t in ts]
+    defects = [t for ts in printed.values() for t in ts if t.quality]
     statuses = [t.status for t in txns] + [e.status for e in entries if e.bank_seq is None]
 
     def n(pred) -> int:
@@ -861,10 +924,11 @@ def build_expected(
                 "account_id": b.account_no,
                 "layout": b.layout,
                 "transactions": len(all_txns[b.key]),
-                "printed_rows": len(all_txns[b.key]) + len(bank_dupes.get(b.key, [])),
+                "printed_rows": len(printed_seqs(printed[b.key], bank_dupes.get(b.key, []))),
+                "printed_seqs": printed_seqs(printed[b.key], bank_dupes.get(b.key, [])),
                 "duplicate_printed_seqs": bank_dupes.get(b.key, []),
-                "wrapped_descriptions": sum(t.wrapped for t in all_txns[b.key]),
-                "pages": max((t.page or 0) for t in all_txns[b.key]) or None,
+                "wrapped_descriptions": sum(t.wrapped for t in printed[b.key]),
+                "pages": max((t.page or 0) for t in printed[b.key]) or None,
                 "opening_balance": str(b.opening),
                 "closing_balance": str(all_txns[b.key][-1].balance),
             }
@@ -883,6 +947,14 @@ def build_expected(
             "date_shift": n(lambda t: t.discrepancy == "date_shift"),
             "one_to_many": n(lambda t: t.discrepancy == "one_to_many"),
             "bank_duplicate_printed_rows": sum(len(v) for v in bank_dupes.values()),
+            "statement_quality_defects": len(defects),
+        },
+        "expected_quarantine": {
+            "rows": len(defects),
+            "by_rule": {
+                r: sum(t.quality == r for t in defects)
+                for r in sorted({t.quality for t in defects})
+            },
         },
         "expected_matches": {
             "tier1_exact": n(lambda t: t.tier == "tier1_exact"),
@@ -896,9 +968,13 @@ def build_expected(
                 "file": t.bank.file_name,
                 "account_id": t.bank.account_no,
                 "seq": t.seq,
+                "row_number": t.row_number,
                 "page": t.page,
                 "excel_row": t.excel_row,
                 "date": t.date.isoformat(),
+                "printed_date": t.printed_date.isoformat() if t.printed_date else None,
+                "printed_balance": None if t.printed_balance is None else str(t.printed_balance),
+                "data_quality": t.quality,
                 "ref_id": t.ref,
                 "description": t.description,
                 "amount": str(t.amount),
@@ -923,7 +999,49 @@ def build_expected(
             for e in entries
             if e.bank_seq is None
         ],
+        "quality_defects": [
+            {
+                "file": t.bank.file_name,
+                "account_id": t.bank.account_no,
+                "row_number": t.row_number,
+                "seq": None if t.extra else t.seq,
+                "rule": t.quality,
+                "kind": "extra_zero_amount_line"
+                if t.extra
+                else ("misprinted_balance" if t.printed_balance is not None else "misprinted_date"),
+                "date": (t.printed_date or t.date).isoformat(),
+                "description": t.description,
+                "amount": str(t.amount),
+                "balance": str(t.balance if t.printed_balance is None else t.printed_balance),
+            }
+            for t in defects
+        ],
     }
+
+
+def printed_seqs(lines: list[BankTxn], duplicated: list[int]) -> list[int | None]:
+    """The seq of every printed line in order (None for a line that is not a transaction)."""
+    out: list[int | None] = []
+    for t in lines:
+        out.append(None if t.extra else t.seq)
+        if not t.extra and t.seq in duplicated:
+            out.append(t.seq)
+    return out
+
+
+def assign_row_numbers(printed: dict[str, list[BankTxn]], bank_dupes: dict[str, list[int]]) -> None:
+    """Set what each parser will emit as row_number: printed position, or the Excel row."""
+    for key, lines in printed.items():
+        if key == "C":
+            for t in lines:
+                t.row_number = t.excel_row
+            continue
+        position = 0
+        for t in lines:
+            position += 1
+            t.row_number = position
+            if not t.extra and t.seq in bank_dupes.get(key, []):
+                position += 1  # the reprint takes the next printed position
 
 
 # --------------------------------------------------------------------------- #
@@ -944,14 +1062,16 @@ def generate(seed: int, out_dir: Path, expected_path: Path) -> dict:
         entries += plant_and_build_ledger(bank, txns, rng)
         all_txns[bank.key] = txns
     number_ledger(entries, [t for ts in all_txns.values() for t in ts])
+    printed = plant_quality_defects(all_txns, rng)
 
     bank_dupes: dict[str, list[int]] = {}
-    render_bank_a(BANKS[0], all_txns["A"], out_dir / BANKS[0].file_name)
-    bank_dupes["B"] = render_bank_b(BANKS[1], all_txns["B"], out_dir / BANKS[1].file_name)
-    render_bank_c(BANKS[2], all_txns["C"], out_dir / BANKS[2].file_name)
+    render_bank_a(BANKS[0], printed["A"], out_dir / BANKS[0].file_name)
+    bank_dupes["B"] = render_bank_b(BANKS[1], printed["B"], out_dir / BANKS[1].file_name)
+    render_bank_c(BANKS[2], printed["C"], out_dir / BANKS[2].file_name)
     render_ledger(entries, out_dir / "ledger.xlsx")
+    assign_row_numbers(printed, bank_dupes)
 
-    expected = build_expected(seed, all_txns, entries, bank_dupes, out_dir)
+    expected = build_expected(seed, all_txns, entries, bank_dupes, printed, out_dir)
     expected_path.write_text(json.dumps(expected, indent=2) + "\n", encoding="utf-8")
     return expected
 
@@ -973,6 +1093,9 @@ def main(argv: list[str] | None = None) -> int:
     print(f"  ledger: {expected['ledger']['entries']} entries")
     print("Planted discrepancies:")
     for k, v in expected["planted"].items():
+        print(f"  {k:<28} {v}")
+    print("Statement defects to quarantine:")
+    for k, v in expected["expected_quarantine"]["by_rule"].items():
         print(f"  {k:<28} {v}")
     print("Expected matches:")
     for k, v in expected["expected_matches"].items():
