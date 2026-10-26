@@ -1,0 +1,666 @@
+<title>Architecture — Confidence-Driven Finance ETL Pipeline</title>
+<style>
+  :root {
+    --paper: #F4F7F6;
+    --ink: #161B1E;
+    --ink-soft: #55706F;
+    --line: #DCE6E4;
+    --accent: #0E7B78;
+    --accent-soft: #E3F1EF;
+    --surface: #FFFFFF;
+    --accent-ink: #FFFFFF;
+    color-scheme: light;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --paper: #10161A;
+      --ink: #E6EDEC;
+      --ink-soft: #8FA6A4;
+      --line: #24312F;
+      --accent: #4FC7C1;
+      --accent-soft: #16302E;
+      --surface: #172023;
+      --accent-ink: #0A1113;
+      color-scheme: dark;
+    }
+  }
+  :root[data-theme="dark"] {
+    --paper: #10161A;
+    --ink: #E6EDEC;
+    --ink-soft: #8FA6A4;
+    --line: #24312F;
+    --accent: #4FC7C1;
+    --accent-soft: #16302E;
+    --surface: #172023;
+    --accent-ink: #0A1113;
+    color-scheme: dark;
+  }
+  :root[data-theme="light"] {
+    --paper: #F4F7F6;
+    --ink: #161B1E;
+    --ink-soft: #55706F;
+    --line: #DCE6E4;
+    --accent: #0E7B78;
+    --accent-soft: #E3F1EF;
+    --surface: #FFFFFF;
+    --accent-ink: #FFFFFF;
+    color-scheme: light;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    background: var(--paper);
+    color: var(--ink);
+    font-family: Optima, Candara, "Noto Sans", "Segoe UI", sans-serif;
+    font-size: 16px;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  h1, h2, h3 {
+    font-family: Charter, "Iowan Old Style", "Palatino Linotype", "Book Antiqua", Georgia, serif;
+    text-wrap: balance;
+    line-height: 1.25;
+    font-weight: 600;
+  }
+
+  code, pre, .mono {
+    font-family: "Cascadia Code", "JetBrains Mono", Consolas, "SF Mono", Menlo, monospace;
+  }
+
+  a { color: var(--accent); }
+  a:focus-visible, button:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+  }
+
+  /* ---------- Top bar ---------- */
+  .topbar {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    background: var(--surface);
+    border-bottom: 1px solid var(--line);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 0.85rem 1.5rem;
+  }
+  .topbar-titles h1 {
+    margin: 0;
+    font-size: 1.15rem;
+  }
+  .topbar-titles p {
+    margin: 0.15rem 0 0;
+    font-size: 0.8rem;
+    color: var(--ink-soft);
+    font-family: "Cascadia Code", "JetBrains Mono", Consolas, "SF Mono", Menlo, monospace;
+  }
+  .download-btn {
+    flex: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: var(--accent);
+    color: var(--accent-ink);
+    border: none;
+    border-radius: 6px;
+    padding: 0.6rem 1.1rem;
+    font-family: inherit;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: filter 0.15s ease, transform 0.1s ease;
+  }
+  .download-btn:hover { filter: brightness(1.08); }
+  .download-btn:active { transform: translateY(1px); }
+  .download-btn svg { width: 16px; height: 16px; flex: none; }
+  .download-note {
+    font-size: 0.72rem;
+    color: var(--ink-soft);
+    margin-top: 0.3rem;
+    text-align: right;
+  }
+  .topbar-right { display: flex; flex-direction: column; align-items: flex-end; }
+
+  /* ---------- Secondary nav ---------- */
+  .toc {
+    position: sticky;
+    top: 61px;
+    z-index: 9;
+    background: var(--paper);
+    border-bottom: 1px solid var(--line);
+    display: flex;
+    gap: 1.5rem;
+    padding: 0.6rem 1.5rem;
+    overflow-x: auto;
+  }
+  .toc a {
+    text-decoration: none;
+    color: var(--ink-soft);
+    font-size: 0.78rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    white-space: nowrap;
+    font-family: "Cascadia Code", "JetBrains Mono", Consolas, "SF Mono", Menlo, monospace;
+  }
+  .toc a:hover { color: var(--accent); }
+
+  /* ---------- Layout ---------- */
+  main {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 2.5rem 1.5rem 5rem;
+  }
+  .lede {
+    max-width: 66ch;
+    color: var(--ink-soft);
+    font-size: 1.02rem;
+  }
+  .doc-section { margin-top: 3.5rem; }
+  .section-head {
+    display: flex;
+    align-items: baseline;
+    gap: 0.9rem;
+    border-left: 4px solid var(--accent);
+    padding-left: 0.9rem;
+    margin-bottom: 1.4rem;
+  }
+  .section-head .num {
+    font-family: "Cascadia Code", "JetBrains Mono", Consolas, "SF Mono", Menlo, monospace;
+    font-size: 0.85rem;
+    color: var(--accent);
+    background: var(--accent-soft);
+    border-radius: 4px;
+    padding: 0.15rem 0.5rem;
+  }
+  .section-head h2 { margin: 0; font-size: 1.5rem; }
+
+  .prose { max-width: 68ch; }
+  .prose p, .prose li { max-width: 68ch; }
+  .prose ul, .prose ol { padding-left: 1.3rem; }
+  .prose li { margin-bottom: 0.5rem; }
+
+  h3 { font-size: 1.05rem; margin: 1.8rem 0 0.7rem; }
+  h3 code { font-size: 0.95em; }
+
+  /* ---------- Code & mermaid blocks ---------- */
+  .scroll-x { overflow-x: auto; }
+  pre.code-block, pre.mermaid {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 1rem 1.2rem;
+    margin: 0.9rem 0 1.3rem;
+  }
+  pre.code-block {
+    font-size: 0.83rem;
+    line-height: 1.55;
+    overflow-x: auto;
+    white-space: pre;
+  }
+  pre.mermaid { padding: 1.4rem; }
+
+  code:not(pre code) {
+    background: var(--accent-soft);
+    color: var(--ink);
+    border-radius: 4px;
+    padding: 0.1em 0.4em;
+    font-size: 0.88em;
+  }
+
+  /* ---------- Tables ---------- */
+  .table-wrap { overflow-x: auto; margin: 0.9rem 0 1.3rem; }
+  table {
+    border-collapse: collapse;
+    width: 100%;
+    font-size: 0.88rem;
+  }
+  caption { text-align: left; font-size: 0.8rem; color: var(--ink-soft); margin-bottom: 0.4rem; }
+  th, td {
+    border: 1px solid var(--line);
+    padding: 0.5rem 0.7rem;
+    text-align: left;
+    vertical-align: top;
+  }
+  th {
+    background: var(--accent-soft);
+    font-family: "Cascadia Code", "JetBrains Mono", Consolas, "SF Mono", Menlo, monospace;
+    font-size: 0.76rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    font-weight: 600;
+  }
+  td.num, th.num { font-variant-numeric: tabular-nums; }
+
+  /* ---------- File guide cards ---------- */
+  .file-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1rem;
+    margin-bottom: 1.6rem;
+  }
+  .file-card {
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    background: var(--surface);
+    padding: 1.1rem 1.3rem 1.3rem;
+  }
+  .file-card h3 {
+    margin: 0 0 0.9rem;
+    font-size: 1rem;
+  }
+  .file-card h3 code {
+    background: var(--accent-soft);
+    color: var(--accent);
+    font-weight: 600;
+  }
+  .file-card dl { margin: 0; }
+  .file-card dt {
+    font-family: "Cascadia Code", "JetBrains Mono", Consolas, "SF Mono", Menlo, monospace;
+    font-size: 0.68rem;
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    color: var(--ink-soft);
+    margin-top: 0.75rem;
+  }
+  .file-card dt:first-of-type { margin-top: 0; }
+  .file-card dd {
+    margin: 0.2rem 0 0;
+    font-size: 0.92rem;
+  }
+
+  footer {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 1.5rem 1.5rem 3rem;
+    border-top: 1px solid var(--line);
+    color: var(--ink-soft);
+    font-size: 0.8rem;
+  }
+  footer code { font-size: 0.9em; }
+
+  @media (max-width: 640px) {
+    .topbar { padding: 0.7rem 1rem; }
+    .topbar-titles h1 { font-size: 1rem; }
+    main { padding: 1.8rem 1rem 4rem; }
+    .toc { padding: 0.5rem 1rem; gap: 1rem; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    * { transition: none !important; }
+  }
+</style>
+
+<div class="topbar">
+  <div class="topbar-titles">
+    <h1>Architecture — Confidence-Driven Finance ETL Pipeline</h1>
+    <p>ai_ingestion/ pipeline reference</p>
+  </div>
+  <div class="topbar-right">
+    <button class="download-btn" id="downloadBtn" type="button">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="M7 10l5 5 5-5"/><path d="M4 19h16"/></svg>
+      Download ARCHITECTURE.md
+    </button>
+    <span class="download-note">Byte-identical to the source file</span>
+  </div>
+</div>
+
+<nav class="toc" aria-label="Sections">
+  <a href="#flowchart">1 — Flowchart</a>
+  <a href="#file-guide">2 — File Guide</a>
+  <a href="#data-flow">3 — Data Flow Example</a>
+</nav>
+
+<main>
+  <p class="lede">
+    This covers the <code>ai_ingestion/</code> pipeline: the AI-assisted, schema-agnostic
+    module that turns an unpredictable multi-sheet Excel export into an Odoo-ready
+    Universal General Ledger (UGL). It does not cover the separate CoA-based reporting
+    engine at the repository root (<code>adapters.py</code> / <code>etl_pipeline.py</code> /
+    <code>reports.py</code>) — see <code>system.md</code> for that one.
+  </p>
+
+  <!-- ============================================================ -->
+  <section class="doc-section" id="flowchart">
+    <div class="section-head"><span class="num">1</span><h2>System Architectural Flowchart</h2></div>
+
+    <div class="scroll-x">
+      <pre class="mermaid">
+flowchart TD
+    subgraph ENTRY["Entry Points"]
+        SEED["seed_memory.py\n(optional, run anytime beforehand)\npython seed_memory.py seed_mappings.json"]
+        MAIN["main.py\npython main.py Client_Report.xlsx"]
+    end
+
+    SEED -->|"remember_mapping() + save_memory()"| MEMFILE[("schema_memory.json")]
+
+    MAIN --> ING1["ingestion.read_workbook()\npd.read_excel(sheet_name=None, header=None)\n-> raw dict of EVERY sheet"]
+    ING1 --> ING2{"detect_header_row()\nscore_row() vs FINANCIAL_KEYWORDS\n(first 15 rows)"}
+
+    ING2 -->|"No row scores\n>= 2 keywords\nand >= 50% text cells"| SKIP["Sheet SKIPPED\n(e.g. 'Cover', 'Instructions')\nrecorded with a reason"]
+    ING2 -->|"Header row found"| ING3["build_sheet_dataframe()\nslice header + body,\ndrop empty rows/cols"]
+    ING3 --> ING4{"is_financial_sheet()?\nheader found AND\n>= 1 data row below it"}
+    ING4 -->|"No"| SKIP
+    ING4 -->|"Yes"| FINSHEETS["financial_sheets: dict[str, DataFrame]\n(one entry per kept sheet)"]
+
+    FINSHEETS --> PIPE1["pipeline.process_workbook()\niterates every financial sheet"]
+    PIPE1 --> MEM1["memory.compute_fingerprint(columns)\nSHA256 of cleaned + sorted column names"]
+    MEM1 --> MEM2{"fingerprint already in\nschema_memory.json?"}
+    MEMFILE -.->|"read"| MEM2
+
+    MEM2 -->|"YES -- Fast Lane"| APPLYMAP["Reuse saved mapping instantly\nsource = 'memory'\n(NO Gemini call)"]
+
+    MEM2 -->|"NO -- new schema"| AI1["ai_mapper.map_columns_with_ai()\nsample_rows = df.head(3)\nGemini 2.5 Flash + Pydantic response_schema"]
+    AI1 --> AI2["SchemaMappingResponse\n{assignments[], confidence_score, reasoning}"]
+    AI2 --> GATE{"confidence_score\n>= 90 ?"}
+
+    GATE -->|"YES"| AUTOAPPLY["Auto-apply mapping\nsource = 'ai_auto'"]
+    GATE -->|"NO"| HUMAN["CLI Human Gate:\nprint proposed mapping + confidence + reasoning\nuser accepts [y] or corrects each column"]
+    HUMAN --> HUMANRESULT["final_mapping\nsource = 'user_confirmed' or 'user_adjusted'"]
+
+    AUTOAPPLY --> REMEMBER["memory.remember_mapping()\n+ memory.save_memory()"]
+    HUMANRESULT --> REMEMBER
+    REMEMBER -->|"write"| MEMFILE
+
+    APPLYMAP --> TRANSFORM
+    AUTOAPPLY --> TRANSFORM
+    HUMANRESULT --> TRANSFORM
+
+    TRANSFORM["transformer.transform_sheet()\napply_mapping() -> standardize_types()\n-> add_source_sheet()"] --> CONSOL["transformer.consolidate()\npd.concat() every transformed sheet"]
+    CONSOL --> MASTER["Master UGL DataFrame\n[Date, Description, Payee, Debit, Credit, Balance, source_sheet]"]
+    MASTER --> CHECK["transformer.check_debit_credit_integrity()\nSUM(Debit) vs SUM(Credit), whole-ledger flag"]
+    CHECK --> EXPORT["exporter.generate_odoo_export()\nbuild_odoo_journal_entries()\n(2 balanced lines per UGL row)"]
+
+    EXPORT --> OUT1[("output/master_general_ledger.csv")]
+    EXPORT --> OUT2[("output/odoo_journal_entries.csv")]
+    EXPORT --> OUT3[("output/odoo_journal_entries.xlsx")]
+      </pre>
+    </div>
+
+    <div class="prose">
+      <h3>Reading the diagram</h3>
+      <ul>
+        <li><strong>Two entry points, one shared file.</strong> <code>seed_memory.py</code> and <code>main.py</code> never call each other — they only communicate through <code>schema_memory.json</code> on disk. Seeding is a one-time, offline step; <code>main.py</code> is what you run against a real workbook. If a sheet's fingerprint was seeded ahead of time, <code>main.py</code>'s very first encounter with that format is already a Fast Lane hit.</li>
+        <li><strong>Every sheet independently walks the whole right-hand path.</strong> A single workbook with 5 sheets can produce 5 different outcomes: some skipped, some Fast Lane, some auto-applied, some needing a human — <code>pipeline.py</code> makes this decision per sheet, not per workbook.</li>
+        <li><strong><code>schema_memory.json</code> is both read and written by the same run.</strong> A sheet resolved via AI or a human this run is saved immediately (not batched to the end), so an interrupted CLI session doesn't lose already-approved mappings.</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- ============================================================ -->
+  <section class="doc-section" id="file-guide">
+    <div class="section-head"><span class="num">2</span><h2>File-by-File Responsibility Guide</h2></div>
+
+    <div class="file-grid">
+      <article class="file-card">
+        <h3><code>main.py</code></h3>
+        <dl>
+          <dt>Responsibility</dt><dd>CLI entry point; wires all six stages together for one workbook end-to-end.</dd>
+          <dt>Inputs</dt><dd><code>file_path</code> (positional CLI arg — path to <code>.xlsx</code>); <code>--output-dir</code> (default <code>./output</code>); <code>--memory-path</code> (default <code>./schema_memory.json</code>).</dd>
+          <dt>Outputs</dt><dd>Console progress log for every stage; writes <code>output/master_general_ledger.csv</code>, <code>output/odoo_journal_entries.csv</code>, <code>output/odoo_journal_entries.xlsx</code>; process exit code (<code>0</code> success, <code>1</code> on a hard error like a missing file or zero financial sheets found).</dd>
+          <dt>Imports / calls</dt><dd><code>ingestion.discover_financial_sheets</code>, <code>pipeline.process_workbook</code>, <code>transformer.consolidate</code>, <code>transformer.check_debit_credit_integrity</code>, <code>exporter.generate_odoo_export</code>, <code>memory.DEFAULT_MEMORY_PATH</code>.</dd>
+        </dl>
+      </article>
+
+      <article class="file-card">
+        <h3><code>seed_memory.py</code></h3>
+        <dl>
+          <dt>Responsibility</dt><dd>Bulk-preload <code>schema_memory.json</code> with mappings authored ahead of time — bypasses ingestion/AI/CLI entirely so a known, recurring format hits the Fast Lane on its very first real run through <code>main.py</code>.</dd>
+          <dt>Inputs</dt><dd><code>seed_file</code> (positional CLI arg — path to a JSON list of <code>{raw_columns, mapping, confidence_score, reasoning}</code> entries, see <code>sample_data/seed_mappings.example.json</code>); <code>--memory-path</code>.</dd>
+          <dt>Outputs</dt><dd>Writes/updates <code>schema_memory.json</code>; prints one line per seeded entry plus a summary count.</dd>
+          <dt>Imports / calls</dt><dd><code>memory.compute_fingerprint</code>, <code>memory.load_memory</code>, <code>memory.remember_mapping</code>, <code>memory.save_memory</code>. Deliberately does <strong>not</strong> import <code>ingestion</code>, <code>ai_mapper</code>, <code>pipeline</code>, or <code>transformer</code> — its only relationship to the rest of the system is the shared <code>schema_memory.json</code> file.</dd>
+        </dl>
+      </article>
+
+      <article class="file-card">
+        <h3><code>ingestion.py</code></h3>
+        <dl>
+          <dt>Responsibility</dt><dd>Stage 1 — read every sheet in the workbook, locate each sheet's true header row (ignoring title blocks/logos above it), and filter down to only genuinely financial sheets.</dd>
+          <dt>Inputs</dt><dd><code>file_path</code> (path to <code>.xlsx</code>).</dd>
+          <dt>Outputs</dt><dd><code>discover_financial_sheets()</code> → <code>(financial_sheets: dict[str, DataFrame], skipped_sheets: dict[str, str])</code> — the second dict maps skipped sheet names to a human-readable reason.</dd>
+          <dt>Imports / calls</dt><dd><code>pandas</code> only. This is the foundational layer — it imports nothing else from this project.</dd>
+        </dl>
+      </article>
+
+      <article class="file-card">
+        <h3><code>memory.py</code></h3>
+        <dl>
+          <dt>Responsibility</dt><dd>Stage 2 — schema fingerprinting and the JSON-backed mapping cache. Has zero awareness of Excel, AI, or the CLI; purely a hash + persistence utility.</dd>
+          <dt>Inputs</dt><dd>Column name lists, mapping dicts, confidence/reasoning strings, a <code>memory</code> dict, a file path.</dd>
+          <dt>Outputs</dt><dd><code>compute_fingerprint()</code> → <code>str</code> (SHA256 hex digest); <code>load_memory()</code> / <code>save_memory()</code> → <code>dict</code> / disk read-write side effect; <code>get_mapping_for_fingerprint()</code> → <code>dict | None</code>; <code>remember_mapping()</code> → mutated <code>dict</code>.</dd>
+          <dt>Imports / calls</dt><dd><code>hashlib</code>, <code>json</code>, <code>pathlib</code>, <code>datetime</code> only. Called <strong>by</strong> <code>pipeline.py</code> and <code>seed_memory.py</code>; calls nothing else in the project.</dd>
+        </dl>
+      </article>
+
+      <article class="file-card">
+        <h3><code>ai_mapper.py</code></h3>
+        <dl>
+          <dt>Responsibility</dt><dd>Stage 3 — the AI Confidence Engine. For a schema <code>memory.py</code> has never seen, asks Gemini to propose a column mapping plus a self-reported confidence score, using a Pydantic structured-output schema so the response is always machine-parseable.</dd>
+          <dt>Inputs</dt><dd><code>raw_columns: list[str]</code>, <code>sample_rows: list[dict]</code> (typically <code>df.head(3)</code> as records), optional <code>model</code> override (default <code>gemini-2.5-flash</code>).</dd>
+          <dt>Outputs</dt><dd><code>map_columns_with_ai()</code> → <code>{"mapping": dict[str, str], "confidence_score": int, "reasoning": str}</code>. Raises <code>AIMapperError</code> if the package/API key is missing or the response can't be parsed.</dd>
+          <dt>Imports / calls</dt><dd><code>google.genai</code> (imported lazily, inside the function, so the module can still be imported without the package installed), <code>pydantic</code>, <code>python-dotenv</code>. Called <strong>by</strong> <code>pipeline.py</code>; imports nothing else in the project.</dd>
+        </dl>
+      </article>
+
+      <article class="file-card">
+        <h3><code>pipeline.py</code></h3>
+        <dl>
+          <dt>Responsibility</dt><dd>Stage 4 — the routing / exception gate. Decides Fast Lane vs. AI vs. Human Gate for each sheet, and persists every newly-approved mapping.</dd>
+          <dt>Inputs</dt><dd><code>financial_sheets: dict[str, DataFrame]</code> (from <code>ingestion.py</code>), <code>memory_path</code>.</dd>
+          <dt>Outputs</dt><dd><code>process_workbook()</code> → <code>dict[sheet_name, {"mapping", "confidence_score", "source", "fingerprint"}]</code>. Side effect: incrementally updates <code>schema_memory.json</code> after each newly-resolved sheet.</dd>
+          <dt>Imports / calls</dt><dd><code>memory.py</code> (<code>compute_fingerprint</code>, <code>get_mapping_for_fingerprint</code>, <code>remember_mapping</code>, <code>save_memory</code>, <code>load_memory</code>), <code>ai_mapper.py</code> (<code>map_columns_with_ai</code>, <code>TARGET_COLUMNS</code>). Called <strong>by</strong> <code>main.py</code>.</dd>
+        </dl>
+      </article>
+
+      <article class="file-card">
+        <h3><code>transformer.py</code></h3>
+        <dl>
+          <dt>Responsibility</dt><dd>Stage 5 — apply each sheet's approved mapping, enforce the UGL's strict data types, tag <code>source_sheet</code>, consolidate every sheet into one master ledger, and run the whole-ledger Debit/Credit integrity check.</dd>
+          <dt>Inputs</dt><dd><code>df</code> + <code>mapping</code> + <code>sheet_name</code> (per-sheet functions); <code>financial_sheets</code> + <code>mappings</code> dicts (<code>consolidate()</code>); <code>master_df</code> (<code>check_debit_credit_integrity()</code>).</dd>
+          <dt>Outputs</dt><dd><code>transform_sheet()</code> → <code>DataFrame[Date, Description, Payee, Debit, Credit, Balance, source_sheet]</code>; <code>consolidate()</code> → the master <code>DataFrame</code> (all sheets concatenated); <code>check_debit_credit_integrity()</code> → <code>{"total_debit", "total_credit", "difference", "is_balanced"}</code>.</dd>
+          <dt>Imports / calls</dt><dd><code>pandas</code> only. Called <strong>by</strong> <code>main.py</code>; has no awareness of <code>memory</code>/<code>ai_mapper</code>/<code>pipeline</code> at all — it only ever sees a mapping dict it's handed.</dd>
+        </dl>
+      </article>
+
+      <article class="file-card">
+        <h3><code>exporter.py</code></h3>
+        <dl>
+          <dt>Responsibility</dt><dd>Stage 6 — format the master UGL into Odoo <code>account.move</code>-ready Journal Entry lines (two balanced lines per source row: the real account + a suspense/clearing account pending manual reclassification in Odoo) and write both a CSV and an Excel copy.</dd>
+          <dt>Inputs</dt><dd><code>master_df</code> (the consolidated UGL DataFrame), <code>output_dir</code>.</dd>
+          <dt>Outputs</dt><dd><code>build_odoo_journal_entries()</code> → <code>DataFrame[id, date, journal_id, account_id, partner, label, debit, credit]</code>; <code>generate_odoo_export()</code> → <code>{"csv": Path, "xlsx": Path}</code> (side effect: files written to disk).</dd>
+          <dt>Imports / calls</dt><dd><code>pandas</code>, <code>pathlib</code> only. Called <strong>by</strong> <code>main.py</code>; no awareness of <code>memory</code>/<code>ai_mapper</code>/<code>ingestion</code>.</dd>
+        </dl>
+      </article>
+    </div>
+
+    <div class="prose">
+      <h3>Import dependency summary</h3>
+    </div>
+    <div class="scroll-x">
+<pre class="code-block">main.py            -&gt; ingestion, pipeline, transformer, exporter, memory (for the default path constant)
+seed_memory.py      -&gt; memory                                            (nothing else)
+pipeline.py         -&gt; memory, ai_mapper
+transformer.py      -&gt; (pandas only)
+exporter.py         -&gt; (pandas only)
+ingestion.py        -&gt; (pandas only)
+memory.py           -&gt; (stdlib only)
+ai_mapper.py        -&gt; google-genai, pydantic, python-dotenv             (nothing else in this project)</pre>
+    </div>
+
+    <div class="prose">
+      <p>Notice the dependency graph is a strict DAG with no cycles, and the three "pure" modules (<code>ingestion</code>, <code>transformer</code>, <code>exporter</code>) never import each other or <code>memory</code>/<code>ai_mapper</code> — every cross-module decision is made by <code>pipeline.py</code> and handed down as plain data (a <code>mapping</code> dict), which is what makes each stage independently testable (see how the earlier build verified <code>transformer</code>/<code>exporter</code> using a hand-written fake mapping, with no Gemini call involved at all).</p>
+    </div>
+  </section>
+
+  <!-- ============================================================ -->
+  <section class="doc-section" id="data-flow">
+    <div class="section-head"><span class="num">3</span><h2>Data Flow Example: <code>Client_Report.xlsx</code></h2></div>
+
+    <div class="prose">
+      <p>Assume a workbook with three sheets:</p>
+    </div>
+
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Sheet</th><th>Shape</th></tr></thead>
+        <tbody>
+          <tr><td><code>Cover</code></td><td>Row 0: <code>"CLIENT REPORT"</code>, row 1: <code>"Prepared for internal review"</code> — no tabular data at all</td></tr>
+          <tr><td><code>Transactions</code></td><td>Rows 0-1: title block (<code>"CLIENT REPORT - MAIN OPERATING ACCOUNT"</code>, <code>"Period: Q1 2026"</code>), row 2: header, rows 3+: data — a schema <strong>never seen before</strong></td></tr>
+          <tr><td><code>Q1_Summary</code></td><td>Header directly on row 0 — columns <code>["Trans Date","Details","Debit Amount","Credit Amount","Running Balance"]</code>, which happens to be <strong>exactly</strong> the schema pre-loaded via <code>seed_memory.py sample_data/seed_mappings.example.json</code></td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="prose">
+      <h3>Step 1 — <code>ingestion.py</code></h3>
+      <p><code>read_workbook("Client_Report.xlsx")</code> returns:</p>
+    </div>
+    <div class="scroll-x">
+<pre class="code-block">{
+  "Cover":        &lt;headerless DataFrame, 2 rows&gt;,
+  "Transactions": &lt;headerless DataFrame, title block + header + data&gt;,
+  "Q1_Summary":   &lt;headerless DataFrame, header on row 0 + data&gt;,
+}</pre>
+    </div>
+
+    <div class="prose">
+      <ul>
+        <li><strong><code>Cover</code></strong>: <code>detect_header_row()</code> scans both rows, finds no row hitting ≥2 financial keywords → <code>header_row_idx = None</code> → <code>skipped_sheets["Cover"] = "No header row with &gt;= 2 financial keywords found in the first 15 rows"</code>.</li>
+        <li><strong><code>Transactions</code></strong>: row 2 (<code>["Txn Date","Memo","Amount Out","Amount In","Acct Balance"]</code>) scores 4 distinct keywords (<code>date</code>, <code>amount</code> ×2, <code>balance</code>) with a string ratio of 1.0 → detected as the header. <code>build_sheet_dataframe()</code> slices rows 3+ as the body.</li>
+        <li><strong><code>Q1_Summary</code></strong>: row 0 is the header directly; same detection logic applies.</li>
+      </ul>
+      <p>Result:</p>
+    </div>
+    <div class="scroll-x">
+<pre class="code-block">financial_sheets = {
+    "Transactions": DataFrame[["Txn Date","Memo","Amount Out","Amount In","Acct Balance"], 5 rows],
+    "Q1_Summary":   DataFrame[["Trans Date","Details","Debit Amount","Credit Amount","Running Balance"], 4 rows],
+}
+skipped_sheets = {"Cover": "No header row with &gt;= 2 financial keywords found in the first 15 rows"}</pre>
+    </div>
+
+    <div class="prose">
+      <h3>Step 2 — <code>memory.py</code> (via <code>pipeline.process_workbook</code>)</h3>
+    </div>
+    <div class="scroll-x">
+<pre class="code-block">fingerprint("Transactions")  # columns: txn date|memo|amount out|amount in|acct balance
+# -&gt; "7fa2c9..."  -- NOT in schema_memory.json (never seen)
+
+fingerprint("Q1_Summary")    # columns: trans date|details|debit amount|credit amount|running balance
+# -&gt; "590512394f21..." -- ALREADY in schema_memory.json (seeded earlier)</pre>
+    </div>
+    <div class="prose"><p><code>Q1_Summary</code> resolves immediately:</p></div>
+    <div class="scroll-x">
+<pre class="code-block">{"mapping": {"Trans Date": "Date", "Details": "Description", "Debit Amount": "Debit",
+             "Credit Amount": "Credit", "Running Balance": "Balance"},
+ "confidence_score": 100, "source": "memory", "fingerprint": "590512394f21..."}</pre>
+    </div>
+    <div class="prose"><p>No Gemini call happens for this sheet at all.</p>
+
+      <h3>Step 3 — <code>ai_mapper.py</code> (only for <code>Transactions</code>)</h3>
+      <p><code>sample_rows = df.head(3).to_dict(orient="records")</code>:</p>
+    </div>
+    <div class="scroll-x">
+<pre class="code-block">[
+  {"Txn Date": "2026-01-05", "Memo": "Client Retainer - Acme", "Amount Out": None,   "Amount In": 5000.0, "Acct Balance": 5000.0},
+  {"Txn Date": "2026-01-09", "Memo": "Office Lease - Jan",     "Amount Out": 1200.0, "Amount In": None,   "Acct Balance": 3800.0},
+  {"Txn Date": "2026-01-14", "Memo": "Consulting Fee - Globex","Amount Out": None,   "Amount In": 2500.0, "Acct Balance": 6300.0},
+]</pre>
+    </div>
+    <div class="prose"><p>Gemini's structured response (<code>SchemaMappingResponse</code>, parsed via <code>response.parsed</code>):</p></div>
+    <div class="scroll-x">
+<pre class="code-block">assignments = [
+    {"raw_column": "Txn Date",     "target_column": "Date"},
+    {"raw_column": "Memo",         "target_column": "Description"},
+    {"raw_column": "Amount Out",   "target_column": "Debit"},
+    {"raw_column": "Amount In",    "target_column": "Credit"},
+    {"raw_column": "Acct Balance", "target_column": "Balance"},
+]
+confidence_score = 92
+reasoning = "Column names clearly correspond to a transaction ledger with separate debit/credit amounts and a running balance."</pre>
+    </div>
+    <div class="prose"><p><code>map_columns_with_ai()</code> converts this into:</p></div>
+    <div class="scroll-x">
+<pre class="code-block">{"mapping": {"Txn Date": "Date", "Memo": "Description", "Amount Out": "Debit",
+             "Amount In": "Credit", "Acct Balance": "Balance"},
+ "confidence_score": 92, "reasoning": "..."}</pre>
+    </div>
+
+    <div class="prose">
+      <h3>Step 4 — <code>pipeline.py</code> gate</h3>
+      <ul>
+        <li><code>Transactions</code>: <code>confidence_score = 92 &gt;= 90</code> → <strong>AUTO-APPLY</strong>, <code>source = "ai_auto"</code>. <code>memory.remember_mapping()</code> + <code>save_memory()</code> write this brand-new fingerprint into <code>schema_memory.json</code> — next quarter's <code>Transactions</code> sheet (identical columns) will hit the Fast Lane instead of calling Gemini again.</li>
+        <li><code>Q1_Summary</code>: already resolved in Step 2, <code>source = "memory"</code>.</li>
+      </ul>
+      <p>No human prompt occurs in this example (both sheets cleared the gate one way or another) — if <code>Transactions</code> had scored, say, 75, the CLI would have shown the proposed mapping and paused for <code>y</code>/corrections before continuing.</p>
+
+      <h3>Step 5 — <code>transformer.py</code></h3>
+      <p><code>transform_sheet(df, mapping, "Transactions")</code>:</p>
+      <ol>
+        <li><code>apply_mapping()</code> selects/renames the 5 raw columns → <code>[Date, Description, Payee, Debit, Credit, Balance]</code> (Payee is added as all-<code>NaN</code> — nothing in this sheet's mapping targets it).</li>
+        <li><code>standardize_types()</code> — <code>"2026-01-05"</code> → ISO <code>"2026-01-05"</code>; <code>Amount Out</code>/<code>Amount In</code>/<code>Acct Balance</code> → floats, blanks → <code>0.0</code>; <code>Description</code> stripped, filled <code>""</code>.</li>
+        <li><code>add_source_sheet()</code> stamps <code>source_sheet = "Transactions"</code> on every row.</li>
+      </ol>
+      <p>Same for <code>Q1_Summary</code> → <code>source_sheet = "Q1_Summary"</code>.</p>
+      <p><code>consolidate()</code> concatenates both into the master ledger (9 rows total: 5 + 4):</p>
+    </div>
+
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Date</th><th>Description</th><th>Payee</th><th class="num">Debit</th><th class="num">Credit</th><th class="num">Balance</th><th>source_sheet</th></tr></thead>
+        <tbody>
+          <tr><td class="num">2026-01-05</td><td>Client Retainer - Acme</td><td></td><td class="num">0.0</td><td class="num">5000.0</td><td class="num">5000.0</td><td>Transactions</td></tr>
+          <tr><td class="num">2026-01-09</td><td>Office Lease - Jan</td><td></td><td class="num">1200.0</td><td class="num">0.0</td><td class="num">3800.0</td><td>Transactions</td></tr>
+          <tr><td class="num">…</td><td>…</td><td></td><td class="num">…</td><td class="num">…</td><td class="num">…</td><td>…</td></tr>
+          <tr><td class="num">2026-01-03</td><td>…</td><td></td><td class="num">…</td><td class="num">…</td><td class="num">…</td><td>Q1_Summary</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="prose">
+      <p><code>check_debit_credit_integrity(master_df)</code> sums <code>Debit</code>/<code>Credit</code> across <strong>both</strong> sheets together and returns e.g. <code>{"total_debit": 6820.0, "total_credit": 9500.0, "difference": -2680.0, "is_balanced": False}</code> — printed as an <code>[ALERT]</code> for review (expected here, since these are individual statement lines, not matched double-entry pairs).</p>
+
+      <h3>Step 6 — <code>exporter.py</code></h3>
+      <p><code>build_odoo_journal_entries(master_df)</code> emits <strong>two lines per master row</strong> (18 lines total for 9 rows), sharing external IDs <code>ugl_import_0</code> … <code>ugl_import_8</code>:</p>
+    </div>
+    <div class="scroll-x">
+<pre class="code-block">id,date,journal_id,account_id,partner,label,debit,credit
+ugl_import_0,2026-01-05,BANK1,1000,,Client Retainer - Acme,0.0,5000.0
+ugl_import_0,2026-01-05,BANK1,499999,,Client Retainer - Acme,5000.0,0.0
+ugl_import_1,2026-01-09,BANK1,1000,,Office Lease - Jan,1200.0,0.0
+ugl_import_1,2026-01-09,BANK1,499999,,Office Lease - Jan,0.0,1200.0
+...</pre>
+    </div>
+
+    <div class="prose">
+      <p><code>generate_odoo_export()</code> writes <code>output/odoo_journal_entries.csv</code> and <code>.xlsx</code>; <code>main.py</code> additionally writes the pre-Odoo-formatting master ledger to <code>output/master_general_ledger.csv</code> for audit/reference. The final console summary reports both file paths and the <code>is_balanced</code> flag from Step 5.</p>
+    </div>
+  </section>
+</main>
+
+<footer>
+  Source: <code>ai_ingestion/ARCHITECTURE.md</code> in the <code>finance_system</code> project. The download button reproduces that file byte-for-byte.
+</footer>
+
+<script>
+  const B64_CONTENT = "IyBBcmNoaXRlY3R1cmUg4oCUIENvbmZpZGVuY2UtRHJpdmVuIEZpbmFuY2UgRVRMIFBpcGVsaW5lCgpUaGlzIGRvY3VtZW50IGNvdmVycyB0aGUgYGFpX2luZ2VzdGlvbi9gIHBpcGVsaW5lOiB0aGUgQUktYXNzaXN0ZWQsCnNjaGVtYS1hZ25vc3RpYyBtb2R1bGUgdGhhdCB0dXJucyBhbiB1bnByZWRpY3RhYmxlIG11bHRpLXNoZWV0IEV4Y2VsCmV4cG9ydCBpbnRvIGFuIE9kb28tcmVhZHkgVW5pdmVyc2FsIEdlbmVyYWwgTGVkZ2VyIChVR0wpLiBJdCBkb2VzIG5vdApjb3ZlciB0aGUgc2VwYXJhdGUgQ29BLWJhc2VkIHJlcG9ydGluZyBlbmdpbmUgYXQgdGhlIHJlcG9zaXRvcnkgcm9vdAooYGFkYXB0ZXJzLnB5YCAvIGBldGxfcGlwZWxpbmUucHlgIC8gYHJlcG9ydHMucHlgKSDigJQgc2VlIGBzeXN0ZW0ubWRgIGZvcgp0aGF0IG9uZS4KCi0tLQoKIyMgMS4gU3lzdGVtIEFyY2hpdGVjdHVyYWwgRmxvd2NoYXJ0CgpgYGBtZXJtYWlkCmZsb3djaGFydCBURAogICAgc3ViZ3JhcGggRU5UUllbIkVudHJ5IFBvaW50cyJdCiAgICAgICAgU0VFRFsic2VlZF9tZW1vcnkucHlcbihvcHRpb25hbCwgcnVuIGFueXRpbWUgYmVmb3JlaGFuZClcbnB5dGhvbiBzZWVkX21lbW9yeS5weSBzZWVkX21hcHBpbmdzLmpzb24iXQogICAgICAgIE1BSU5bIm1haW4ucHlcbnB5dGhvbiBtYWluLnB5IENsaWVudF9SZXBvcnQueGxzeCJdCiAgICBlbmQKCiAgICBTRUVEIC0tPnwicmVtZW1iZXJfbWFwcGluZygpICsgc2F2ZV9tZW1vcnkoKSJ8IE1FTUZJTEVbKCJzY2hlbWFfbWVtb3J5Lmpzb24iKV0KCiAgICBNQUlOIC0tPiBJTkcxWyJpbmdlc3Rpb24ucmVhZF93b3JrYm9vaygpXG5wZC5yZWFkX2V4Y2VsKHNoZWV0X25hbWU9Tm9uZSwgaGVhZGVyPU5vbmUpXG4tPiByYXcgZGljdCBvZiBFVkVSWSBzaGVldCJdCiAgICBJTkcxIC0tPiBJTkcyeyJkZXRlY3RfaGVhZGVyX3JvdygpXG5zY29yZV9yb3coKSB2cyBGSU5BTkNJQUxfS0VZV09SRFNcbihmaXJzdCAxNSByb3dzKSJ9CgogICAgSU5HMiAtLT58Ik5vIHJvdyBzY29yZXNcbj49IDIga2V5d29yZHNcbmFuZCA+PSA1MCUgdGV4dCBjZWxscyJ8IFNLSVBbIlNoZWV0IFNLSVBQRURcbihlLmcuICdDb3ZlcicsICdJbnN0cnVjdGlvbnMnKVxucmVjb3JkZWQgd2l0aCBhIHJlYXNvbiJdCiAgICBJTkcyIC0tPnwiSGVhZGVyIHJvdyBmb3VuZCJ8IElORzNbImJ1aWxkX3NoZWV0X2RhdGFmcmFtZSgpXG5zbGljZSBoZWFkZXIgKyBib2R5LFxuZHJvcCBlbXB0eSByb3dzL2NvbHMiXQogICAgSU5HMyAtLT4gSU5HNHsiaXNfZmluYW5jaWFsX3NoZWV0KCk/XG5oZWFkZXIgZm91bmQgQU5EXG4+PSAxIGRhdGEgcm93IGJlbG93IGl0In0KICAgIElORzQgLS0+fCJObyJ8IFNLSVAKICAgIElORzQgLS0+fCJZZXMifCBGSU5TSEVFVFNbImZpbmFuY2lhbF9zaGVldHM6IGRpY3Rbc3RyLCBEYXRhRnJhbWVdXG4ob25lIGVudHJ5IHBlciBrZXB0IHNoZWV0KSJdCgogICAgRklOU0hFRVRTIC0tPiBQSVBFMVsicGlwZWxpbmUucHJvY2Vzc193b3JrYm9vaygpXG5pdGVyYXRlcyBldmVyeSBmaW5hbmNpYWwgc2hlZXQiXQogICAgUElQRTEgLS0+IE1FTTFbIm1lbW9yeS5jb21wdXRlX2ZpbmdlcnByaW50KGNvbHVtbnMpXG5TSEEyNTYgb2YgY2xlYW5lZCArIHNvcnRlZCBjb2x1bW4gbmFtZXMiXQogICAgTUVNMSAtLT4gTUVNMnsiZmluZ2VycHJpbnQgYWxyZWFkeSBpblxuc2NoZW1hX21lbW9yeS5qc29uPyJ9CiAgICBNRU1GSUxFIC0uLT58InJlYWQifCBNRU0yCgogICAgTUVNMiAtLT58IllFUyAtLSBGYXN0IExhbmUifCBBUFBMWU1BUFsiUmV1c2Ugc2F2ZWQgbWFwcGluZyBpbnN0YW50bHlcbnNvdXJjZSA9ICdtZW1vcnknXG4oTk8gR2VtaW5pIGNhbGwpIl0KCiAgICBNRU0yIC0tPnwiTk8gLS0gbmV3IHNjaGVtYSJ8IEFJMVsiYWlfbWFwcGVyLm1hcF9jb2x1bW5zX3dpdGhfYWkoKVxuc2FtcGxlX3Jvd3MgPSBkZi5oZWFkKDMpXG5HZW1pbmkgMi41IEZsYXNoICsgUHlkYW50aWMgcmVzcG9uc2Vfc2NoZW1hIl0KICAgIEFJMSAtLT4gQUkyWyJTY2hlbWFNYXBwaW5nUmVzcG9uc2Vcbnthc3NpZ25tZW50c1tdLCBjb25maWRlbmNlX3Njb3JlLCByZWFzb25pbmd9Il0KICAgIEFJMiAtLT4gR0FURXsiY29uZmlkZW5jZV9zY29yZVxuPj0gOTAgPyJ9CgogICAgR0FURSAtLT58IllFUyJ8IEFVVE9BUFBMWVsiQXV0by1hcHBseSBtYXBwaW5nXG5zb3VyY2UgPSAnYWlfYXV0byciXQogICAgR0FURSAtLT58Ik5PInwgSFVNQU5bIkNMSSBIdW1hbiBHYXRlOlxucHJpbnQgcHJvcG9zZWQgbWFwcGluZyArIGNvbmZpZGVuY2UgKyByZWFzb25pbmdcbnVzZXIgYWNjZXB0cyBbeV0gb3IgY29ycmVjdHMgZWFjaCBjb2x1bW4iXQogICAgSFVNQU4gLS0+IEhVTUFOUkVTVUxUWyJmaW5hbF9tYXBwaW5nXG5zb3VyY2UgPSAndXNlcl9jb25maXJtZWQnIG9yICd1c2VyX2FkanVzdGVkJyJdCgogICAgQVVUT0FQUExZIC0tPiBSRU1FTUJFUlsibWVtb3J5LnJlbWVtYmVyX21hcHBpbmcoKVxuKyBtZW1vcnkuc2F2ZV9tZW1vcnkoKSJdCiAgICBIVU1BTlJFU1VMVCAtLT4gUkVNRU1CRVIKICAgIFJFTUVNQkVSIC0tPnwid3JpdGUifCBNRU1GSUxFCgogICAgQVBQTFlNQVAgLS0+IFRSQU5TRk9STQogICAgQVVUT0FQUExZIC0tPiBUUkFOU0ZPUk0KICAgIEhVTUFOUkVTVUxUIC0tPiBUUkFOU0ZPUk0KCiAgICBUUkFOU0ZPUk1bInRyYW5zZm9ybWVyLnRyYW5zZm9ybV9zaGVldCgpXG5hcHBseV9tYXBwaW5nKCkgLT4gc3RhbmRhcmRpemVfdHlwZXMoKVxuLT4gYWRkX3NvdXJjZV9zaGVldCgpIl0gLS0+IENPTlNPTFsidHJhbnNmb3JtZXIuY29uc29saWRhdGUoKVxucGQuY29uY2F0KCkgZXZlcnkgdHJhbnNmb3JtZWQgc2hlZXQiXQogICAgQ09OU09MIC0tPiBNQVNURVJbIk1hc3RlciBVR0wgRGF0YUZyYW1lXG5bRGF0ZSwgRGVzY3JpcHRpb24sIFBheWVlLCBEZWJpdCwgQ3JlZGl0LCBCYWxhbmNlLCBzb3VyY2Vfc2hlZXRdIl0KICAgIE1BU1RFUiAtLT4gQ0hFQ0tbInRyYW5zZm9ybWVyLmNoZWNrX2RlYml0X2NyZWRpdF9pbnRlZ3JpdHkoKVxuU1VNKERlYml0KSB2cyBTVU0oQ3JlZGl0KSwgd2hvbGUtbGVkZ2VyIGZsYWciXQogICAgQ0hFQ0sgLS0+IEVYUE9SVFsiZXhwb3J0ZXIuZ2VuZXJhdGVfb2Rvb19leHBvcnQoKVxuYnVpbGRfb2Rvb19qb3VybmFsX2VudHJpZXMoKVxuKDIgYmFsYW5jZWQgbGluZXMgcGVyIFVHTCByb3cpIl0KCiAgICBFWFBPUlQgLS0+IE9VVDFbKCJvdXRwdXQvbWFzdGVyX2dlbmVyYWxfbGVkZ2VyLmNzdiIpXQogICAgRVhQT1JUIC0tPiBPVVQyWygib3V0cHV0L29kb29fam91cm5hbF9lbnRyaWVzLmNzdiIpXQogICAgRVhQT1JUIC0tPiBPVVQzWygib3V0cHV0L29kb29fam91cm5hbF9lbnRyaWVzLnhsc3giKV0KYGBgCgojIyMgUmVhZGluZyB0aGUgZGlhZ3JhbQoKLSAqKlR3byBlbnRyeSBwb2ludHMsIG9uZSBzaGFyZWQgZmlsZS4qKiBgc2VlZF9tZW1vcnkucHlgIGFuZCBgbWFpbi5weWAKICBuZXZlciBjYWxsIGVhY2ggb3RoZXIg4oCUIHRoZXkgb25seSBjb21tdW5pY2F0ZSB0aHJvdWdoCiAgYHNjaGVtYV9tZW1vcnkuanNvbmAgb24gZGlzay4gU2VlZGluZyBpcyBhIG9uZS10aW1lLCBvZmZsaW5lIHN0ZXA7IGBtYWluLnB5YAogIGlzIHdoYXQgeW91IHJ1biBhZ2FpbnN0IGEgcmVhbCB3b3JrYm9vay4gSWYgYSBzaGVldCdzIGZpbmdlcnByaW50IHdhcwogIHNlZWRlZCBhaGVhZCBvZiB0aW1lLCBgbWFpbi5weWAncyB2ZXJ5IGZpcnN0IGVuY291bnRlciB3aXRoIHRoYXQgZm9ybWF0CiAgaXMgYWxyZWFkeSBhIEZhc3QgTGFuZSBoaXQuCi0gKipFdmVyeSBzaGVldCBpbmRlcGVuZGVudGx5IHdhbGtzIHRoZSB3aG9sZSByaWdodC1oYW5kIHBhdGguKiogQSBzaW5nbGUKICB3b3JrYm9vayB3aXRoIDUgc2hlZXRzIGNhbiBwcm9kdWNlIDUgZGlmZmVyZW50IG91dGNvbWVzOiBzb21lIHNraXBwZWQsCiAgc29tZSBGYXN0IExhbmUsIHNvbWUgYXV0by1hcHBsaWVkLCBzb21lIG5lZWRpbmcgYSBodW1hbiDigJQgYHBpcGVsaW5lLnB5YAogIG1ha2VzIHRoaXMgZGVjaXNpb24gcGVyIHNoZWV0LCBub3QgcGVyIHdvcmtib29rLgotICoqYHNjaGVtYV9tZW1vcnkuanNvbmAgaXMgYm90aCByZWFkIGFuZCB3cml0dGVuIGJ5IHRoZSBzYW1lIHJ1bi4qKiBBCiAgc2hlZXQgcmVzb2x2ZWQgdmlhIEFJIG9yIGEgaHVtYW4gdGhpcyBydW4gaXMgc2F2ZWQgaW1tZWRpYXRlbHkgKG5vdAogIGJhdGNoZWQgdG8gdGhlIGVuZCksIHNvIGFuIGludGVycnVwdGVkIENMSSBzZXNzaW9uIGRvZXNuJ3QgbG9zZSBhbHJlYWR5LQogIGFwcHJvdmVkIG1hcHBpbmdzLgoKLS0tCgojIyAyLiBGaWxlLWJ5LUZpbGUgUmVzcG9uc2liaWxpdHkgR3VpZGUKCiMjIyBgbWFpbi5weWAKLSAqKlJlc3BvbnNpYmlsaXR5OioqIENMSSBlbnRyeSBwb2ludDsgd2lyZXMgYWxsIHNpeCBzdGFnZXMgdG9nZXRoZXIgZm9yIG9uZSB3b3JrYm9vayBlbmQtdG8tZW5kLgotICoqSW5wdXRzOioqIGBmaWxlX3BhdGhgIChwb3NpdGlvbmFsIENMSSBhcmcg4oCUIHBhdGggdG8gYC54bHN4YCk7IGAtLW91dHB1dC1kaXJgIChkZWZhdWx0IGAuL291dHB1dGApOyBgLS1tZW1vcnktcGF0aGAgKGRlZmF1bHQgYC4vc2NoZW1hX21lbW9yeS5qc29uYCkuCi0gKipPdXRwdXRzOioqIENvbnNvbGUgcHJvZ3Jlc3MgbG9nIGZvciBldmVyeSBzdGFnZTsgd3JpdGVzIGBvdXRwdXQvbWFzdGVyX2dlbmVyYWxfbGVkZ2VyLmNzdmAsIGBvdXRwdXQvb2Rvb19qb3VybmFsX2VudHJpZXMuY3N2YCwgYG91dHB1dC9vZG9vX2pvdXJuYWxfZW50cmllcy54bHN4YDsgcHJvY2VzcyBleGl0IGNvZGUgKGAwYCBzdWNjZXNzLCBgMWAgb24gYSBoYXJkIGVycm9yIGxpa2UgYSBtaXNzaW5nIGZpbGUgb3IgemVybyBmaW5hbmNpYWwgc2hlZXRzIGZvdW5kKS4KLSAqKkltcG9ydHMvY2FsbHM6KiogYGluZ2VzdGlvbi5kaXNjb3Zlcl9maW5hbmNpYWxfc2hlZXRzYCwgYHBpcGVsaW5lLnByb2Nlc3Nfd29ya2Jvb2tgLCBgdHJhbnNmb3JtZXIuY29uc29saWRhdGVgLCBgdHJhbnNmb3JtZXIuY2hlY2tfZGViaXRfY3JlZGl0X2ludGVncml0eWAsIGBleHBvcnRlci5nZW5lcmF0ZV9vZG9vX2V4cG9ydGAsIGBtZW1vcnkuREVGQVVMVF9NRU1PUllfUEFUSGAuCgojIyMgYHNlZWRfbWVtb3J5LnB5YAotICoqUmVzcG9uc2liaWxpdHk6KiogQnVsay1wcmVsb2FkIGBzY2hlbWFfbWVtb3J5Lmpzb25gIHdpdGggbWFwcGluZ3MgYXV0aG9yZWQgYWhlYWQgb2YgdGltZSDigJQgYnlwYXNzZXMgaW5nZXN0aW9uL0FJL0NMSSBlbnRpcmVseSBzbyBhIGtub3duLCByZWN1cnJpbmcgZm9ybWF0IGhpdHMgdGhlIEZhc3QgTGFuZSBvbiBpdHMgdmVyeSBmaXJzdCByZWFsIHJ1biB0aHJvdWdoIGBtYWluLnB5YC4KLSAqKklucHV0czoqKiBgc2VlZF9maWxlYCAocG9zaXRpb25hbCBDTEkgYXJnIOKAlCBwYXRoIHRvIGEgSlNPTiBsaXN0IG9mIGB7cmF3X2NvbHVtbnMsIG1hcHBpbmcsIGNvbmZpZGVuY2Vfc2NvcmUsIHJlYXNvbmluZ31gIGVudHJpZXMsIHNlZSBgc2FtcGxlX2RhdGEvc2VlZF9tYXBwaW5ncy5leGFtcGxlLmpzb25gKTsgYC0tbWVtb3J5LXBhdGhgLgotICoqT3V0cHV0czoqKiBXcml0ZXMvdXBkYXRlcyBgc2NoZW1hX21lbW9yeS5qc29uYDsgcHJpbnRzIG9uZSBsaW5lIHBlciBzZWVkZWQgZW50cnkgcGx1cyBhIHN1bW1hcnkgY291bnQuCi0gKipJbXBvcnRzL2NhbGxzOioqIGBtZW1vcnkuY29tcHV0ZV9maW5nZXJwcmludGAsIGBtZW1vcnkubG9hZF9tZW1vcnlgLCBgbWVtb3J5LnJlbWVtYmVyX21hcHBpbmdgLCBgbWVtb3J5LnNhdmVfbWVtb3J5YC4gRGVsaWJlcmF0ZWx5IGRvZXMgKipub3QqKiBpbXBvcnQgYGluZ2VzdGlvbmAsIGBhaV9tYXBwZXJgLCBgcGlwZWxpbmVgLCBvciBgdHJhbnNmb3JtZXJgIOKAlCBpdHMgb25seSByZWxhdGlvbnNoaXAgdG8gdGhlIHJlc3Qgb2YgdGhlIHN5c3RlbSBpcyB0aGUgc2hhcmVkIGBzY2hlbWFfbWVtb3J5Lmpzb25gIGZpbGUuCgojIyMgYGluZ2VzdGlvbi5weWAKLSAqKlJlc3BvbnNpYmlsaXR5OioqIFN0YWdlIDEg4oCUIHJlYWQgZXZlcnkgc2hlZXQgaW4gdGhlIHdvcmtib29rLCBsb2NhdGUgZWFjaCBzaGVldCdzIHRydWUgaGVhZGVyIHJvdyAoaWdub3JpbmcgdGl0bGUgYmxvY2tzL2xvZ29zIGFib3ZlIGl0KSwgYW5kIGZpbHRlciBkb3duIHRvIG9ubHkgZ2VudWluZWx5IGZpbmFuY2lhbCBzaGVldHMuCi0gKipJbnB1dHM6KiogYGZpbGVfcGF0aGAgKHBhdGggdG8gYC54bHN4YCkuCi0gKipPdXRwdXRzOioqIGBkaXNjb3Zlcl9maW5hbmNpYWxfc2hlZXRzKClgIOKGkiBgKGZpbmFuY2lhbF9zaGVldHM6IGRpY3Rbc3RyLCBEYXRhRnJhbWVdLCBza2lwcGVkX3NoZWV0czogZGljdFtzdHIsIHN0cl0pYCDigJQgdGhlIHNlY29uZCBkaWN0IG1hcHMgc2tpcHBlZCBzaGVldCBuYW1lcyB0byBhIGh1bWFuLXJlYWRhYmxlIHJlYXNvbi4KLSAqKkltcG9ydHMvY2FsbHM6KiogYHBhbmRhc2Agb25seS4gVGhpcyBpcyB0aGUgZm91bmRhdGlvbmFsIGxheWVyIOKAlCBpdCBpbXBvcnRzIG5vdGhpbmcgZWxzZSBmcm9tIHRoaXMgcHJvamVjdC4KCiMjIyBgbWVtb3J5LnB5YAotICoqUmVzcG9uc2liaWxpdHk6KiogU3RhZ2UgMiDigJQgc2NoZW1hIGZpbmdlcnByaW50aW5nIGFuZCB0aGUgSlNPTi1iYWNrZWQgbWFwcGluZyBjYWNoZS4gSGFzIHplcm8gYXdhcmVuZXNzIG9mIEV4Y2VsLCBBSSwgb3IgdGhlIENMSTsgcHVyZWx5IGEgaGFzaCArIHBlcnNpc3RlbmNlIHV0aWxpdHkuCi0gKipJbnB1dHM6KiogY29sdW1uIG5hbWUgbGlzdHMsIG1hcHBpbmcgZGljdHMsIGNvbmZpZGVuY2UvcmVhc29uaW5nIHN0cmluZ3MsIGEgYG1lbW9yeWAgZGljdCwgYSBmaWxlIHBhdGguCi0gKipPdXRwdXRzOioqIGBjb21wdXRlX2ZpbmdlcnByaW50KClgIOKGkiBgc3RyYCAoU0hBMjU2IGhleCBkaWdlc3QpOyBgbG9hZF9tZW1vcnkoKWAgLyBgc2F2ZV9tZW1vcnkoKWAg4oaSIGBkaWN0YCAvIGRpc2sgcmVhZC13cml0ZSBzaWRlIGVmZmVjdDsgYGdldF9tYXBwaW5nX2Zvcl9maW5nZXJwcmludCgpYCDihpIgYGRpY3QgfCBOb25lYDsgYHJlbWVtYmVyX21hcHBpbmcoKWAg4oaSIG11dGF0ZWQgYGRpY3RgLgotICoqSW1wb3J0cy9jYWxsczoqKiBgaGFzaGxpYmAsIGBqc29uYCwgYHBhdGhsaWJgLCBgZGF0ZXRpbWVgIG9ubHkuIENhbGxlZCAqKmJ5KiogYHBpcGVsaW5lLnB5YCBhbmQgYHNlZWRfbWVtb3J5LnB5YDsgY2FsbHMgbm90aGluZyBlbHNlIGluIHRoZSBwcm9qZWN0LgoKIyMjIGBhaV9tYXBwZXIucHlgCi0gKipSZXNwb25zaWJpbGl0eToqKiBTdGFnZSAzIOKAlCB0aGUgQUkgQ29uZmlkZW5jZSBFbmdpbmUuIEZvciBhIHNjaGVtYSBgbWVtb3J5LnB5YCBoYXMgbmV2ZXIgc2VlbiwgYXNrcyBHZW1pbmkgdG8gcHJvcG9zZSBhIGNvbHVtbiBtYXBwaW5nIHBsdXMgYSBzZWxmLXJlcG9ydGVkIGNvbmZpZGVuY2Ugc2NvcmUsIHVzaW5nIGEgUHlkYW50aWMgc3RydWN0dXJlZC1vdXRwdXQgc2NoZW1hIHNvIHRoZSByZXNwb25zZSBpcyBhbHdheXMgbWFjaGluZS1wYXJzZWFibGUuCi0gKipJbnB1dHM6KiogYHJhd19jb2x1bW5zOiBsaXN0W3N0cl1gLCBgc2FtcGxlX3Jvd3M6IGxpc3RbZGljdF1gICh0eXBpY2FsbHkgYGRmLmhlYWQoMylgIGFzIHJlY29yZHMpLCBvcHRpb25hbCBgbW9kZWxgIG92ZXJyaWRlIChkZWZhdWx0IGBnZW1pbmktMi41LWZsYXNoYCkuCi0gKipPdXRwdXRzOioqIGBtYXBfY29sdW1uc193aXRoX2FpKClgIOKGkiBgeyJtYXBwaW5nIjogZGljdFtzdHIsIHN0cl0sICJjb25maWRlbmNlX3Njb3JlIjogaW50LCAicmVhc29uaW5nIjogc3RyfWAuIFJhaXNlcyBgQUlNYXBwZXJFcnJvcmAgaWYgdGhlIHBhY2thZ2UvQVBJIGtleSBpcyBtaXNzaW5nIG9yIHRoZSByZXNwb25zZSBjYW4ndCBiZSBwYXJzZWQuCi0gKipJbXBvcnRzL2NhbGxzOioqIGBnb29nbGUuZ2VuYWlgIChpbXBvcnRlZCBsYXppbHksIGluc2lkZSB0aGUgZnVuY3Rpb24sIHNvIHRoZSBtb2R1bGUgY2FuIHN0aWxsIGJlIGltcG9ydGVkIHdpdGhvdXQgdGhlIHBhY2thZ2UgaW5zdGFsbGVkKSwgYHB5ZGFudGljYCwgYHB5dGhvbi1kb3RlbnZgLiBDYWxsZWQgKipieSoqIGBwaXBlbGluZS5weWA7IGltcG9ydHMgbm90aGluZyBlbHNlIGluIHRoZSBwcm9qZWN0LgoKIyMjIGBwaXBlbGluZS5weWAKLSAqKlJlc3BvbnNpYmlsaXR5OioqIFN0YWdlIDQg4oCUIHRoZSByb3V0aW5nIC8gZXhjZXB0aW9uIGdhdGUuIERlY2lkZXMgRmFzdCBMYW5lIHZzLiBBSSB2cy4gSHVtYW4gR2F0ZSBmb3IgZWFjaCBzaGVldCwgYW5kIHBlcnNpc3RzIGV2ZXJ5IG5ld2x5LWFwcHJvdmVkIG1hcHBpbmcuCi0gKipJbnB1dHM6KiogYGZpbmFuY2lhbF9zaGVldHM6IGRpY3Rbc3RyLCBEYXRhRnJhbWVdYCAoZnJvbSBgaW5nZXN0aW9uLnB5YCksIGBtZW1vcnlfcGF0aGAuCi0gKipPdXRwdXRzOioqIGBwcm9jZXNzX3dvcmtib29rKClgIOKGkiBgZGljdFtzaGVldF9uYW1lLCB7Im1hcHBpbmciLCAiY29uZmlkZW5jZV9zY29yZSIsICJzb3VyY2UiLCAiZmluZ2VycHJpbnQifV1gLiBTaWRlIGVmZmVjdDogaW5jcmVtZW50YWxseSB1cGRhdGVzIGBzY2hlbWFfbWVtb3J5Lmpzb25gIGFmdGVyIGVhY2ggbmV3bHktcmVzb2x2ZWQgc2hlZXQuCi0gKipJbXBvcnRzL2NhbGxzOioqIGBtZW1vcnkucHlgIChgY29tcHV0ZV9maW5nZXJwcmludGAsIGBnZXRfbWFwcGluZ19mb3JfZmluZ2VycHJpbnRgLCBgcmVtZW1iZXJfbWFwcGluZ2AsIGBzYXZlX21lbW9yeWAsIGBsb2FkX21lbW9yeWApLCBgYWlfbWFwcGVyLnB5YCAoYG1hcF9jb2x1bW5zX3dpdGhfYWlgLCBgVEFSR0VUX0NPTFVNTlNgKS4gQ2FsbGVkICoqYnkqKiBgbWFpbi5weWAuCgojIyMgYHRyYW5zZm9ybWVyLnB5YAotICoqUmVzcG9uc2liaWxpdHk6KiogU3RhZ2UgNSDigJQgYXBwbHkgZWFjaCBzaGVldCdzIGFwcHJvdmVkIG1hcHBpbmcsIGVuZm9yY2UgdGhlIFVHTCdzIHN0cmljdCBkYXRhIHR5cGVzLCB0YWcgYHNvdXJjZV9zaGVldGAsIGNvbnNvbGlkYXRlIGV2ZXJ5IHNoZWV0IGludG8gb25lIG1hc3RlciBsZWRnZXIsIGFuZCBydW4gdGhlIHdob2xlLWxlZGdlciBEZWJpdC9DcmVkaXQgaW50ZWdyaXR5IGNoZWNrLgotICoqSW5wdXRzOioqIGBkZmAgKyBgbWFwcGluZ2AgKyBgc2hlZXRfbmFtZWAgKHBlci1zaGVldCBmdW5jdGlvbnMpOyBgZmluYW5jaWFsX3NoZWV0c2AgKyBgbWFwcGluZ3NgIGRpY3RzIChgY29uc29saWRhdGUoKWApOyBgbWFzdGVyX2RmYCAoYGNoZWNrX2RlYml0X2NyZWRpdF9pbnRlZ3JpdHkoKWApLgotICoqT3V0cHV0czoqKiBgdHJhbnNmb3JtX3NoZWV0KClgIOKGkiBgRGF0YUZyYW1lW0RhdGUsIERlc2NyaXB0aW9uLCBQYXllZSwgRGViaXQsIENyZWRpdCwgQmFsYW5jZSwgc291cmNlX3NoZWV0XWA7IGBjb25zb2xpZGF0ZSgpYCDihpIgdGhlIG1hc3RlciBgRGF0YUZyYW1lYCAoYWxsIHNoZWV0cyBjb25jYXRlbmF0ZWQpOyBgY2hlY2tfZGViaXRfY3JlZGl0X2ludGVncml0eSgpYCDihpIgYHsidG90YWxfZGViaXQiLCAidG90YWxfY3JlZGl0IiwgImRpZmZlcmVuY2UiLCAiaXNfYmFsYW5jZWQifWAuCi0gKipJbXBvcnRzL2NhbGxzOioqIGBwYW5kYXNgIG9ubHkuIENhbGxlZCAqKmJ5KiogYG1haW4ucHlgOyBoYXMgbm8gYXdhcmVuZXNzIG9mIGBtZW1vcnlgL2BhaV9tYXBwZXJgL2BwaXBlbGluZWAgYXQgYWxsIOKAlCBpdCBvbmx5IGV2ZXIgc2VlcyBhIG1hcHBpbmcgZGljdCBpdCdzIGhhbmRlZC4KCiMjIyBgZXhwb3J0ZXIucHlgCi0gKipSZXNwb25zaWJpbGl0eToqKiBTdGFnZSA2IOKAlCBmb3JtYXQgdGhlIG1hc3RlciBVR0wgaW50byBPZG9vIGBhY2NvdW50Lm1vdmVgLXJlYWR5IEpvdXJuYWwgRW50cnkgbGluZXMgKHR3byBiYWxhbmNlZCBsaW5lcyBwZXIgc291cmNlIHJvdzogdGhlIHJlYWwgYWNjb3VudCArIGEgc3VzcGVuc2UvY2xlYXJpbmcgYWNjb3VudCBwZW5kaW5nIG1hbnVhbCByZWNsYXNzaWZpY2F0aW9uIGluIE9kb28pIGFuZCB3cml0ZSBib3RoIGEgQ1NWIGFuZCBhbiBFeGNlbCBjb3B5LgotICoqSW5wdXRzOioqIGBtYXN0ZXJfZGZgICh0aGUgY29uc29saWRhdGVkIFVHTCBEYXRhRnJhbWUpLCBgb3V0cHV0X2RpcmAuCi0gKipPdXRwdXRzOioqIGBidWlsZF9vZG9vX2pvdXJuYWxfZW50cmllcygpYCDihpIgYERhdGFGcmFtZVtpZCwgZGF0ZSwgam91cm5hbF9pZCwgYWNjb3VudF9pZCwgcGFydG5lciwgbGFiZWwsIGRlYml0LCBjcmVkaXRdYDsgYGdlbmVyYXRlX29kb29fZXhwb3J0KClgIOKGkiBgeyJjc3YiOiBQYXRoLCAieGxzeCI6IFBhdGh9YCAoc2lkZSBlZmZlY3Q6IGZpbGVzIHdyaXR0ZW4gdG8gZGlzaykuCi0gKipJbXBvcnRzL2NhbGxzOioqIGBwYW5kYXNgLCBgcGF0aGxpYmAgb25seS4gQ2FsbGVkICoqYnkqKiBgbWFpbi5weWA7IG5vIGF3YXJlbmVzcyBvZiBgbWVtb3J5YC9gYWlfbWFwcGVyYC9gaW5nZXN0aW9uYC4KCiMjIyBJbXBvcnQgZGVwZW5kZW5jeSBzdW1tYXJ5CgpgYGAKbWFpbi5weSAgICAgICAgICAgIC0+IGluZ2VzdGlvbiwgcGlwZWxpbmUsIHRyYW5zZm9ybWVyLCBleHBvcnRlciwgbWVtb3J5IChmb3IgdGhlIGRlZmF1bHQgcGF0aCBjb25zdGFudCkKc2VlZF9tZW1vcnkucHkgICAgICAtPiBtZW1vcnkgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIChub3RoaW5nIGVsc2UpCnBpcGVsaW5lLnB5ICAgICAgICAgLT4gbWVtb3J5LCBhaV9tYXBwZXIKdHJhbnNmb3JtZXIucHkgICAgICAtPiAocGFuZGFzIG9ubHkpCmV4cG9ydGVyLnB5ICAgICAgICAgLT4gKHBhbmRhcyBvbmx5KQppbmdlc3Rpb24ucHkgICAgICAgIC0+IChwYW5kYXMgb25seSkKbWVtb3J5LnB5ICAgICAgICAgICAtPiAoc3RkbGliIG9ubHkpCmFpX21hcHBlci5weSAgICAgICAgLT4gZ29vZ2xlLWdlbmFpLCBweWRhbnRpYywgcHl0aG9uLWRvdGVudiAgICAgICAgICAgICAobm90aGluZyBlbHNlIGluIHRoaXMgcHJvamVjdCkKYGBgCgpOb3RpY2UgdGhlIGRlcGVuZGVuY3kgZ3JhcGggaXMgYSBzdHJpY3QgREFHIHdpdGggbm8gY3ljbGVzLCBhbmQgdGhlIHRocmVlCiJwdXJlIiBtb2R1bGVzIChgaW5nZXN0aW9uYCwgYHRyYW5zZm9ybWVyYCwgYGV4cG9ydGVyYCkgbmV2ZXIgaW1wb3J0IGVhY2gKb3RoZXIgb3IgYG1lbW9yeWAvYGFpX21hcHBlcmAg4oCUIGV2ZXJ5IGNyb3NzLW1vZHVsZSBkZWNpc2lvbiBpcyBtYWRlIGJ5CmBwaXBlbGluZS5weWAgYW5kIGhhbmRlZCBkb3duIGFzIHBsYWluIGRhdGEgKGEgYG1hcHBpbmdgIGRpY3QpLCB3aGljaCBpcwp3aGF0IG1ha2VzIGVhY2ggc3RhZ2UgaW5kZXBlbmRlbnRseSB0ZXN0YWJsZSAoc2VlIGhvdyB0aGUgZWFybGllciBidWlsZAp2ZXJpZmllZCBgdHJhbnNmb3JtZXJgL2BleHBvcnRlcmAgdXNpbmcgYSBoYW5kLXdyaXR0ZW4gZmFrZSBtYXBwaW5nLAp3aXRoIG5vIEdlbWluaSBjYWxsIGludm9sdmVkIGF0IGFsbCkuCgotLS0KCiMjIDMuIERhdGEgRmxvdyBFeGFtcGxlOiBgQ2xpZW50X1JlcG9ydC54bHN4YAoKQXNzdW1lIGEgd29ya2Jvb2sgd2l0aCB0aHJlZSBzaGVldHM6Cgp8IFNoZWV0IHwgU2hhcGUgfAp8LS0tfC0tLXwKfCBgQ292ZXJgIHwgUm93IDA6IGAiQ0xJRU5UIFJFUE9SVCJgLCByb3cgMTogYCJQcmVwYXJlZCBmb3IgaW50ZXJuYWwgcmV2aWV3ImAg4oCUIG5vIHRhYnVsYXIgZGF0YSBhdCBhbGwgfAp8IGBUcmFuc2FjdGlvbnNgIHwgUm93cyAwLTE6IHRpdGxlIGJsb2NrIChgIkNMSUVOVCBSRVBPUlQgLSBNQUlOIE9QRVJBVElORyBBQ0NPVU5UImAsIGAiUGVyaW9kOiBRMSAyMDI2ImApLCByb3cgMjogaGVhZGVyLCByb3dzIDMrOiBkYXRhIOKAlCBhIHNjaGVtYSAqKm5ldmVyIHNlZW4gYmVmb3JlKiogfAp8IGBRMV9TdW1tYXJ5YCB8IEhlYWRlciBkaXJlY3RseSBvbiByb3cgMCDigJQgY29sdW1ucyBgWyJUcmFucyBEYXRlIiwiRGV0YWlscyIsIkRlYml0IEFtb3VudCIsIkNyZWRpdCBBbW91bnQiLCJSdW5uaW5nIEJhbGFuY2UiXWAsIHdoaWNoIGhhcHBlbnMgdG8gYmUgKipleGFjdGx5KiogdGhlIHNjaGVtYSBwcmUtbG9hZGVkIHZpYSBgc2VlZF9tZW1vcnkucHkgc2FtcGxlX2RhdGEvc2VlZF9tYXBwaW5ncy5leGFtcGxlLmpzb25gIHwKCiMjIyBTdGVwIDEg4oCUIGBpbmdlc3Rpb24ucHlgCgpgcmVhZF93b3JrYm9vaygiQ2xpZW50X1JlcG9ydC54bHN4IilgIHJldHVybnM6CgpgYGBweXRob24KewogICJDb3ZlciI6ICAgICAgICA8aGVhZGVybGVzcyBEYXRhRnJhbWUsIDIgcm93cz4sCiAgIlRyYW5zYWN0aW9ucyI6IDxoZWFkZXJsZXNzIERhdGFGcmFtZSwgdGl0bGUgYmxvY2sgKyBoZWFkZXIgKyBkYXRhPiwKICAiUTFfU3VtbWFyeSI6ICAgPGhlYWRlcmxlc3MgRGF0YUZyYW1lLCBoZWFkZXIgb24gcm93IDAgKyBkYXRhPiwKfQpgYGAKCi0gKipgQ292ZXJgKio6IGBkZXRlY3RfaGVhZGVyX3JvdygpYCBzY2FucyBib3RoIHJvd3MsIGZpbmRzIG5vIHJvdyBoaXR0aW5nIOKJpTIgZmluYW5jaWFsIGtleXdvcmRzIOKGkiBgaGVhZGVyX3Jvd19pZHggPSBOb25lYCDihpIgYHNraXBwZWRfc2hlZXRzWyJDb3ZlciJdID0gIk5vIGhlYWRlciByb3cgd2l0aCA+PSAyIGZpbmFuY2lhbCBrZXl3b3JkcyBmb3VuZCBpbiB0aGUgZmlyc3QgMTUgcm93cyJgLgotICoqYFRyYW5zYWN0aW9uc2AqKjogcm93IDIgKGBbIlR4biBEYXRlIiwiTWVtbyIsIkFtb3VudCBPdXQiLCJBbW91bnQgSW4iLCJBY2N0IEJhbGFuY2UiXWApIHNjb3JlcyA0IGRpc3RpbmN0IGtleXdvcmRzIChgZGF0ZWAsIGBhbW91bnRgIMOXMiwgYGJhbGFuY2VgKSB3aXRoIGEgc3RyaW5nIHJhdGlvIG9mIDEuMCDihpIgZGV0ZWN0ZWQgYXMgdGhlIGhlYWRlci4gYGJ1aWxkX3NoZWV0X2RhdGFmcmFtZSgpYCBzbGljZXMgcm93cyAzKyBhcyB0aGUgYm9keS4KLSAqKmBRMV9TdW1tYXJ5YCoqOiByb3cgMCBpcyB0aGUgaGVhZGVyIGRpcmVjdGx5OyBzYW1lIGRldGVjdGlvbiBsb2dpYyBhcHBsaWVzLgoKUmVzdWx0OgoKYGBgcHl0aG9uCmZpbmFuY2lhbF9zaGVldHMgPSB7CiAgICAiVHJhbnNhY3Rpb25zIjogRGF0YUZyYW1lW1siVHhuIERhdGUiLCJNZW1vIiwiQW1vdW50IE91dCIsIkFtb3VudCBJbiIsIkFjY3QgQmFsYW5jZSJdLCA1IHJvd3NdLAogICAgIlExX1N1bW1hcnkiOiAgIERhdGFGcmFtZVtbIlRyYW5zIERhdGUiLCJEZXRhaWxzIiwiRGViaXQgQW1vdW50IiwiQ3JlZGl0IEFtb3VudCIsIlJ1bm5pbmcgQmFsYW5jZSJdLCA0IHJvd3NdLAp9CnNraXBwZWRfc2hlZXRzID0geyJDb3ZlciI6ICJObyBoZWFkZXIgcm93IHdpdGggPj0gMiBmaW5hbmNpYWwga2V5d29yZHMgZm91bmQgaW4gdGhlIGZpcnN0IDE1IHJvd3MifQpgYGAKCiMjIyBTdGVwIDIg4oCUIGBtZW1vcnkucHlgICh2aWEgYHBpcGVsaW5lLnByb2Nlc3Nfd29ya2Jvb2tgKQoKYGBgcHl0aG9uCmZpbmdlcnByaW50KCJUcmFuc2FjdGlvbnMiKSAgIyBjb2x1bW5zOiB0eG4gZGF0ZXxtZW1vfGFtb3VudCBvdXR8YW1vdW50IGlufGFjY3QgYmFsYW5jZQojIC0+ICI3ZmEyYzkuLi4iICAtLSBOT1QgaW4gc2NoZW1hX21lbW9yeS5qc29uIChuZXZlciBzZWVuKQoKZmluZ2VycHJpbnQoIlExX1N1bW1hcnkiKSAgICAjIGNvbHVtbnM6IHRyYW5zIGRhdGV8ZGV0YWlsc3xkZWJpdCBhbW91bnR8Y3JlZGl0IGFtb3VudHxydW5uaW5nIGJhbGFuY2UKIyAtPiAiNTkwNTEyMzk0ZjIxLi4uIiAtLSBBTFJFQURZIGluIHNjaGVtYV9tZW1vcnkuanNvbiAoc2VlZGVkIGVhcmxpZXIpCmBgYAoKYFExX1N1bW1hcnlgIHJlc29sdmVzIGltbWVkaWF0ZWx5OgoKYGBgcHl0aG9uCnsibWFwcGluZyI6IHsiVHJhbnMgRGF0ZSI6ICJEYXRlIiwgIkRldGFpbHMiOiAiRGVzY3JpcHRpb24iLCAiRGViaXQgQW1vdW50IjogIkRlYml0IiwKICAgICAgICAgICAgICJDcmVkaXQgQW1vdW50IjogIkNyZWRpdCIsICJSdW5uaW5nIEJhbGFuY2UiOiAiQmFsYW5jZSJ9LAogImNvbmZpZGVuY2Vfc2NvcmUiOiAxMDAsICJzb3VyY2UiOiAibWVtb3J5IiwgImZpbmdlcnByaW50IjogIjU5MDUxMjM5NGYyMS4uLiJ9CmBgYAoKTm8gR2VtaW5pIGNhbGwgaGFwcGVucyBmb3IgdGhpcyBzaGVldCBhdCBhbGwuCgojIyMgU3RlcCAzIOKAlCBgYWlfbWFwcGVyLnB5YCAob25seSBmb3IgYFRyYW5zYWN0aW9uc2ApCgpgc2FtcGxlX3Jvd3MgPSBkZi5oZWFkKDMpLnRvX2RpY3Qob3JpZW50PSJyZWNvcmRzIilgOgoKYGBgcHl0aG9uClsKICB7IlR4biBEYXRlIjogIjIwMjYtMDEtMDUiLCAiTWVtbyI6ICJDbGllbnQgUmV0YWluZXIgLSBBY21lIiwgIkFtb3VudCBPdXQiOiBOb25lLCAgICJBbW91bnQgSW4iOiA1MDAwLjAsICJBY2N0IEJhbGFuY2UiOiA1MDAwLjB9LAogIHsiVHhuIERhdGUiOiAiMjAyNi0wMS0wOSIsICJNZW1vIjogIk9mZmljZSBMZWFzZSAtIEphbiIsICAgICAiQW1vdW50IE91dCI6IDEyMDAuMCwgIkFtb3VudCBJbiI6IE5vbmUsICAgIkFjY3QgQmFsYW5jZSI6IDM4MDAuMH0sCiAgeyJUeG4gRGF0ZSI6ICIyMDI2LTAxLTE0IiwgIk1lbW8iOiAiQ29uc3VsdGluZyBGZWUgLSBHbG9iZXgiLCJBbW91bnQgT3V0IjogTm9uZSwgICAiQW1vdW50IEluIjogMjUwMC4wLCAiQWNjdCBCYWxhbmNlIjogNjMwMC4wfSwKXQpgYGAKCkdlbWluaSdzIHN0cnVjdHVyZWQgcmVzcG9uc2UgKGBTY2hlbWFNYXBwaW5nUmVzcG9uc2VgLCBwYXJzZWQgdmlhIGByZXNwb25zZS5wYXJzZWRgKToKCmBgYHB5dGhvbgphc3NpZ25tZW50cyA9IFsKICAgIHsicmF3X2NvbHVtbiI6ICJUeG4gRGF0ZSIsICAgICAidGFyZ2V0X2NvbHVtbiI6ICJEYXRlIn0sCiAgICB7InJhd19jb2x1bW4iOiAiTWVtbyIsICAgICAgICAgInRhcmdldF9jb2x1bW4iOiAiRGVzY3JpcHRpb24ifSwKICAgIHsicmF3X2NvbHVtbiI6ICJBbW91bnQgT3V0IiwgICAidGFyZ2V0X2NvbHVtbiI6ICJEZWJpdCJ9LAogICAgeyJyYXdfY29sdW1uIjogIkFtb3VudCBJbiIsICAgICJ0YXJnZXRfY29sdW1uIjogIkNyZWRpdCJ9LAogICAgeyJyYXdfY29sdW1uIjogIkFjY3QgQmFsYW5jZSIsICJ0YXJnZXRfY29sdW1uIjogIkJhbGFuY2UifSwKXQpjb25maWRlbmNlX3Njb3JlID0gOTIKcmVhc29uaW5nID0gIkNvbHVtbiBuYW1lcyBjbGVhcmx5IGNvcnJlc3BvbmQgdG8gYSB0cmFuc2FjdGlvbiBsZWRnZXIgd2l0aCBzZXBhcmF0ZSBkZWJpdC9jcmVkaXQgYW1vdW50cyBhbmQgYSBydW5uaW5nIGJhbGFuY2UuIgpgYGAKCmBtYXBfY29sdW1uc193aXRoX2FpKClgIGNvbnZlcnRzIHRoaXMgaW50bzoKCmBgYHB5dGhvbgp7Im1hcHBpbmciOiB7IlR4biBEYXRlIjogIkRhdGUiLCAiTWVtbyI6ICJEZXNjcmlwdGlvbiIsICJBbW91bnQgT3V0IjogIkRlYml0IiwKICAgICAgICAgICAgICJBbW91bnQgSW4iOiAiQ3JlZGl0IiwgIkFjY3QgQmFsYW5jZSI6ICJCYWxhbmNlIn0sCiAiY29uZmlkZW5jZV9zY29yZSI6IDkyLCAicmVhc29uaW5nIjogIi4uLiJ9CmBgYAoKIyMjIFN0ZXAgNCDigJQgYHBpcGVsaW5lLnB5YCBnYXRlCgotIGBUcmFuc2FjdGlvbnNgOiBgY29uZmlkZW5jZV9zY29yZSA9IDkyID49IDkwYCDihpIgKipBVVRPLUFQUExZKiosIGBzb3VyY2UgPSAiYWlfYXV0byJgLiBgbWVtb3J5LnJlbWVtYmVyX21hcHBpbmcoKWAgKyBgc2F2ZV9tZW1vcnkoKWAgd3JpdGUgdGhpcyBicmFuZC1uZXcgZmluZ2VycHJpbnQgaW50byBgc2NoZW1hX21lbW9yeS5qc29uYCDigJQgbmV4dCBxdWFydGVyJ3MgYFRyYW5zYWN0aW9uc2Agc2hlZXQgKGlkZW50aWNhbCBjb2x1bW5zKSB3aWxsIGhpdCB0aGUgRmFzdCBMYW5lIGluc3RlYWQgb2YgY2FsbGluZyBHZW1pbmkgYWdhaW4uCi0gYFExX1N1bW1hcnlgOiBhbHJlYWR5IHJlc29sdmVkIGluIFN0ZXAgMiwgYHNvdXJjZSA9ICJtZW1vcnkiYC4KCk5vIGh1bWFuIHByb21wdCBvY2N1cnMgaW4gdGhpcyBleGFtcGxlIChib3RoIHNoZWV0cyBjbGVhcmVkIHRoZSBnYXRlIG9uZSB3YXkgb3IgYW5vdGhlcikg4oCUIGlmIGBUcmFuc2FjdGlvbnNgIGhhZCBzY29yZWQsIHNheSwgNzUsIHRoZSBDTEkgd291bGQgaGF2ZSBzaG93biB0aGUgcHJvcG9zZWQgbWFwcGluZyBhbmQgcGF1c2VkIGZvciBgeWAvY29ycmVjdGlvbnMgYmVmb3JlIGNvbnRpbnVpbmcuCgojIyMgU3RlcCA1IOKAlCBgdHJhbnNmb3JtZXIucHlgCgpgdHJhbnNmb3JtX3NoZWV0KGRmLCBtYXBwaW5nLCAiVHJhbnNhY3Rpb25zIilgOgoKMS4gYGFwcGx5X21hcHBpbmcoKWAgc2VsZWN0cy9yZW5hbWVzIHRoZSA1IHJhdyBjb2x1bW5zIOKGkiBgW0RhdGUsIERlc2NyaXB0aW9uLCBQYXllZSwgRGViaXQsIENyZWRpdCwgQmFsYW5jZV1gIChQYXllZSBpcyBhZGRlZCBhcyBhbGwtYE5hTmAg4oCUIG5vdGhpbmcgaW4gdGhpcyBzaGVldCdzIG1hcHBpbmcgdGFyZ2V0cyBpdCkuCjIuIGBzdGFuZGFyZGl6ZV90eXBlcygpYCDigJQgYCIyMDI2LTAxLTA1ImAg4oaSIElTTyBgIjIwMjYtMDEtMDUiYDsgYEFtb3VudCBPdXRgL2BBbW91bnQgSW5gL2BBY2N0IEJhbGFuY2VgIOKGkiBmbG9hdHMsIGJsYW5rcyDihpIgYDAuMGA7IGBEZXNjcmlwdGlvbmAgc3RyaXBwZWQsIGZpbGxlZCBgIiJgLgozLiBgYWRkX3NvdXJjZV9zaGVldCgpYCBzdGFtcHMgYHNvdXJjZV9zaGVldCA9ICJUcmFuc2FjdGlvbnMiYCBvbiBldmVyeSByb3cuCgpTYW1lIGZvciBgUTFfU3VtbWFyeWAg4oaSIGBzb3VyY2Vfc2hlZXQgPSAiUTFfU3VtbWFyeSJgLgoKYGNvbnNvbGlkYXRlKClgIGNvbmNhdGVuYXRlcyBib3RoIGludG8gdGhlIG1hc3RlciBsZWRnZXIgKDkgcm93cyB0b3RhbDogNSArIDQpOgoKfCBEYXRlIHwgRGVzY3JpcHRpb24gfCBQYXllZSB8IERlYml0IHwgQ3JlZGl0IHwgQmFsYW5jZSB8IHNvdXJjZV9zaGVldCB8CnwtLS18LS0tfC0tLXwtLS18LS0tfC0tLXwtLS18CnwgMjAyNi0wMS0wNSB8IENsaWVudCBSZXRhaW5lciAtIEFjbWUgfCB8IDAuMCB8IDUwMDAuMCB8IDUwMDAuMCB8IFRyYW5zYWN0aW9ucyB8CnwgMjAyNi0wMS0wOSB8IE9mZmljZSBMZWFzZSAtIEphbiB8IHwgMTIwMC4wIHwgMC4wIHwgMzgwMC4wIHwgVHJhbnNhY3Rpb25zIHwKfCAuLi4gfCAuLi4gfCB8IC4uLiB8IC4uLiB8IC4uLiB8IC4uLiB8CnwgMjAyNi0wMS0wMyB8IC4uLiB8IHwgLi4uIHwgLi4uIHwgLi4uIHwgUTFfU3VtbWFyeSB8CgpgY2hlY2tfZGViaXRfY3JlZGl0X2ludGVncml0eShtYXN0ZXJfZGYpYCBzdW1zIGBEZWJpdGAvYENyZWRpdGAgYWNyb3NzICoqYm90aCoqIHNoZWV0cyB0b2dldGhlciBhbmQgcmV0dXJucyBlLmcuIGB7InRvdGFsX2RlYml0IjogNjgyMC4wLCAidG90YWxfY3JlZGl0IjogOTUwMC4wLCAiZGlmZmVyZW5jZSI6IC0yNjgwLjAsICJpc19iYWxhbmNlZCI6IEZhbHNlfWAg4oCUIHByaW50ZWQgYXMgYW4gYFtBTEVSVF1gIGZvciByZXZpZXcgKGV4cGVjdGVkIGhlcmUsIHNpbmNlIHRoZXNlIGFyZSBpbmRpdmlkdWFsIHN0YXRlbWVudCBsaW5lcywgbm90IG1hdGNoZWQgZG91YmxlLWVudHJ5IHBhaXJzKS4KCiMjIyBTdGVwIDYg4oCUIGBleHBvcnRlci5weWAKCmBidWlsZF9vZG9vX2pvdXJuYWxfZW50cmllcyhtYXN0ZXJfZGYpYCBlbWl0cyAqKnR3byBsaW5lcyBwZXIgbWFzdGVyIHJvdyoqICgxOCBsaW5lcyB0b3RhbCBmb3IgOSByb3dzKSwgc2hhcmluZyBleHRlcm5hbCBJRHMgYHVnbF9pbXBvcnRfMGAg4oCmIGB1Z2xfaW1wb3J0XzhgOgoKYGBgCmlkLGRhdGUsam91cm5hbF9pZCxhY2NvdW50X2lkLHBhcnRuZXIsbGFiZWwsZGViaXQsY3JlZGl0CnVnbF9pbXBvcnRfMCwyMDI2LTAxLTA1LEJBTksxLDEwMDAsLENsaWVudCBSZXRhaW5lciAtIEFjbWUsMC4wLDUwMDAuMAp1Z2xfaW1wb3J0XzAsMjAyNi0wMS0wNSxCQU5LMSw0OTk5OTksLENsaWVudCBSZXRhaW5lciAtIEFjbWUsNTAwMC4wLDAuMAp1Z2xfaW1wb3J0XzEsMjAyNi0wMS0wOSxCQU5LMSwxMDAwLCxPZmZpY2UgTGVhc2UgLSBKYW4sMTIwMC4wLDAuMAp1Z2xfaW1wb3J0XzEsMjAyNi0wMS0wOSxCQU5LMSw0OTk5OTksLE9mZmljZSBMZWFzZSAtIEphbiwwLjAsMTIwMC4wCi4uLgpgYGAKCmBnZW5lcmF0ZV9vZG9vX2V4cG9ydCgpYCB3cml0ZXMgYG91dHB1dC9vZG9vX2pvdXJuYWxfZW50cmllcy5jc3ZgIGFuZCBgLnhsc3hgOyBgbWFpbi5weWAgYWRkaXRpb25hbGx5IHdyaXRlcyB0aGUgcHJlLU9kb28tZm9ybWF0dGluZyBtYXN0ZXIgbGVkZ2VyIHRvIGBvdXRwdXQvbWFzdGVyX2dlbmVyYWxfbGVkZ2VyLmNzdmAgZm9yIGF1ZGl0L3JlZmVyZW5jZS4gVGhlIGZpbmFsIGNvbnNvbGUgc3VtbWFyeSByZXBvcnRzIGJvdGggZmlsZSBwYXRocyBhbmQgdGhlIGBpc19iYWxhbmNlZGAgZmxhZyBmcm9tIFN0ZXAgNS4K";
+
+  document.getElementById('downloadBtn').addEventListener('click', function () {
+    const binary = atob(B64_CONTENT);
+    const bytes = new Uint8Array(binary.length);
+    for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+    const blob = new Blob([bytes], { type: 'text/markdown;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'ARCHITECTURE.md';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  });
+</script>
