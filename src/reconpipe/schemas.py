@@ -67,7 +67,14 @@ NonNegativeMoney = Annotated[
 
 SourceFile = Annotated[str, Field(min_length=1, description="File name under data/raw/.")]
 RowNumber = Annotated[
-    int, Field(ge=1, description="1-based line number of the row in its source file.")
+    int,
+    Field(
+        ge=1,
+        description=(
+            "1-based position of the row in its source file: the spreadsheet row for "
+            "Excel, the transaction's order in the statement for PDF."
+        ),
+    ),
 ]
 AccountId = Annotated[str, Field(min_length=1, description="Bank account the row belongs to.")]
 

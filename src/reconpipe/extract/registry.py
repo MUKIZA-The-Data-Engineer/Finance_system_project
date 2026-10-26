@@ -13,6 +13,7 @@ from __future__ import annotations
 
 from pathlib import Path
 
+from reconpipe.extract.bank_a_pdf import BankAPdfParser
 from reconpipe.extract.base import BaseStatementParser
 from reconpipe.extract.excel_parser import ExcelStatementParser
 from reconpipe.schemas import RawTransaction
@@ -58,4 +59,4 @@ class ParserRegistry:
 
 def default_registry() -> ParserRegistry:
     """Every bank layout ReconPipe knows. A new bank is one more line here."""
-    return ParserRegistry([ExcelStatementParser()])
+    return ParserRegistry([BankAPdfParser(), ExcelStatementParser()])
