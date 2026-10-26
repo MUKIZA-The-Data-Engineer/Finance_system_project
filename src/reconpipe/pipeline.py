@@ -247,7 +247,7 @@ def describe(summary: dict) -> str:
 
 def main() -> int:
     logging.basicConfig(level=logging.INFO, format="%(levelname)s %(message)s")
-    result = run_all()
+    result = run_all(db_path=Path(os.environ.get("RECONPIPE_DB", "warehouse.duckdb")))
     summary = result.report.summary
     print(describe(summary))
     print(summary["headline"])

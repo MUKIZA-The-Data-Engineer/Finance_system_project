@@ -1,0 +1,15 @@
+.git
+.venv
+**/__pycache__
+*.duckdb
+*.duckdb.wal
+reports/*
+data/quarantine/*
+data/real
+data/gl_raw
+dbt/target
+dbt/logs
+dbt/.user.yml
+.pytest_cache
+.ruff_cache
+.tmp_dagster_home*

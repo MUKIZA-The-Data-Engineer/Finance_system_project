@@ -1,8 +1,10 @@
 # ReconPipe
 
+[![CI](https://github.com/MUKIZA-The-Data-Engineer/Finance_system_project/actions/workflows/ci.yml/badge.svg)](https://github.com/MUKIZA-The-Data-Engineer/Finance_system_project/actions/workflows/ci.yml)
+
 Bank statement → ledger reconciliation pipeline.
 
-> Work in progress: day 13 of a 16-day build (26 Oct – 10 Nov 2026).
+> Work in progress: day 14 of a 16-day build (26 Oct – 10 Nov 2026).
 > The full README with the architecture, metrics and design decisions lands on day 15.
 
 ## Architecture
@@ -41,6 +43,19 @@ python -m reconpipe                     # everything: parse -> validate -> load 
 person must look at, with the file and row on both sides), `reports/matched.csv` and
 `reports/run_summary.json`. To run only the dbt part again:
 `dbt build --project-dir dbt --profiles-dir dbt`.
+
+## Docker
+
+```bash
+docker compose up          # reconcile data/raw/, then the review app on http://localhost:8501
+```
+
+The `pipeline` service runs `python -m reconpipe` and exits (reports land in
+`./reports`); the `app` service starts once it has succeeded. The image needs no
+network at run time.
+
+CI (GitHub Actions) lints with ruff, runs pytest with coverage, runs the whole
+reconciliation and `dbt build`, and builds and runs the Docker image.
 
 ## Orchestration
 

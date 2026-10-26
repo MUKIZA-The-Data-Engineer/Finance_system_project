@@ -1,0 +1,32 @@
+# docker compose up
+#   1. `pipeline` reconciles data/raw/ and exits; reports land in ./reports
+#   2. `app` then serves the review app on http://localhost:8501
+services:
+  pipeline:
+    build: .
+    image: reconpipe
+    command: ["python", "-m", "reconpipe"]
+    volumes:
+      - warehouse:/app/warehouse
+      - ./reports:/app/reports
+
+  app:
+    image: reconpipe   # same image the pipeline service builds
+    command:
+      - streamlit
+      - run
+      - app/dashboard.py
+      - --server.address=0.0.0.0
+      - --server.port=8501
+      - --server.headless=true
+      - --browser.gatherUsageStats=false
+    volumes:
+      - warehouse:/app/warehouse
+    ports:
+      - "8501:8501"
+    depends_on:
+      pipeline:
+        condition: service_completed_successfully
+
+volumes:
+  warehouse:
