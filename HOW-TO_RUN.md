@@ -82,7 +82,7 @@ python run_pipeline.py
 
 What happens, in order:
 
-1. **Sample data is (re)generated** into `data/raw/` — five messy, differently
+1. **Sample data is (re)generated** into `data/gl_raw/` — five messy, differently
    -shaped `.xlsx` files (see `generate_sample_data.py`). Safe to re-run any
    time; it overwrites the same files.
 2. **Extraction (Phase 1)** — `adapters.py` detects each file's shape
@@ -120,7 +120,7 @@ python generate_sample_data.py
 
 ## 4. Using your OWN Excel files instead of the sample data
 
-1. Drop your `.xlsx` file(s) into `data/raw/`.
+1. Drop your `.xlsx` file(s) into `data/gl_raw/`.
 2. Each file needs to match one of the three shapes `adapters.py` understands:
    - **Already double-entry** (one row per Debit/Credit leg, grouped by a
      reference number) → register it in `FILE_ADAPTER_REGISTRY` in
@@ -178,7 +178,7 @@ against it instead of relying only on the internal CSV:
 import etl_pipeline
 
 clean_ledger = etl_pipeline.run_extraction_and_validation(
-    "data/raw",
+    "data/gl_raw",
     coa_filepath="data/odoo_coa_sample.csv",   # or None to skip this step
 )
 ```

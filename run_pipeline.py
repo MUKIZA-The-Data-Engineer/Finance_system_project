@@ -9,7 +9,7 @@ click (via `python run_pipeline.py`) to regenerate the books.
 Pipeline flow (mirrors the three phases across adapters.py / etl_pipeline.py
 / reports.py):
 
-    data/raw/*.xlsx  --[adapters.py: Phase 1 extraction]-->
+    data/gl_raw/*.xlsx  --[adapters.py: Phase 1 extraction]-->
     staging rows     --[etl_pipeline.py: Phase 2 double-entry engine]-->
     Universal GL     --[etl_pipeline.py: validate_ledger()]-->
     clean GL         --[reports.py: Phase 3 groupby/pivot reporting]-->
@@ -24,7 +24,7 @@ import etl_pipeline
 import generate_sample_data
 import reports
 
-RAW_DIR = Path("data/raw")
+RAW_DIR = Path("data/gl_raw")
 OUTPUT_PATH = Path("output/financial_statements.xlsx")
 
 

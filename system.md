@@ -108,7 +108,7 @@ finance_system/
 | **Key functions** | `rename_columns()`, `standardize_dates()` (→ strict `DD-MM-YYYY`), `is_wide_format()` (heuristic: ≥2 column headers that parse as dates ⇒ wide file) |
 | **Ingestion adapters** | `ingest_gl_passthrough()` — already double-entry, rename & pass through. `ingest_expense_file()`, `ingest_revenue_file()`, `ingest_financing_file()` — single-sided row-based, one real-world event per row. `ingest_wide_expense_budget()` — column-based, unpivoted via `pd.melt()`. |
 | **Dispatcher** | `FILE_ADAPTER_REGISTRY` (filename → adapter), `detect_and_ingest()` (registry lookup, falls back to shape-sniffing via `is_wide_format()` for unregistered files) |
-| **Reads** | Files in `data/raw/*.xlsx` |
+| **Reads** | Files in `data/gl_raw/*.xlsx` |
 | **Outputs** | In-memory **staging DataFrames** (not written to disk) — either `gl_passthrough` shape (`Transaction_ID, Date, Account_Label, Debit, Credit, Description, Source_File_Ref`) or single-sided shape (`Date, Description, Debit_Account_Label, Credit_Account_Label, Amount, Source_File_Ref`) |
 | **Consumed by** | `etl_pipeline.build_general_ledger()` |
 
@@ -136,9 +136,9 @@ finance_system/
 
 | | |
 |---|---|
-| **Purpose** | Produces the 5 sample raw Excel files in `data/raw/`, including one **deliberately unbalanced** transaction (`TXN-BANK-003`, off by $15) so the validation step has something real to catch on every run. |
+| **Purpose** | Produces the 5 sample raw Excel files in `data/gl_raw/`, including one **deliberately unbalanced** transaction (`TXN-BANK-003`, off by $15) so the validation step has something real to catch on every run. |
 | **Key functions** | `make_bank_ledger_export()`, `make_expenses_july()`, `make_sales_invoices_july()`, `make_financing_activities()`, `make_monthly_expense_budget_wide()`, `main()` |
-| **Writes** | `data/raw/*.xlsx` (5 files) |
+| **Writes** | `data/gl_raw/*.xlsx` (5 files) |
 
 #### `run_pipeline.py` — Orchestrator / Sample Script
 
@@ -146,7 +146,7 @@ finance_system/
 |---|---|
 | **Purpose** | The single entry point: regenerates sample data, runs extraction → validation → reporting, demonstrates the optional CoA enrichment, and writes the final workbook. |
 | **Key functions** | `demo_optional_coa_enrichment()` — runs both branches of `enrich_with_external_coa()` side by side and prints a before/after code comparison. `main()` — full pipeline orchestration. |
-| **Reads** | `data/raw/*.xlsx` (indirectly, via `etl_pipeline`), `data/odoo_coa_sample.csv` (for the demo) |
+| **Reads** | `data/gl_raw/*.xlsx` (indirectly, via `etl_pipeline`), `data/odoo_coa_sample.csv` (for the demo) |
 | **Writes** | `output/financial_statements.xlsx` |
 
 ---
@@ -157,7 +157,7 @@ finance_system/
 
 ```mermaid
 flowchart TD
-    A["Raw Excel files\ndata/raw/*.xlsx"] --> B{"detect_and_ingest()\ningestion router\n(adapters.py)"}
+    A["Raw Excel files\ndata/gl_raw/*.xlsx"] --> B{"detect_and_ingest()\ningestion router\n(adapters.py)"}
 
     B -->|"already double-entry"| C1["ingest_gl_passthrough()\nrename + standardize only"]
     B -->|"single-sided event"| C2["ingest_expense_file()\ningest_revenue_file()\ningest_financing_file()"]
@@ -201,9 +201,9 @@ sequenceDiagram
     participant REP as reports.py
 
     User->>RP: python run_pipeline.py
-    RP->>ETL: run_extraction_and_validation("data/raw", coa_filepath=None)
+    RP->>ETL: run_extraction_and_validation("data/gl_raw", coa_filepath=None)
 
-    loop for each *.xlsx in data/raw/
+    loop for each *.xlsx in data/gl_raw/
         ETL->>AD: detect_and_ingest(filepath)
         AD->>AD: is_wide_format() / registry lookup
         AD->>AD: ingest_expense_file(filepath, source_ref)
@@ -310,7 +310,7 @@ export (e.g. a live Odoo CoA):
 
 ```python
 clean_ledger = etl_pipeline.run_extraction_and_validation(
-    "data/raw",
+    "data/gl_raw",
     coa_filepath="data/odoo_coa_sample.csv",   # or None
 )
 ```
@@ -363,7 +363,7 @@ pointed at `python run_pipeline.py`.
 
 ### 5.2 Adding a New Raw File Source
 
-1. Drop the `.xlsx` into `data/raw/`.
+1. Drop the `.xlsx` into `data/gl_raw/`.
 2. Decide its shape: already-double-entry, single-sided, or wide/column.
 3. Register it (or a new adapter function) in `FILE_ADAPTER_REGISTRY` at the
    bottom of `adapters.py`. Unregistered files are auto-sniffed via

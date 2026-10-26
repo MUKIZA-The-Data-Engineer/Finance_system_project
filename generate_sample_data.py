@@ -2,7 +2,7 @@
 generate_sample_data.py
 ========================
 Creates a handful of deliberately MESSY, deliberately DIFFERENT-SHAPED
-sample Excel workbooks in data/raw/, so run_pipeline.py has something
+sample Excel workbooks in data/gl_raw/, so run_pipeline.py has something
 realistic to ingest. This script is NOT part of the pipeline itself --
 it's a one-time (or re-runnable) fixture generator, standing in for "the
 five different departments/systems that hand you Excel files" a real
@@ -29,7 +29,7 @@ from pathlib import Path
 
 import pandas as pd
 
-RAW_DIR = Path(__file__).parent / "data" / "raw"
+RAW_DIR = Path(__file__).parent / "data" / "gl_raw"
 
 
 def make_bank_ledger_export() -> pd.DataFrame:
