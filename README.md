@@ -2,7 +2,7 @@
 
 Bank statement → ledger reconciliation pipeline.
 
-> Work in progress: day 1 of a 16-day build (26 Oct – 10 Nov 2026).
+> Work in progress: day 2 of a 16-day build (26 Oct – 10 Nov 2026).
 > The full README with the architecture, metrics and design decisions lands on day 15.
 
 ## Architecture
@@ -32,8 +32,14 @@ The contract between layers lives in [`src/reconpipe/schemas.py`](src/reconpipe/
 python -m venv .venv
 source .venv/bin/activate        # Windows Git Bash: source .venv/Scripts/activate
 pip install -e ".[dev]"
+python scripts/generate_statements.py   # writes data/raw/ + tests/expected_results.json
 pytest
 ```
+
+The bank statements are confidential, so ReconPipe ships a seeded generator: three
+deliberately different bank layouts (two PDF, one Excel), a ledger with planted
+discrepancies, and the ground truth in `tests/expected_results.json`. Your own
+real files belong in `data/real/`, which the pipeline never reads.
 
 ## Repository layout
 

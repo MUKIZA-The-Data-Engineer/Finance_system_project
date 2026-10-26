@@ -1,0 +1,5355 @@
+{
+  "seed": 42,
+  "period": {
+    "start": "2026-01-01",
+    "end": "2026-03-31"
+  },
+  "currency": "RWF",
+  "sign_convention": "credit (money in) positive, debit (money out) negative",
+  "tier2_window_days": 2,
+  "statements": [
+    {
+      "file": "data/raw/bank_a_statement_2026Q1.pdf",
+      "bank": "Kivu Commercial Bank",
+      "account_id": "0040-1187342-01",
+      "layout": "pdf_ruled_debit_credit",
+      "transactions": 110,
+      "printed_rows": 110,
+      "duplicate_printed_seqs": [],
+      "wrapped_descriptions": 28,
+      "pages": 4,
+      "opening_balance": "18450000.00",
+      "closing_balance": "66040250.00"
+    },
+    {
+      "file": "data/raw/bank_b_statement_2026Q1.pdf",
+      "bank": "Akagera Trust Bank",
+      "account_id": "200-554-781-903",
+      "layout": "pdf_unruled_signed_amount",
+      "transactions": 95,
+      "printed_rows": 96,
+      "duplicate_printed_seqs": [
+        39
+      ],
+      "wrapped_descriptions": 21,
+      "pages": 3,
+      "opening_balance": "7325500.00",
+      "closing_balance": "53940350.00"
+    },
+    {
+      "file": "data/raw/bank_c_statement_2026Q1.xlsx",
+      "bank": "Nyungwe Cooperative Bank",
+      "account_id": "NCB-7781-0042",
+      "layout": "xlsx_money_out_in",
+      "transactions": 85,
+      "printed_rows": 85,
+      "duplicate_printed_seqs": [],
+      "wrapped_descriptions": 0,
+      "pages": null,
+      "opening_balance": "3910250.00",
+      "closing_balance": "30947250.00"
+    }
+  ],
+  "ledger": {
+    "file": "data/raw/ledger.xlsx",
+    "entries": 296
+  },
+  "totals": {
+    "bank_transactions": 290,
+    "ledger_entries": 296
+  },
+  "planted": {
+    "amount_typo": 6,
+    "missing_in_ledger": 6,
+    "missing_in_bank": 3,
+    "ledger_duplicate": 3,
+    "date_shift": 6,
+    "one_to_many": 3,
+    "bank_duplicate_printed_rows": 1
+  },
+  "expected_matches": {
+    "tier1_exact": 219,
+    "tier2_amount_date": 53,
+    "tier3_fuzzy": 6,
+    "total_matched_bank_lines": 278
+  },
+  "expected_classification": {
+    "amount_mismatch": 6,
+    "duplicate_suspected": 3,
+    "matched": 278,
+    "missing_in_bank": 3,
+    "missing_in_ledger": 6
+  },
+  "bank_transactions": [
+    {
+      "file": "bank_a_statement_2026Q1.pdf",
+      "account_id": "0040-1187342-01",
+      "seq": 1,
+      "page": 1,
+      "excel_row": null,
+      "date": "2026-01-01",
+      "ref_id": "FT2600186JSF",
+      "description": "POS 2743 SIMBA SUPERMARKET KIGALI RW",
+      "amount": "-8650.00",
+      "balance": "18441350.00",
+      "expected_status": "matched",
+      "expected_tier": "tier1_exact",
+      "discrepancy": null,
+      "ledger_entry_ids": [
+        "JE-2026-0006"
+      ]
+    },
+    {
+      "file": "bank_a_statement_2026Q1.pdf",
+      "account_id": "0040-1187342-01",
+      "seq": 2,
+      "page": 1,
+      "excel_row": null,
+      "date": "2026-01-02",
+      "ref_id": "FT26002VE2T2",
+      "description": "TRF TO AKAGERA OFFICE SUPPLIES LTD INV 1041",
+      "amount": "-891750.00",
+      "balance": "17549600.00",
+      "expected_status": "matched",
+      "expected_tier": "tier1_exact",
+      "discrepancy": null,
+      "ledger_entry_ids": [
+        "JE-2026-0002"
+      ]
+    },
+    {
+      "file": "bank_a_statement_2026Q1.pdf",
+      "account_id": "0040-1187342-01",
+      "seq": 3,
+      "page": 1,
+      "excel_row": null,
+      "date": "2026-01-06",
+      "ref_id": null,
+      "description": "MONTHLY ACCOUNT MAINTENANCE FEE",
+      "amount": "-14500.00",
+      "balance": "17535100.00",
+      "expected_status": "matched",
+      "expected_tier": "tier2_amount_date",
+      "discrepancy": null,
+      "ledger_entry_ids": [
+        "JE-2026-0018"
+      ]
+    },
+    {
+      "file": "bank_a_statement_2026Q1.pdf",
+      "account_id": "0040-1187342-01",
+      "seq": 4,
+      "page": 1,
+      "excel_row": null,
+      "date": "2026-01-06",
+      "ref_id": "FT26006HHUCZ",
+      "description": "TRF FROM MUSANZE TOURS LTD INV 1042",
+      "amount": "1127650.00",
+      "balance": "18662750.00",
+      "expected_status": "matched",
+      "expected_tier": "tier2_amount_date",
+      "discrepancy": null,
+      "ledger_entry_ids": [
+        "JE-2026-0013"
+      ]
+    },
+    {
+      "file": "bank_a_statement_2026Q1.pdf",
+      "account_id": "0040-1187342-01",
+      "seq": 5,
+      "page": 1,
+      "excel_row": null,
+      "date": "2026-01-06",
+      "ref_id": "FT26006X8FSV",
+      "description": "TRF FROM GISENYI BEACH RESORT INV 1043",
+      "amount": "570700.00",
+      "balance": "19233450.00",
+      "expected_status": "matched",
+      "expected_tier": "tier2_amount_date",
+      "discrepancy": null,
+      "ledger_entry_ids": [
+        "JE-2026-0019"
+      ]
+    },
+    {
+      "file": "bank_a_statement_2026Q1.pdf",
+      "account_id": "0040-1187342-01",
+      "seq": 6,
+      "page": 1,
+      "excel_row": null,
+      "date": "2026-01-07",
+      "ref_id": "FT26007GK9WQ",
+      "description": "TRF FROM GISENYI BEACH RESORT INV 1044",
+      "amount": "2410550.00",
+      "balance": "21644000.00",
+      "expected_status": "matched",
+      "expected_tier": "tier1_exact",
+      "discrepancy": null,
+      "ledger_entry_ids": [
+        "JE-2026-0020"
+      ]
+    },
+    {
+      "file": "bank_a_statement_2026Q1.pdf",
+      "account_id": "0040-1187342-01",
+      "seq": 7,
+      "page": 1,
+      "excel_row": null,
+      "date": "2026-01-07",
+      "ref_id": "FT26007CATUA",
+      "description": "POS 1964 SIMBA SUPERMARKET KIGALI RW",
+      "amount": "-54000.00",
+      "balance": "21590000.00",
+      "expected_status": "matched",
+      "expected_tier": "tier1_exact",
+      "discrepancy": null,
+      "ledger_entry_ids": [
+        "JE-2026-0021"
+      ]
+    },
+    {
+      "file": "bank_a_statement_2026Q1.pdf",
+      "account_id": "0040-1187342-01",
+      "seq": 8,
+      "page": 1,
+      "excel_row": null,
+      "date": "2026-01-08",
+      "ref_id": "FT260085CHXG",
+      "description": "POS 3167 SIMBA SUPERMARKET KIGALI RW",
+      "amount": "-14400.00",
+      "balance": "21575600.00",
+      "expected_status": "matched",
+      "expected_tier": "tier1_exact",
+      "discrepancy": null,
+      "ledger_entry_ids": [
+        "JE-2026-0022"
+      ]
+    },
+    {
+      "file": "bank_a_statement_2026Q1.pdf",
+      "account_id": "0040-1187342-01",
+      "seq": 9,
+      "page": 1,
+      "excel_row": null,
+      "date": "2026-01-08",
+      "ref_id": "FT2600833GDP",
+      "description": "SALARY BATCH JAN 2026",
+      "amount": "-4592500.00",
+      "balance": "16983100.00",
+      "expected_status": "matched",
+      "expected_tier": "tier1_exact",
+      "discrepancy": null,
+      "ledger_entry_ids": [
+        "JE-2026-0023"
+      ]
+    },
+    {
+      "file": "bank_a_statement_2026Q1.pdf",
+      "account_id": "0040-1187342-01",
+      "seq": 10,
+      "page": 1,
+      "excel_row": null,
+      "date": "2026-01-09",
+      "ref_id": "FT26009X9DNL",
+      "description": "DD ISHEMA POWER UTILITY ACC 42591",
+      "amount": "-62150.00",
+      "balance": "16920950.00",
+      "expected_status": "amount_mismatch",
+      "expected_tier": null,
+      "discrepancy": "amount_typo",
+      "ledger_entry_ids": [
+        "JE-2026-0028"
+      ]
+    },
+    {
+      "file": "bank_a_statement_2026Q1.pdf",
+      "account_id": "0040-1187342-01",
+      "seq": 11,
+      "page": 1,
+      "excel_row": null,
+      "date": "2026-01-12",
+      "ref_id": "FT26012QPJH7",
+      "description": "POS 8260 MUHAZI FUEL STATION KIGALI RW",
+      "amount": "-239650.00",
+      "balance": "16681300.00",
+      "expected_status": "matched",
+      "expected_tier": "tier1_exact",
+      "discrepancy": null,
+      "ledger_entry_ids": [
+        "JE-2026-0035"
+      ]
+    },
+    {
+      "file": "bank_a_statement_2026Q1.pdf",
+      "account_id": "0040-1187342-01",
+      "seq": 12,
+      "page": 1,
+      "excel_row": null,
+      "date": "2026-01-13",
+      "ref_id": "FT2601394975",
+      "description": "POS 3724 SIMBA SUPERMARKET KIGALI RW",
+      "amount": "-141550.00",
+      "balance": "16539750.00",
+      "expected_status": "matched",
+      "expected_tier": "tier1_exact",
+      "discrepancy": null,
+      "ledger_entry_ids": [
+        "JE-2026-0034"
+      ]
+    },
+    {
+      "file": "bank_a_statement_2026Q1.pdf",
+      "account_id": "0040-1187342-01",
+      "seq": 13,
+      "page": 1,
+      "excel_row": null,
+      "date": "2026-01-13",
+      "ref_id": "FT2601356FAN",
+      "description": "DD ISHEMA POWER UTILITY ACC 47388",
+      "amount": "-127550.00",
+      "balance": "16412200.00",
+      "expected_status": "matched",
+      "expected_tier": "tier1_exact",
+      "discrepancy": null,
+      "ledger_entry_ids": [
+        "JE-2026-0032"
+      ]
+    },
+    {
+      "file": "bank_a_statement_2026Q1.pdf",
+      "account_id": "0040-1187342-01",
+      "seq": 14,
+      "page": 1,
+      "excel_row": null,
+      "date": "2026-01-13",
+      "ref_id": "FT260139TYEK",
+      "description": "TRF TO KIGALI FRESH LOGISTICS LTD INV 1045",
+      "amount": "-1286850.00",
+      "balance": "15125350.00",
+      "expected_status": "matched",
+      "expected_tier": "tier1_exact",
+      "discrepancy": null,
+      "ledger_entry_ids": [
+        "JE-2026-0029"
+      ]
+    },
+    {
+      "file": "bank_a_statement_2026Q1.pdf",
+      "account_id": "0040-1187342-01",
+      "seq": 15,
+      "page": 1,
+      "excel_row": null,
+      "date": "2026-01-14",
+      "ref_id": "FT26014ZBUS5",
+      "description": "TRF FROM GISENYI BEACH RESORT INV 1046",
+      "amount": "349700.00",
+      "balance": "15475050.00",
+      "expected_status": "matched",
+      "expected_tier": "tier1_exact",
+      "discrepancy": null,
+      "ledger_entry_ids": [
+        "JE-2026-0033"
+      ]
+    },
+    {
+      "file": "bank_a_statement_2026Q1.pdf",
+      "account_id": "0040-1187342-01",
+      "seq": 16,
+      "page": 1,
+      "excel_row": null,
+      "date": "2026-01-15",
+      "ref_id": "FT260155CC5N",
+      "description": "TRF FROM MUSANZE TOURS LTD INV 1047",
+      "amount": "382500.00",
+      "balance": "15857550.00",
+      "expected_status": "matched",
+      "expected_tier": "tier1_exact",
+      "discrepancy": null,
+      "ledger_entry_ids": [
+        "JE-2026-0047"
+      ]
+    },
+    {
+      "file": "bank_a_statement_2026Q1.pdf",
+      "account_id": "0040-1187342-01",
+      "seq": 17,
+      "page": 1,
+      "excel_row": null,
+      "date": "2026-01-15",
+      "ref_id": null,
+      "description": "MONTHLY ACCOUNT MAINTENANCE FEE",
+      "amount": "-4050.00",
+      "balance": "15853500.00",
+      "expected_status": "matched",
+      "expected_tier": "tier2_amount_date",
+      "discrepancy": null,
+      "ledger_entry_ids": [
+        "JE-2026-0048"
+      ]
+    },
+    {
+      "file": "bank_a_statement_2026Q1.pdf",
+      "account_id": "0040-1187342-01",
+      "seq": 18,
+      "page": 1,
+      "excel_row": null,
+      "date": "2026-01-16",
+      "ref_id": "FT26016LJXLJ",
+      "description": "SALARY BATCH JAN 2026",
+      "amount": "-6426100.00",
+      "balance": "9427400.00",
+      "expected_status": "matched",
+      "expected_tier": "tier2_amount_date",
+      "discrepancy": null,
+      "ledger_entry_ids": [
+        "JE-2026-0049"
+      ]
+    },
+    {
+      "file": "bank_a_statement_2026Q1.pdf",
+      "account_id": "0040-1187342-01",
+      "seq": 19,
+      "page": 1,
+      "excel_row": null,
+      "date": "2026-01-16",
+      "ref_id": "FT26016L2CQ9",
+      "description": "TRF FROM KIVU HOTELS GROUP LTD INV 1048",
+      "amount": "3246450.00",
+      "balance": "12673850.00",
+      "expected_status": "matched",
+      "expected_tier": "tier1_exact",
+      "discrepancy": null,
+      "ledger_entry_ids": [
+        "JE-2026-0039"
+      ]
+    },
+    {
+      "file": "bank_a_statement_2026Q1.pdf",
+      "account_id": "0040-1187342-01",
+      "seq": 20,
+      "page": 1,
+      "excel_row": null,
+      "date": "2026-01-16",
+      "ref_id": "FT26016J766M",
+      "description": "DD RUGALI TELECOM ACC 67433",
+      "amount": "-133600.00",
+      "balance": "12540250.00",
+      "expected_status": "matched",
+      "expected_tier": "tier2_amount_date",
+      "discrepancy": null,
+      "ledger_entry_ids": [
+        "JE-2026-0043"
+      ]
+    },
+    {
+      "file": "bank_a_statement_2026Q1.pdf",
+      "account_id": "0040-1187342-01",
+      "seq": 21,
+      "page": 1,
+      "excel_row": null,
+      "date": "2026-01-16",
+      "ref_id": "FT26016K93SX",
+      "description": "TRF FROM HUYE COFFEE EXPORTERS LTD INV 1049",
+      "amount": "5010700.00",
+      "balance": "17550950.00",
+      "expected_status": "matched",
+      "expected_tier": "tier2_amount_date",
+      "discrepancy": null,
+      "ledger_entry_ids": [
+        "JE-2026-0053"
+      ]
+    },
+    {
+      "file": "bank_a_statement_2026Q1.pdf",
+      "account_id": "0040-1187342-01",
+      "seq": 22,
+      "page": 1,
+      "excel_row": null,
+      "date": "2026-01-19",
+      "ref_id": "FT26019J6ZEK",
+      "description": "POS 4450 SIMBA SUPERMARKET KIGALI RW",
+      "amount": "-35500.00",
+      "balance": "17515450.00",
+      "expected_status": "matched",
+      "expected_tier": "tier1_exact",
+      "discrepancy": null,
+      "ledger_entry_ids": [
+        "JE-2026-0060"
+      ]
+    },
+    {
+      "file": "bank_a_statement_2026Q1.pdf",
+      "account_id": "0040-1187342-01",
+      "seq": 23,
+      "page": 1,
+      "excel_row": null,
+      "date": "2026-01-19",
+      "ref_id": "FT26019SJ7BW",
+      "description": "POS 5533 MUHAZI FUEL STATION KIGALI RW",
+      "amount": "-128100.00",
+      "balance": "17387350.00",
+      "expected_status": "matched",
+      "expected_tier": "tier1_exact",
+      "discrepancy": null,
+      "ledger_entry_ids": [
+        "JE-2026-0050"
+      ]
+    },
+    {
+      "file": "bank_a_statement_2026Q1.pdf",
+      "account_id": "0040-1187342-01",
+      "seq": 24,
+      "page": 1,
+      "excel_row": null,
+      "date": "2026-01-20",
+      "ref_id": "FT26020E9FQY",
+      "description": "POS 1158 SIMBA SUPERMARKET KIGALI RW",
+      "amount": "-165900.00",
+      "balance": "17221450.00",
+      "expected_status": "matched",
+      "expected_tier": "tier1_exact",
+      "discrepancy": null,
+      "ledger_entry_ids": [
+        "JE-2026-0055"
+      ]
+    },
+    {
+      "file": "bank_a_statement_2026Q1.pdf",
+      "account_id": "0040-1187342-01",
+      "seq": 25,
+      "page": 1,
+      "excel_row": null,
+      "date": "2026-01-20",
+      "ref_id": "FT260206T4UE",
+      "description": "POS 3088 SIMBA SUPERMARKET KIGALI RW",
+      "amount": "-149500.00",
+      "balance": "17071950.00",
+      "expected_status": "matched",
+      "expected_tier": "tier1_exact",
+      "discrepancy": null,
+      "ledger_entry_ids": [
+        "JE-2026-0056"
+      ]
+    },
+    {
+      "file": "bank_a_statement_2026Q1.pdf",
+      "account_id": "0040-1187342-01",
+      "seq": 26,
+      "page": 1,
+      "excel_row": null,
+      "date": "2026-01-21",
+      "ref_id": "FT260216GHD2",
+      "description": "TRF TO AKAGERA OFFICE SUPPLIES LTD INV 1050",
+      "amount": "-125350.00",
+      "balance": "16946600.00",
+      "expected_status": "matched",
+      "expected_tier": "tier1_exact",
+      "discrepancy": null,
+      "ledger_entry_ids": [
+        "JE-2026-0068"
+      ]
+    },
+    {
+      "file": "bank_a_statement_2026Q1.pdf",
+      "account_id": "0040-1187342-01",
+      "seq": 27,
+      "page": 1,
+      "excel_row": null,
+      "date": "2026-01-21",
+      "ref_id": "FT260215936A",
+      "description": "TRF FROM GISENYI BEACH RESORT INV 1051",
+      "amount": "925700.00",
+      "balance": "17872300.00",
+      "expected_status": "matched",
+      "expected_tier": "tier1_exact",
+      "discrepancy": null,
+      "ledger_entry_ids": [
+        "JE-2026-0057"
+      ]
+    },
+    {
+      "file": "bank_a_statement_2026Q1.pdf",
+      "account_id": "0040-1187342-01",
+      "seq": 28,
+      "page": 1,
+      "excel_row": null,
+      "date": "2026-01-21",
+      "ref_id": "FT260213J3D5",
+      "description": "TRF FROM GISENYI BEACH RESORT INV 1052",
+      "amount": "2558600.00",
+      "balance": "20430900.00",
+      "expected_status": "missing_in_ledger",
+      "expected_tier": null,
+      "discrepancy": "missing_in_ledger",
+      "ledger_entry_ids": []
+    },
+    {
+      "file": "bank_a_statement_2026Q1.pdf",
+      "account_id": "0040-1187342-01",
+      "seq": 29,
+      "page": 1,
+      "excel_row": null,
+      "date": "2026-01-21",
+      "ref_id": "FT26021M45HX",
+      "description": "POS 7528 MUHAZI FUEL STATION KIGALI RW",
+      "amount": "-208500.00",
+      "balance": "20222400.00",
+      "expected_status": "matched",
+      "expected_tier": "tier1_exact",
+      "discrepancy": null,
+      "ledger_entry_ids": [
+        "JE-2026-0065"
+      ]
+    },
+    {
+      "file": "bank_a_statement_2026Q1.pdf",
+      "account_id": "0040-1187342-01",
+      "seq": 30,
+      "page": 1,
+      "excel_row": null,
+      "date": "2026-01-22",
+      "ref_id": "FT260228JWN9",
+      "description": "TRF TO AKAGERA OFFICE SUPPLIES LTD INV 1053",
+      "amount": "-173700.00",
+      "balance": "20048700.00",
+      "expected_status": "matched",
+      "expected_tier": "tier1_exact",
+      "discrepancy": null,
+      "ledger_entry_ids": [
+        "JE-2026-0061"
+      ]
+    },
+    {
+      "file": "bank_a_statement_2026Q1.pdf",
+      "account_id": "0040-1187342-01",
+      "seq": 31,
+      "page": 1,
+      "excel_row": null,
+      "date": "2026-01-26",
+      "ref_id": "FT260266JU9B",
+      "description": "TRF FROM MUSANZE TOURS LTD INV 1054",
+      "amount": "497950.00",
+      "balance": "20546650.00",
+      "expected_status": "matched",
+      "expected_tier": "tier1_exact",
+      "discrepancy": null,
+      "ledger_entry_ids": [
+        "JE-2026-0086"
+      ]
+    },
+    {
+      "file": "bank_a_statement_2026Q1.pdf",
+      "account_id": "0040-1187342-01",
+      "seq": 32,
+      "page": 1,
+      "excel_row": null,
+      "date": "2026-01-26",
+      "ref_id": "FT26026P9D6G",
+      "description": "TRF FROM GISENYI BEACH RESORT INV 1055",
+      "amount": "1177850.00",
+      "balance": "21724500.00",
+      "expected_status": "matched",
+      "expected_tier": "tier1_exact",
+      "discrepancy": null,
+      "ledger_entry_ids": [
+        "JE-2026-0076"
+      ]
+    },
+    {
+      "file": "bank_a_statement_2026Q1.pdf",
+      "account_id": "0040-1187342-01",
+      "seq": 33,
+      "page": 1,
+      "excel_row": null,
+      "date": "2026-01-26",
+      "ref_id": "FT26026TZZXM",
+      "description": "POS 2146 SIMBA SUPERMARKET KIGALI RW",
+      "amount": "-173150.00",
+      "balance": "21551350.00",
+      "expected_status": "matched",
+      "expected_tier": "tier2_amount_date",
+      "discrepancy": null,
+      "ledger_entry_ids": [
+        "JE-2026-0077"
+      ]
+    },
+    {
+      "file": "bank_a_statement_2026Q1.pdf",
+      "account_id": "0040-1187342-01",
+      "seq": 34,
+      "page": 1,
+      "excel_row": null,
+      "date": "2026-01-27",
+      "ref_id": "FT26027XD6SX",
+      "description": "TRF FROM MUSANZE TOURS LTD INV 1056",
+      "amount": "1148600.00",
+      "balance": "22699950.00",
+      "expected_status": "matched",
+      "expected_tier": "tier2_amount_date",
+      "discrepancy": null,
+      "ledger_entry_ids": [
+        "JE-2026-0078"
+      ]
+    },
+    {
+      "file": "bank_a_statement_2026Q1.pdf",
+      "account_id": "0040-1187342-01",
+      "seq": 35,
+      "page": 1,
+      "excel_row": null,
+      "date": "2026-01-28",
+      "ref_id": "FT26028EP8X6",
+      "description": "TRF FROM KIVU HOTELS GROUP LTD INV 1057",
+      "amount": "3883350.00",
+      "balance": "26583300.00",
+      "expected_status": "matched",
+      "expected_tier": "tier1_exact",
+      "discrepancy": null,
+      "ledger_entry_ids": [
+        "JE-2026-0099"
+      ]
+    },
+    {
+      "file": "bank_a_statement_2026Q1.pdf",
+      "account_id": "0040-1187342-01",
+      "seq": 36,
+      "page": 1,
+      "excel_row": null,
+      "date": "2026-01-28",
+      "ref_id": "FT26028KG3VL",
+      "description": "DD RUGALI TELECOM ACC 67954",
+      "amount": "-30050.00",
+      "balance": "26553250.00",
+      "expected_status": "matched",
+      "expected_tier": "tier1_exact",
+      "discrepancy": null,
+      "ledger_entry_ids": [
+        "JE-2026-0087"
+      ]
+    },
+    {
+      "file": "bank_a_statement_2026Q1.pdf",
+      "account_id": "0040-1187342-01",
+      "seq": 37,
+      "page": 1,
+      "excel_row": null,
+      "date": "2026-01-29",
+      "ref_id": "FT26029R63FC",
+      "description": "TRF FROM KIVU HOTELS GROUP LTD INV 1058",
+      "amount": "3600000.00",
+      "balance": "30153250.00",
+      "expected_status": "matched",
+      "expected_tier": "tier1_exact",
+      "discrepancy": null,
+      "ledger_entry_ids": [
+        "JE-2026-0079"
+      ]
+    },
+    {
+      "file": "bank_a_statement_2026Q1.pdf",
+      "account_id": "0040-1187342-01",
+      "seq": 38,
+      "page": 1,
+      "excel_row": null,
+      "date": "2026-01-29",
+      "ref_id": "FT26029C8HK3",
+      "description": "TRF FROM KIVU HOTELS GROUP LTD INV 1059",
+      "amount": "2446650.00",
+      "balance": "32599900.00",
+      "expected_status": "matched",
+      "expected_tier": "tier1_exact",
+      "discrepancy": null,
+      "ledger_entry_ids": [
+        "JE-2026-0102"
+      ]
+    },
+    {
+      "file": "bank_a_statement_2026Q1.pdf",
+      "account_id": "0040-1187342-01",
+      "seq": 39,
+      "page": 1,
+      "excel_row": null,
+      "date": "2026-01-29",
+      "ref_id": "FT26029V2Q6U",
+      "description": "POS 7291 SIMBA SUPERMARKET KIGALI RW",
+      "amount": "-105300.00",
+      "balance": "32494600.00",
+      "expected_status": "matched",
+      "expected_tier": "tier3_fuzzy",
+      "discrepancy": "date_shift",
+      "ledger_entry_ids": [
+        "JE-2026-0075"
+      ]
+    },
+    {
+      "file": "bank_a_statement_2026Q1.pdf",
+      "account_id": "0040-1187342-01",
+      "seq": 40,
+      "page": 1,
+      "excel_row": null,
+      "date": "2026-01-29",
+      "ref_id": "FT26029WA22D",
+      "description": "TRF TO KIGALI FRESH LOGISTICS LTD INV 1060",
+      "amount": "-331750.00",
+      "balance": "32162850.00",
+      "expected_status": "matched",
+      "expected_tier": "tier1_exact",
+      "discrepancy": "one_to_many",
+      "ledger_entry_ids": [
+        "JE-2026-0094",
+        "JE-2026-0095",
+        "JE-2026-0096"
+      ]
+    },
+    {
+      "file": "bank_a_statement_2026Q1.pdf",
+      "account_id": "0040-1187342-01",
+      "seq": 41,
+      "page": 2,
+      "excel_row": null,
+      "date": "2026-01-30",
+      "ref_id": "FT26030QT7DE",
+      "description": "POS 8612 MUHAZI FUEL STATION KIGALI RW",
+      "amount": "-232150.00",
+      "balance": "31930700.00",
+      "expected_status": "matched",
+      "expected_tier": "tier1_exact",
+      "discrepancy": null,
+      "ledger_entry_ids": [
+        "JE-2026-0100"
+      ]
+    },
+    {
+      "file": "bank_a_statement_2026Q1.pdf",
+      "account_id": "0040-1187342-01",
+      "seq": 42,
+      "page": 2,
+      "excel_row": null,
+      "date": "2026-02-04",
+      "ref_id": "FT26035V86VZ",
+      "description": "DD RUGALI TELECOM ACC 65933",
+      "amount": "-144450.00",
+      "balance": "31786250.00",
+      "expected_status": "matched",
+      "expected_tier": "tier1_exact",
+      "discrepancy": null,
+      "ledger_entry_ids": [
+        "JE-2026-0116"
+      ]
+    },
+    {
+      "file": "bank_a_statement_2026Q1.pdf",
+      "account_id": "0040-1187342-01",
+      "seq": 43,
+      "page": 2,
+      "excel_row": null,
+      "date": "2026-02-05",
+      "ref_id": "FT26036QF5Q2",
+      "description": "TRF FROM HUYE COFFEE EXPORTERS LTD INV 1061",
+      "amount": "3990500.00",
+      "balance": "35776750.00",
+      "expected_status": "matched",
+      "expected_tier": "tier1_exact",
+      "discrepancy": null,
+      "ledger_entry_ids": [
+        "JE-2026-0120"
+      ]
+    },
+    {
+      "file": "bank_a_statement_2026Q1.pdf",
+      "account_id": "0040-1187342-01",
+      "seq": 44,
+      "page": 2,
+      "excel_row": null,
+      "date": "2026-02-06",
+      "ref_id": "FT26037JCKJL",
+      "description": "DD ISHEMA POWER UTILITY ACC 20561",
+      "amount": "-137950.00",
+      "balance": "35638800.00",
+      "expected_status": "matched",
+      "expected_tier": "tier1_exact",
+      "discrepancy": null,
+      "ledger_entry_ids": [
+        "JE-2026-0110"
+      ]
+    },
+    {
+      "file": "bank_a_statement_2026Q1.pdf",
+      "account_id": "0040-1187342-01",
+      "seq": 45,
+      "page": 2,
+      "excel_row": null,
+      "date": "2026-02-09",
+      "ref_id": "FT26040NEGPL",
+      "description": "POS 8633 SIMBA SUPERMARKET KIGALI RW",
+      "amount": "-55350.00",
+      "balance": "35583450.00",
+      "expected_status": "matched",
+      "expected_tier": "tier1_exact",
+      "discrepancy": null,
+      "ledger_entry_ids": [
+        "JE-2026-0125"
+      ]
+    },
+    {
+      "file": "bank_a_statement_2026Q1.pdf",
+      "account_id": "0040-1187342-01",
+      "seq": 46,
+      "page": 2,
+      "excel_row": null,
+      "date": "2026-02-09",
+      "ref_id": "FT26040P6UY5",
+      "description": "POS 7232 SIMBA SUPERMARKET KIGALI RW",
+      "amount": "-178550.00",
+      "balance": "35404900.00",
+      "expected_status": "matched",
+      "expected_tier": "tier1_exact",
+      "discrepancy": null,
+      "ledger_entry_ids": [
+        "JE-2026-0123"
+      ]
+    },
+    {
+      "file": "bank_a_statement_2026Q1.pdf",
+      "account_id": "0040-1187342-01",
+      "seq": 47,
+      "page": 2,
+      "excel_row": null,
+      "date": "2026-02-09",
+      "ref_id": "FT26040KN64T",
+      "description": "POS 9947 SIMBA SUPERMARKET KIGALI RW",
+      "amount": "-80000.00",
+      "balance": "35324900.00",
+      "expected_status": "matched",
+      "expected_tier": "tier2_amount_date",
+      "discrepancy": null,
+      "ledger_entry_ids": [
+        "JE-2026-0126"
+      ]
+    },
+    {
+      "file": "bank_a_statement_2026Q1.pdf",
+      "account_id": "0040-1187342-01",
+      "seq": 48,
+      "page": 2,
+      "excel_row": null,
+      "date": "2026-02-09",
+      "ref_id": "FT26040HPALX",
+      "description": "TRF FROM MUSANZE TOURS LTD INV 1062",
+      "amount": "1719800.00",
+      "balance": "37044700.00",
+      "expected_status": "matched",
+      "expected_tier": "tier1_exact",
+      "discrepancy": null,
+      "ledger_entry_ids": [
+        "JE-2026-0121"
+      ]
+    },
+    {
+      "file": "bank_a_statement_2026Q1.pdf",
+      "account_id": "0040-1187342-01",
+      "seq": 49,
+      "page": 2,
+      "excel_row": null,
+      "date": "2026-02-10",
+      "ref_id": "FT260419T7UX",
+      "description": "TRF FROM HUYE COFFEE EXPORTERS LTD INV 1063",
+      "amount": "1236400.00",
+      "balance": "38281100.00",
+      "expected_status": "matched",
+      "expected_tier": "tier1_exact",
+      "discrepancy": null,
+      "ledger_entry_ids": [
+        "JE-2026-0130"
+      ]
+    },
+    {
+      "file": "bank_a_statement_2026Q1.pdf",
+      "account_id": "0040-1187342-01",
+      "seq": 50,
+      "page": 2,
+      "excel_row": null,
+      "date": "2026-02-10",
+      "ref_id": "FT26041FJLQL",
+      "description": "TRF TO KIGALI FRESH LOGISTICS LTD INV 1064",
+      "amount": "-846400.00",
+      "balance": "37434700.00",
+      "expected_status": "matched",
+      "expected_tier": "tier1_exact",
+      "discrepancy": null,
+      "ledger_entry_ids": [
+        "JE-2026-0131"
+      ]
+    },
+    {
+      "file": "bank_a_statement_2026Q1.pdf",
+      "account_id": "0040-1187342-01",
+      "seq": 51,
+      "page": 2,
+      "excel_row": null,
+      "date": "2026-02-10",
+      "ref_id": "FT26041JCAT9",
+      "description": "TRF FROM GISENYI BEACH RESORT INV 1065",
+      "amount": "1531350.00",
+      "balance": "38966050.00",
+      "expected_status": "matched",
+      "expected_tier": "tier1_exact",
+      "discrepancy": null,
+      "ledger_entry_ids": [
+        "JE-2026-0133"
+      ]
+    },
+    {
+      "file": "bank_a_statement_2026Q1.pdf",
+      "account_id": "0040-1187342-01",
+      "seq": 52,
+      "page": 2,
+      "excel_row": null,
+      "date": "2026-02-10",
+      "ref_id": "FT26041BAH4V",
+      "description": "TRF FROM KIVU HOTELS GROUP LTD INV 1066",
+      "amount": "4521300.00",
+      "balance": "43487350.00",
+      "expected_status": "matched",
+      "expected_tier": "tier1_exact",
+      "discrepancy": null,
+      "ledger_entry_ids": [
+        "JE-2026-0127"
+      ]
+    },
+    {
+      "file": "bank_a_statement_2026Q1.pdf",
+      "account_id": "0040-1187342-01",
+      "seq": 53,
+      "page": 2,
+      "excel_row": null,
+      "date": "2026-02-11",
+      "ref_id": "FT26042UGY2F",
+      "description": "DD ISHEMA POWER UTILITY ACC 31465",
+      "amount": "-86850.00",
+      "balance": "43400500.00",
+      "expected_status": "matched",
+      "expected_tier": "tier1_exact",
+      "discrepancy": null,
+      "ledger_entry_ids": [
+        "JE-2026-0142"
+      ]
+    },
+    {
+      "file": "bank_a_statement_2026Q1.pdf",
+      "account_id": "0040-1187342-01",
+      "seq": 54,
+      "page": 2,
+      "excel_row": null,
+      "date": "2026-02-11",
+      "ref_id": "FT26042U7U7N",
+      "description": "TRF FROM MUSANZE TOURS LTD INV 1067",
+      "amount": "474200.00",
+      "balance": "43874700.00",
+      "expected_status": "matched",
+      "expected_tier": "tier1_exact",
+      "discrepancy": null,
+      "ledger_entry_ids": [
+        "JE-2026-0138"
+      ]
+    },
+    {
+      "file": "bank_a_statement_2026Q1.pdf",
+      "account_id": "0040-1187342-01",
+      "seq": 55,
+      "page": 2,
+      "excel_row": null,
+      "date": "2026-02-11",
+      "ref_id": null,
+      "description": "MONTHLY ACCOUNT MAINTENANCE FEE",
+      "amount": "-8200.00",
+      "balance": "43866500.00",
+      "expected_status": "matched",
+      "expected_tier": "tier2_amount_date",
+      "discrepancy": null,
+      "ledger_entry_ids": [
+        "JE-2026-0139"
+      ]
+    },
+    {
+      "file": "bank_a_statement_2026Q1.pdf",
+      "account_id": "0040-1187342-01",
+      "seq": 56,
+      "page": 2,
+      "excel_row": null,
+      "date": "2026-02-11",
+      "ref_id": "FT2604233UBT",
+      "description": "TRF FROM HUYE COFFEE EXPORTERS LTD INV 1068",
+      "amount": "4334850.00",
+      "balance": "48201350.00",
+      "expected_status": "matched",
+      "expected_tier": "tier1_exact",
+      "discrepancy": null,
+      "ledger_entry_ids": [
+        "JE-2026-0140"
+      ]
+    },
+    {
+      "file": "bank_a_statement_2026Q1.pdf",
+      "account_id": "0040-1187342-01",
+      "seq": 57,
+      "page": 2,
+      "excel_row": null,
+      "date": "2026-02-13",
+      "ref_id": "FT26044APRPM",
+      "description": "DD ISHEMA POWER UTILITY ACC 30052",
+      "amount": "-179750.00",
+      "balance": "48021600.00",
+      "expected_status": "matched",
+      "expected_tier": "tier1_exact",
+      "discrepancy": null,
+      "ledger_entry_ids": [
+        "JE-2026-0143"
+      ]
+    },
+    {
+      "file": "bank_a_statement_2026Q1.pdf",
+      "account_id": "0040-1187342-01",
+      "seq": 58,
+      "page": 2,
+      "excel_row": null,
+      "date": "2026-02-13",
+      "ref_id": "FT26044V72Q4",
+      "description": "TRF TO NYARUTARAMA PROPERTY MANAGEMENT INV 1069",
+      "amount": "-1685000.00",
+      "balance": "46336600.00",
+      "expected_status": "matched",
+      "expected_tier": "tier1_exact",
+      "discrepancy": null,
+      "ledger_entry_ids": [
+        "JE-2026-0148"
+      ]
+    },
+    {
+      "file": "bank_a_statement_2026Q1.pdf",
+      "account_id": "0040-1187342-01",
+      "seq": 59,
+      "page": 2,
+      "excel_row": null,
+      "date": "2026-02-13",
+      "ref_id": "FT26044JQ2UX",
+      "description": "TRF FROM HUYE COFFEE EXPORTERS LTD INV 1070",
+      "amount": "967950.00",
+      "balance": "47304550.00",
+      "expected_status": "matched",
+      "expected_tier": "tier1_exact",
+      "discrepancy": null,
+      "ledger_entry_ids": [
+        "JE-2026-0134"
+      ]
+    },
+    {
+      "file": "bank_a_statement_2026Q1.pdf",
+      "account_id": "0040-1187342-01",
+      "seq": 60,
+      "page": 2,
+      "excel_row": null,
+      "date": "2026-02-16",
+      "ref_id": "FT26047FG3L6",
+      "description": "DD ISHEMA POWER UTILITY ACC 82848",
+      "amount": "-173100.00",
+      "balance": "47131450.00",
+      "expected_status": "matched",
+      "expected_tier": "tier1_exact",
+      "discrepancy": null,
+      "ledger_entry_ids": [
+        "JE-2026-0150"
+      ]
+    },
+    {
+      "file": "bank_a_statement_2026Q1.pdf",
+      "account_id": "0040-1187342-01",
+      "seq": 61,
+      "page": 2,
+      "excel_row": null,
+      "date": "2026-02-17",
+      "ref_id": "FT26048CZR2Y",
+      "description": "POS 9041 SIMBA SUPERMARKET KIGALI RW",
+      "amount": "-47100.00",
+      "balance": "47084350.00",
+      "expected_status": "matched",
+      "expected_tier": "tier1_exact",
+      "discrepancy": null,
+      "ledger_entry_ids": [
+        "JE-2026-0151"
+      ]
+    },
+    {
+      "file": "bank_a_statement_2026Q1.pdf",
+      "account_id": "0040-1187342-01",
+      "seq": 62,
+      "page": 2,
+      "excel_row": null,
+      "date": "2026-02-17",
+      "ref_id": "FT26048KNHXM",
+      "description": "TRF FROM GISENYI BEACH RESORT INV 1071",
+      "amount": "454900.00",
+      "balance": "47539250.00",
+      "expected_status": "matched",
+      "expected_tier": "tier1_exact",
+      "discrepancy": null,
+      "ledger_entry_ids": [
+        "JE-2026-0159"
+      ]
+    },
+    {
+      "file": "bank_a_statement_2026Q1.pdf",
+      "account_id": "0040-1187342-01",
+      "seq": 63,
+      "page": 2,
+      "excel_row": null,
+      "date": "2026-02-17",
+      "ref_id": "FT26048TMQKH",
+      "description": "TRF TO KIGALI FRESH LOGISTICS LTD INV 1072",
+      "amount": "-1312100.00",
+      "balance": "46227150.00",
+      "expected_status": "matched",
+      "expected_tier": "tier1_exact",
+      "discrepancy": null,
+      "ledger_entry_ids": [
+        "JE-2026-0163"
+      ]
+    },
+    {
+      "file": "bank_a_statement_2026Q1.pdf",
+      "account_id": "0040-1187342-01",
+      "seq": 64,
+      "page": 2,
+      "excel_row": null,
+      "date": "2026-02-18",
+      "ref_id": "FT260498YGZJ",
+      "description": "POS 9595 SIMBA SUPERMARKET KIGALI RW",
+      "amount": "-117700.00",
+      "balance": "46109450.00",
+      "expected_status": "matched",
+      "expected_tier": "tier1_exact",
+      "discrepancy": null,
+      "ledger_entry_ids": [
+        "JE-2026-0161"
+      ]
+    },
+    {
+      "file": "bank_a_statement_2026Q1.pdf",
+      "account_id": "0040-1187342-01",
+      "seq": 65,
+      "page": 2,
+      "excel_row": null,
+      "date": "2026-02-18",
+      "ref_id": "FT260494KMKY",
+      "description": "TRF TO AKAGERA OFFICE SUPPLIES LTD INV 1073",
+      "amount": "-224700.00",
+      "balance": "45884750.00",
+      "expected_status": "matched",
+      "expected_tier": "tier1_exact",
+      "discrepancy": null,
+      "ledger_entry_ids": [
+        "JE-2026-0160"
+      ]
+    },
+    {
+      "file": "bank_a_statement_2026Q1.pdf",
+      "account_id": "0040-1187342-01",
+      "seq": 66,
+      "page": 2,
+      "excel_row": null,
+      "date": "2026-02-18",
+      "ref_id": "FT26049TYE5R",
+      "description": "POS 1200 SIMBA SUPERMARKET KIGALI RW",
+      "amount": "-19150.00",
+      "balance": "45865600.00",
+      "expected_status": "matched",
+      "expected_tier": "tier1_exact",
+      "discrepancy": null,
+      "ledger_entry_ids": [
+        "JE-2026-0167"
+      ]
+    },
+    {
+      "file": "bank_a_statement_2026Q1.pdf",
+      "account_id": "0040-1187342-01",
+      "seq": 67,
+      "page": 2,
+      "excel_row": null,
+      "date": "2026-02-18",
+      "ref_id": "FT26049QFB8R",
+      "description": "TRF TO AKAGERA OFFICE SUPPLIES LTD INV 1074",
+      "amount": "-844300.00",
+      "balance": "45021300.00",
+      "expected_status": "matched",
+      "expected_tier": "tier1_exact",
+      "discrepancy": null,
+      "ledger_entry_ids": [
+        "JE-2026-0152"
+      ]
+    },
+    {
+      "file": "bank_a_statement_2026Q1.pdf",
+      "account_id": "0040-1187342-01",
+      "seq": 68,
+      "page": 2,
+      "excel_row": null,
+      "date": "2026-02-19",
+      "ref_id": "FT26050WBEUK",
+      "description": "DD ISHEMA POWER UTILITY ACC 25525",
+      "amount": "-276300.00",
+      "balance": "44745000.00",
+      "expected_status": "matched",
+      "expected_tier": "tier1_exact",
+      "discrepancy": null,
+      "ledger_entry_ids": [
+        "JE-2026-0164"
+      ]
+    },
+    {
+      "file": "bank_a_statement_2026Q1.pdf",
+      "account_id": "0040-1187342-01",
+      "seq": 69,
+      "page": 2,
+      "excel_row": null,
+      "date": "2026-02-19",
+      "ref_id": "FT26050V3HSQ",
+      "description": "SALARY BATCH FEB 2026",
+      "amount": "-5727400.00",
+      "balance": "39017600.00",
+      "expected_status": "matched",
+      "expected_tier": "tier1_exact",
+      "discrepancy": null,
+      "ledger_entry_ids": [
+        "JE-2026-0165"
+      ]
+    },
+    {
+      "file": "bank_a_statement_2026Q1.pdf",
+      "account_id": "0040-1187342-01",
+      "seq": 70,
+      "page": 2,
+      "excel_row": null,
+      "date": "2026-02-19",
+      "ref_id": "FT26050KVVZ8",
+      "description": "TRF FROM HUYE COFFEE EXPORTERS LTD INV 1075",
+      "amount": "3210350.00",
+      "balance": "42227950.00",
+      "expected_status": "matched",
+      "expected_tier": "tier1_exact",
+      "discrepancy": null,
+      "ledger_entry_ids": [
+        "JE-2026-0171"
+      ]
+    },
+    {
+      "file": "bank_a_statement_2026Q1.pdf",
+      "account_id": "0040-1187342-01",
+      "seq": 71,
+      "page": 2,
+      "excel_row": null,
+      "date": "2026-02-19",
+      "ref_id": "FT26050FFCAQ",
+      "description": "POS 8699 MUHAZI FUEL STATION KIGALI RW",
+      "amount": "-53250.00",
+      "balance": "42174700.00",
+      "expected_status": "matched",
+      "expected_tier": "tier1_exact",
+      "discrepancy": null,
+      "ledger_entry_ids": [
+        "JE-2026-0168"
+      ]
+    },
+    {
+      "file": "bank_a_statement_2026Q1.pdf",
+      "account_id": "0040-1187342-01",
+      "seq": 72,
+      "page": 2,
+      "excel_row": null,
+      "date": "2026-02-23",
+      "ref_id": "FT26054YYQX7",
+      "description": "POS 4241 SIMBA SUPERMARKET KIGALI RW",
+      "amount": "-67000.00",
+      "balance": "42107700.00",
+      "expected_status": "matched",
+      "expected_tier": "tier1_exact",
+      "discrepancy": null,
+      "ledger_entry_ids": [
+        "JE-2026-0184"
+      ]
+    },
+    {
+      "file": "bank_a_statement_2026Q1.pdf",
+      "account_id": "0040-1187342-01",
+      "seq": 73,
+      "page": 2,
+      "excel_row": null,
+      "date": "2026-02-23",
+      "ref_id": "FT26054EJEB3",
+      "description": "POS 5728 SIMBA SUPERMARKET KIGALI RW",
+      "amount": "-140600.00",
+      "balance": "41967100.00",
+      "expected_status": "matched",
+      "expected_tier": "tier1_exact",
+      "discrepancy": null,
+      "ledger_entry_ids": [
+        "JE-2026-0178"
+      ]
+    },
+    {
+      "file": "bank_a_statement_2026Q1.pdf",
+      "account_id": "0040-1187342-01",
+      "seq": 74,
+      "page": 2,
+      "excel_row": null,
+      "date": "2026-02-23",
+      "ref_id": "FT26054KNJTQ",
+      "description": "POS 1653 SIMBA SUPERMARKET KIGALI RW",
+      "amount": "-149000.00",
+      "balance": "41818100.00",
+      "expected_status": "missing_in_ledger",
+      "expected_tier": null,
+      "discrepancy": "missing_in_ledger",
+      "ledger_entry_ids": []
+    },
+    {
+      "file": "bank_a_statement_2026Q1.pdf",
+      "account_id": "0040-1187342-01",
+      "seq": 75,
+      "page": 2,
+      "excel_row": null,
+      "date": "2026-02-26",
+      "ref_id": "FT26057JC84U",
+      "description": "TRF FROM GISENYI BEACH RESORT INV 1076",
+      "amount": "2128200.00",
+      "balance": "43946300.00",
+      "expected_status": "matched",
+      "expected_tier": "tier2_amount_date",
+      "discrepancy": null,
+      "ledger_entry_ids": [
+        "JE-2026-0192"
+      ]
+    },
+    {
+      "file": "bank_a_statement_2026Q1.pdf",
+      "account_id": "0040-1187342-01",
+      "seq": 76,
+      "page": 3,
+      "excel_row": null,
+      "date": "2026-02-26",
+      "ref_id": "FT26057B2RW7",
+      "description": "TRF FROM HUYE COFFEE EXPORTERS LTD INV 1077",
+      "amount": "4176450.00",
+      "balance": "48122750.00",
+      "expected_status": "matched",
+      "expected_tier": "tier1_exact",
+      "discrepancy": null,
+      "ledger_entry_ids": [
+        "JE-2026-0185"
+      ]
+    },
+    {
+      "file": "bank_a_statement_2026Q1.pdf",
+      "account_id": "0040-1187342-01",
+      "seq": 77,
+      "page": 3,
+      "excel_row": null,
+      "date": "2026-02-27",
+      "ref_id": "FT260589RPLD",
+      "description": "TRF TO NYARUTARAMA PROPERTY MANAGEMENT INV 1078",
+      "amount": "-2411250.00",
+      "balance": "45711500.00",
+      "expected_status": "matched",
+      "expected_tier": "tier2_amount_date",
+      "discrepancy": null,
+      "ledger_entry_ids": [
+        "JE-2026-0195"
+      ]
+    },
+    {
+      "file": "bank_a_statement_2026Q1.pdf",
+      "account_id": "0040-1187342-01",
+      "seq": 78,
+      "page": 3,
+      "excel_row": null,
+      "date": "2026-03-03",
+      "ref_id": "FT26062K84TQ",
+      "description": "TRF TO KIGALI FRESH LOGISTICS LTD INV 1079",
+      "amount": "-901750.00",
+      "balance": "44809750.00",
+      "expected_status": "matched",
+      "expected_tier": "tier1_exact",
+      "discrepancy": null,
+      "ledger_entry_ids": [
+        "JE-2026-0198"
+      ]
+    },
+    {
+      "file": "bank_a_statement_2026Q1.pdf",
+      "account_id": "0040-1187342-01",
+      "seq": 79,
+      "page": 3,
+      "excel_row": null,
+      "date": "2026-03-03",
+      "ref_id": "FT2606254A5Q",
+      "description": "TRF TO AKAGERA OFFICE SUPPLIES LTD INV 1080",
+      "amount": "-722200.00",
+      "balance": "44087550.00",
+      "expected_status": "matched",
+      "expected_tier": "tier1_exact",
+      "discrepancy": null,
+      "ledger_entry_ids": [
+        "JE-2026-0200"
+      ]
+    },
+    {
+      "file": "bank_a_statement_2026Q1.pdf",
+      "account_id": "0040-1187342-01",
+      "seq": 80,
+      "page": 3,
+      "excel_row": null,
+      "date": "2026-03-03",
+      "ref_id": "FT260622W2GT",
+      "description": "DD RUGALI TELECOM ACC 67424",
+      "amount": "-157500.00",
+      "balance": "43930050.00",
+      "expected_status": "matched",
+      "expected_tier": "tier1_exact",
+      "discrepancy": null,
+      "ledger_entry_ids": [
+        "JE-2026-0201"
+      ]
+    },
+    {
+      "file": "bank_a_statement_2026Q1.pdf",
+      "account_id": "0040-1187342-01",
+      "seq": 81,
+      "page": 3,
+      "excel_row": null,
+      "date": "2026-03-04",
+      "ref_id": "FT26063D9VHF",
+      "description": "TRF FROM HUYE COFFEE EXPORTERS LTD INV 1081",
+      "amount": "3576600.00",
+      "balance": "47506650.00",
+      "expected_status": "matched",
+      "expected_tier": "tier2_amount_date",
+      "discrepancy": null,
+      "ledger_entry_ids": [
+        "JE-2026-0214"
+      ]
+    },
+    {
+      "file": "bank_a_statement_2026Q1.pdf",
+      "account_id": "0040-1187342-01",
+      "seq": 82,
+      "page": 3,
+      "excel_row": null,
+      "date": "2026-03-05",
+      "ref_id": "FT2606497QD4",
+      "description": "TRF TO KIGALI FRESH LOGISTICS LTD INV 1082",
+      "amount": "-458100.00",
+      "balance": "47048550.00",
+      "expected_status": "matched",
+      "expected_tier": "tier1_exact",
+      "discrepancy": null,
+      "ledger_entry_ids": [
+        "JE-2026-0210"
+      ]
+    },
+    {
+      "file": "bank_a_statement_2026Q1.pdf",
+      "account_id": "0040-1187342-01",
+      "seq": 83,
+      "page": 3,
+      "excel_row": null,
+      "date": "2026-03-05",
+      "ref_id": "FT26064PRRQE",
+      "description": "DD ISHEMA POWER UTILITY ACC 88561",
+      "amount": "-151950.00",
+      "balance": "46896600.00",
+      "expected_status": "matched",
+      "expected_tier": "tier1_exact",
+      "discrepancy": null,
+      "ledger_entry_ids": [
+        "JE-2026-0218"
+      ]
+    },
+    {
+      "file": "bank_a_statement_2026Q1.pdf",
+      "account_id": "0040-1187342-01",
+      "seq": 84,
+      "page": 3,
+      "excel_row": null,
+      "date": "2026-03-06",
+      "ref_id": "FT260655J3P7",
+      "description": "DD ISHEMA POWER UTILITY ACC 45018",
+      "amount": "-95900.00",
+      "balance": "46800700.00",
+      "expected_status": "matched",
+      "expected_tier": "tier1_exact",
+      "discrepancy": null,
+      "ledger_entry_ids": [
+        "JE-2026-0211"
+      ]
+    },
+    {
+      "file": "bank_a_statement_2026Q1.pdf",
+      "account_id": "0040-1187342-01",
+      "seq": 85,
+      "page": 3,
+      "excel_row": null,
+      "date": "2026-03-06",
+      "ref_id": "FT26065Z4UX5",
+      "description": "TRF FROM HUYE COFFEE EXPORTERS LTD INV 1083",
+      "amount": "2253600.00",
+      "balance": "49054300.00",
+      "expected_status": "matched",
+      "expected_tier": "tier1_exact",
+      "discrepancy": null,
+      "ledger_entry_ids": [
+        "JE-2026-0215"
+      ]
+    },
+    {
+      "file": "bank_a_statement_2026Q1.pdf",
+      "account_id": "0040-1187342-01",
+      "seq": 86,
+      "page": 3,
+      "excel_row": null,
+      "date": "2026-03-06",
+      "ref_id": "FT26065TTQLG",
+      "description": "DD ISHEMA POWER UTILITY ACC 84946",
+      "amount": "-176150.00",
+      "balance": "48878150.00",
+      "expected_status": "matched",
+      "expected_tier": "tier1_exact",
+      "discrepancy": null,
+      "ledger_entry_ids": [
+        "JE-2026-0216"
+      ]
+    },
+    {
+      "file": "bank_a_statement_2026Q1.pdf",
+      "account_id": "0040-1187342-01",
+      "seq": 87,
+      "page": 3,
+      "excel_row": null,
+      "date": "2026-03-09",
+      "ref_id": "FT26068PLR7N",
+      "description": "TRF TO KIGALI FRESH LOGISTICS LTD INV 1084",
+      "amount": "-1360650.00",
+      "balance": "47517500.00",
+      "expected_status": "matched",
+      "expected_tier": "tier1_exact",
+      "discrepancy": null,
+      "ledger_entry_ids": [
+        "JE-2026-0232"
+      ]
+    },
+    {
+      "file": "bank_a_statement_2026Q1.pdf",
+      "account_id": "0040-1187342-01",
+      "seq": 88,
+      "page": 3,
+      "excel_row": null,
+      "date": "2026-03-10",
+      "ref_id": "FT26069SU55Q",
+      "description": "TRF FROM MUSANZE TOURS LTD INV 1085",
+      "amount": "533650.00",
+      "balance": "48051150.00",
+      "expected_status": "matched",
+      "expected_tier": "tier3_fuzzy",
+      "discrepancy": "date_shift",
+      "ledger_entry_ids": [
+        "JE-2026-0261"
+      ]
+    },
+    {
+      "file": "bank_a_statement_2026Q1.pdf",
+      "account_id": "0040-1187342-01",
+      "seq": 89,
+      "page": 3,
+      "excel_row": null,
+      "date": "2026-03-10",
+      "ref_id": "FT26069PWER9",
+      "description": "POS 6546 SIMBA SUPERMARKET KIGALI RW",
+      "amount": "-37500.00",
+      "balance": "48013650.00",
+      "expected_status": "matched",
+      "expected_tier": "tier2_amount_date",
+      "discrepancy": null,
+      "ledger_entry_ids": [
+        "JE-2026-0240"
+      ]
+    },
+    {
+      "file": "bank_a_statement_2026Q1.pdf",
+      "account_id": "0040-1187342-01",
+      "seq": 90,
+      "page": 3,
+      "excel_row": null,
+      "date": "2026-03-10",
+      "ref_id": "FT26069CLXT8",
+      "description": "TRF FROM KIVU HOTELS GROUP LTD INV 1086",
+      "amount": "4508750.00",
+      "balance": "52522400.00",
+      "expected_status": "matched",
+      "expected_tier": "tier1_exact",
+      "discrepancy": null,
+      "ledger_entry_ids": [
+        "JE-2026-0233"
+      ]
+    },
+    {
+      "file": "bank_a_statement_2026Q1.pdf",
+      "account_id": "0040-1187342-01",
+      "seq": 91,
+      "page": 3,
+      "excel_row": null,
+      "date": "2026-03-10",
+      "ref_id": "FT26069HXKHC",
+      "description": "POS 2612 SIMBA SUPERMARKET KIGALI RW",
+      "amount": "-22000.00",
+      "balance": "52500400.00",
+      "expected_status": "matched",
+      "expected_tier": "tier1_exact",
+      "discrepancy": null,
+      "ledger_entry_ids": [
+        "JE-2026-0226"
+      ]
+    },
+    {
+      "file": "bank_a_statement_2026Q1.pdf",
+      "account_id": "0040-1187342-01",
+      "seq": 92,
+      "page": 3,
+      "excel_row": null,
+      "date": "2026-03-10",
+      "ref_id": "FT26069QY6B3",
+      "description": "TRF FROM KIVU HOTELS GROUP LTD INV 1087",
+      "amount": "908650.00",
+      "balance": "53409050.00",
+      "expected_status": "matched",
+      "expected_tier": "tier1_exact",
+      "discrepancy": null,
+      "ledger_entry_ids": [
+        "JE-2026-0234"
+      ]
+    },
+    {
+      "file": "bank_a_statement_2026Q1.pdf",
+      "account_id": "0040-1187342-01",
+      "seq": 93,
+      "page": 3,
+      "excel_row": null,
+      "date": "2026-03-11",
+      "ref_id": "FT26070HPXFF",
+      "description": "TRF TO KIGALI FRESH LOGISTICS LTD INV 1088",
+      "amount": "-328500.00",
+      "balance": "53080550.00",
+      "expected_status": "matched",
+      "expected_tier": "tier1_exact",
+      "discrepancy": null,
+      "ledger_entry_ids": [
+        "JE-2026-0227"
+      ]
+    },
+    {
+      "file": "bank_a_statement_2026Q1.pdf",
+      "account_id": "0040-1187342-01",
+      "seq": 94,
+      "page": 3,
+      "excel_row": null,
+      "date": "2026-03-12",
+      "ref_id": "FT260717EQJJ",
+      "description": "TRF FROM KIVU HOTELS GROUP LTD INV 1089",
+      "amount": "3511500.00",
+      "balance": "56592050.00",
+      "expected_status": "matched",
+      "expected_tier": "tier1_exact",
+      "discrepancy": null,
+      "ledger_entry_ids": [
+        "JE-2026-0228"
+      ]
+    },
+    {
+      "file": "bank_a_statement_2026Q1.pdf",
+      "account_id": "0040-1187342-01",
+      "seq": 95,
+      "page": 3,
+      "excel_row": null,
+      "date": "2026-03-13",
+      "ref_id": "FT26072C89K8",
+      "description": "TRF FROM MUSANZE TOURS LTD INV 1090",
+      "amount": "637650.00",
+      "balance": "57229700.00",
+      "expected_status": "matched",
+      "expected_tier": "tier1_exact",
+      "discrepancy": null,
+      "ledger_entry_ids": [
+        "JE-2026-0235"
+      ]
+    },
+    {
+      "file": "bank_a_statement_2026Q1.pdf",
+      "account_id": "0040-1187342-01",
+      "seq": 96,
+      "page": 3,
+      "excel_row": null,
+      "date": "2026-03-13",
+      "ref_id": "FT2607295DNM",
+      "description": "TRF FROM HUYE COFFEE EXPORTERS LTD INV 1091",
+      "amount": "1705550.00",
+      "balance": "58935250.00",
+      "expected_status": "matched",
+      "expected_tier": "tier1_exact",
+      "discrepancy": null,
+      "ledger_entry_ids": [
+        "JE-2026-0236"
+      ]
+    },
+    {
+      "file": "bank_a_statement_2026Q1.pdf",
+      "account_id": "0040-1187342-01",
+      "seq": 97,
+      "page": 3,
+      "excel_row": null,
+      "date": "2026-03-17",
+      "ref_id": "FT26076XJUXZ",
+      "description": "POS 1803 SIMBA SUPERMARKET KIGALI RW",
+      "amount": "-177950.00",
+      "balance": "58757300.00",
+      "expected_status": "matched",
+      "expected_tier": "tier2_amount_date",
+      "discrepancy": null,
+      "ledger_entry_ids": [
+        "JE-2026-0253"
+      ]
+    },
+    {
+      "file": "bank_a_statement_2026Q1.pdf",
+      "account_id": "0040-1187342-01",
+      "seq": 98,
+      "page": 3,
+      "excel_row": null,
+      "date": "2026-03-18",
+      "ref_id": "FT260772H3HG",
+      "description": "TRF FROM GISENYI BEACH RESORT INV 1092",
+      "amount": "1087800.00",
+      "balance": "59845100.00",
+      "expected_status": "matched",
+      "expected_tier": "tier1_exact",
+      "discrepancy": null,
+      "ledger_entry_ids": [
+        "JE-2026-0247"
+      ]
+    },
+    {
+      "file": "bank_a_statement_2026Q1.pdf",
+      "account_id": "0040-1187342-01",
+      "seq": 99,
+      "page": 3,
+      "excel_row": null,
+      "date": "2026-03-18",
+      "ref_id": "FT26077XEDWB",
+      "description": "TRF FROM GISENYI BEACH RESORT INV 1093",
+      "amount": "2310000.00",
+      "balance": "62155100.00",
+      "expected_status": "matched",
+      "expected_tier": "tier1_exact",
+      "discrepancy": null,
+      "ledger_entry_ids": [
+        "JE-2026-0254"
+      ]
+    },
+    {
+      "file": "bank_a_statement_2026Q1.pdf",
+      "account_id": "0040-1187342-01",
+      "seq": 100,
+      "page": 3,
+      "excel_row": null,
+      "date": "2026-03-18",
+      "ref_id": "FT26077CKZFE",
+      "description": "SALARY BATCH MAR 2026",
+      "amount": "-3861200.00",
+      "balance": "58293900.00",
+      "expected_status": "matched",
+      "expected_tier": "tier1_exact",
+      "discrepancy": null,
+      "ledger_entry_ids": [
+        "JE-2026-0255"
+      ]
+    },
+    {
+      "file": "bank_a_statement_2026Q1.pdf",
+      "account_id": "0040-1187342-01",
+      "seq": 101,
+      "page": 3,
+      "excel_row": null,
+      "date": "2026-03-18",
+      "ref_id": "FT260774J4R3",
+      "description": "DD RUGALI TELECOM ACC 25095",
+      "amount": "-85800.00",
+      "balance": "58208100.00",
+      "expected_status": "matched",
+      "expected_tier": "tier1_exact",
+      "discrepancy": null,
+      "ledger_entry_ids": [
+        "JE-2026-0248"
+      ]
+    },
+    {
+      "file": "bank_a_statement_2026Q1.pdf",
+      "account_id": "0040-1187342-01",
+      "seq": 102,
+      "page": 3,
+      "excel_row": null,
+      "date": "2026-03-19",
+      "ref_id": "FT26078E85Z9",
+      "description": "DD ISHEMA POWER UTILITY ACC 21836",
+      "amount": "-70800.00",
+      "balance": "58137300.00",
+      "expected_status": "matched",
+      "expected_tier": "tier1_exact",
+      "discrepancy": null,
+      "ledger_entry_ids": [
+        "JE-2026-0258"
+      ]
+    },
+    {
+      "file": "bank_a_statement_2026Q1.pdf",
+      "account_id": "0040-1187342-01",
+      "seq": 103,
+      "page": 3,
+      "excel_row": null,
+      "date": "2026-03-23",
+      "ref_id": "FT26082JDMZJ",
+      "description": "TRF FROM GISENYI BEACH RESORT INV 1094",
+      "amount": "195600.00",
+      "balance": "58332900.00",
+      "expected_status": "matched",
+      "expected_tier": "tier1_exact",
+      "discrepancy": null,
+      "ledger_entry_ids": [
+        "JE-2026-0276"
+      ]
+    },
+    {
+      "file": "bank_a_statement_2026Q1.pdf",
+      "account_id": "0040-1187342-01",
+      "seq": 104,
+      "page": 3,
+      "excel_row": null,
+      "date": "2026-03-24",
+      "ref_id": "FT26083XRV8L",
+      "description": "TRF FROM MUSANZE TOURS LTD INV 1095",
+      "amount": "475000.00",
+      "balance": "58807900.00",
+      "expected_status": "amount_mismatch",
+      "expected_tier": null,
+      "discrepancy": "amount_typo",
+      "ledger_entry_ids": [
+        "JE-2026-0270"
+      ]
+    },
+    {
+      "file": "bank_a_statement_2026Q1.pdf",
+      "account_id": "0040-1187342-01",
+      "seq": 105,
+      "page": 3,
+      "excel_row": null,
+      "date": "2026-03-24",
+      "ref_id": "FT26083QYWDB",
+      "description": "POS 1609 SIMBA SUPERMARKET KIGALI RW",
+      "amount": "-176700.00",
+      "balance": "58631200.00",
+      "expected_status": "matched",
+      "expected_tier": "tier2_amount_date",
+      "discrepancy": null,
+      "ledger_entry_ids": [
+        "JE-2026-0277"
+      ]
+    },
+    {
+      "file": "bank_a_statement_2026Q1.pdf",
+      "account_id": "0040-1187342-01",
+      "seq": 106,
+      "page": 3,
+      "excel_row": null,
+      "date": "2026-03-24",
+      "ref_id": null,
+      "description": "CREDIT INTEREST",
+      "amount": "1950.00",
+      "balance": "58633150.00",
+      "expected_status": "matched",
+      "expected_tier": "tier2_amount_date",
+      "discrepancy": null,
+      "ledger_entry_ids": [
+        "JE-2026-0271"
+      ]
+    },
+    {
+      "file": "bank_a_statement_2026Q1.pdf",
+      "account_id": "0040-1187342-01",
+      "seq": 107,
+      "page": 3,
+      "excel_row": null,
+      "date": "2026-03-25",
+      "ref_id": "FT26084NM8YT",
+      "description": "TRF FROM HUYE COFFEE EXPORTERS LTD INV 1096",
+      "amount": "1289050.00",
+      "balance": "59922200.00",
+      "expected_status": "matched",
+      "expected_tier": "tier1_exact",
+      "discrepancy": null,
+      "ledger_entry_ids": [
+        "JE-2026-0269"
+      ]
+    },
+    {
+      "file": "bank_a_statement_2026Q1.pdf",
+      "account_id": "0040-1187342-01",
+      "seq": 108,
+      "page": 3,
+      "excel_row": null,
+      "date": "2026-03-25",
+      "ref_id": "FT26084V8JYG",
+      "description": "TRF FROM KIVU HOTELS GROUP LTD INV 1097",
+      "amount": "3456950.00",
+      "balance": "63379150.00",
+      "expected_status": "matched",
+      "expected_tier": "tier1_exact",
+      "discrepancy": null,
+      "ledger_entry_ids": [
+        "JE-2026-0284"
+      ]
+    },
+    {
+      "file": "bank_a_statement_2026Q1.pdf",
+      "account_id": "0040-1187342-01",
+      "seq": 109,
+      "page": 3,
+      "excel_row": null,
+      "date": "2026-03-31",
+      "ref_id": "FT260909M6WB",
+      "description": "TRF FROM HUYE COFFEE EXPORTERS LTD INV 1098",
+      "amount": "1051100.00",
+      "balance": "64430250.00",
+      "expected_status": "matched",
+      "expected_tier": "tier1_exact",
+      "discrepancy": null,
+      "ledger_entry_ids": [
+        "JE-2026-0292"
+      ]
+    },
+    {
+      "file": "bank_a_statement_2026Q1.pdf",
+      "account_id": "0040-1187342-01",
+      "seq": 110,
+      "page": 4,
+      "excel_row": null,
+      "date": "2026-03-31",
+      "ref_id": "FT26090CGW9B",
+      "description": "TRF FROM MUSANZE TOURS LTD INV 1099",
+      "amount": "1610000.00",
+      "balance": "66040250.00",
+      "expected_status": "matched",
+      "expected_tier": "tier1_exact",
+      "discrepancy": null,
+      "ledger_entry_ids": [
+        "JE-2026-0294"
+      ]
+    },
+    {
+      "file": "bank_b_statement_2026Q1.pdf",
+      "account_id": "200-554-781-903",
+      "seq": 1,
+      "page": 1,
+      "excel_row": null,
+      "date": "2026-01-05",
+      "ref_id": "AKB347231",
+      "description": "Outward transfer Kigali Fresh Logistics Ltd ref inv 1100",
+      "amount": "-702650.00",
+      "balance": "6622850.00",
+      "expected_status": "matched",
+      "expected_tier": "tier1_exact",
+      "discrepancy": null,
+      "ledger_entry_ids": [
+        "JE-2026-0007"
+      ]
+    },
+    {
+      "file": "bank_b_statement_2026Q1.pdf",
+      "account_id": "200-554-781-903",
+      "seq": 2,
+      "page": 1,
+      "excel_row": null,
+      "date": "2026-01-06",
+      "ref_id": "AKB493124",
+      "description": "Outward transfer Kigali Fresh Logistics Ltd ref inv 1101",
+      "amount": "-223700.00",
+      "balance": "6399150.00",
+      "expected_status": "matched",
+      "expected_tier": "tier1_exact",
+      "discrepancy": null,
+      "ledger_entry_ids": [
+        "JE-2026-0010"
+      ]
+    },
+    {
+      "file": "bank_b_statement_2026Q1.pdf",
+      "account_id": "200-554-781-903",
+      "seq": 3,
+      "page": 1,
+      "excel_row": null,
+      "date": "2026-01-07",
+      "ref_id": "AKB203896",
+      "description": "Card purchase Muhazi Fuel Station Kigali",
+      "amount": "-150500.00",
+      "balance": "6248650.00",
+      "expected_status": "matched",
+      "expected_tier": "tier1_exact",
+      "discrepancy": null,
+      "ledger_entry_ids": [
+        "JE-2026-0009"
+      ]
+    },
+    {
+      "file": "bank_b_statement_2026Q1.pdf",
+      "account_id": "200-554-781-903",
+      "seq": 4,
+      "page": 1,
+      "excel_row": null,
+      "date": "2026-01-08",
+      "ref_id": "AKB451577",
+      "description": "Inward transfer from Huye Coffee Exporters Ltd inv 1102",
+      "amount": "4659550.00",
+      "balance": "10908200.00",
+      "expected_status": "matched",
+      "expected_tier": "tier1_exact",
+      "discrepancy": null,
+      "ledger_entry_ids": [
+        "JE-2026-0011"
+      ]
+    },
+    {
+      "file": "bank_b_statement_2026Q1.pdf",
+      "account_id": "200-554-781-903",
+      "seq": 5,
+      "page": 1,
+      "excel_row": null,
+      "date": "2026-01-09",
+      "ref_id": "AKB140163",
+      "description": "Inward transfer from Gisenyi Beach Resort inv 1103",
+      "amount": "600850.00",
+      "balance": "11509050.00",
+      "expected_status": "matched",
+      "expected_tier": "tier1_exact",
+      "discrepancy": null,
+      "ledger_entry_ids": [
+        "JE-2026-0014"
+      ]
+    },
+    {
+      "file": "bank_b_statement_2026Q1.pdf",
+      "account_id": "200-554-781-903",
+      "seq": 6,
+      "page": 1,
+      "excel_row": null,
+      "date": "2026-01-09",
+      "ref_id": "AKB829884",
+      "description": "Outward transfer Akagera Office Supplies Ltd ref inv 1104",
+      "amount": "-834050.00",
+      "balance": "10675000.00",
+      "expected_status": "matched",
+      "expected_tier": "tier1_exact",
+      "discrepancy": "one_to_many",
+      "ledger_entry_ids": [
+        "JE-2026-0024",
+        "JE-2026-0025",
+        "JE-2026-0026"
+      ]
+    },
+    {
+      "file": "bank_b_statement_2026Q1.pdf",
+      "account_id": "200-554-781-903",
+      "seq": 7,
+      "page": 1,
+      "excel_row": null,
+      "date": "2026-01-09",
+      "ref_id": "AKB839808",
+      "description": "Inward transfer from Huye Coffee Exporters Ltd inv 1105",
+      "amount": "5373100.00",
+      "balance": "16048100.00",
+      "expected_status": "matched",
+      "expected_tier": "tier1_exact",
+      "discrepancy": null,
+      "ledger_entry_ids": [
+        "JE-2026-0015"
+      ]
+    },
+    {
+      "file": "bank_b_statement_2026Q1.pdf",
+      "account_id": "200-554-781-903",
+      "seq": 8,
+      "page": 1,
+      "excel_row": null,
+      "date": "2026-01-13",
+      "ref_id": "AKB105506",
+      "description": "Direct debit Ishema Power Utility",
+      "amount": "-292000.00",
+      "balance": "15756100.00",
+      "expected_status": "matched",
+      "expected_tier": "tier1_exact",
+      "discrepancy": null,
+      "ledger_entry_ids": [
+        "JE-2026-0030"
+      ]
+    },
+    {
+      "file": "bank_b_statement_2026Q1.pdf",
+      "account_id": "200-554-781-903",
+      "seq": 9,
+      "page": 1,
+      "excel_row": null,
+      "date": "2026-01-14",
+      "ref_id": "AKB368355",
+      "description": "Inward transfer from Musanze Tours Ltd inv 1106",
+      "amount": "182250.00",
+      "balance": "15938350.00",
+      "expected_status": "matched",
+      "expected_tier": "tier1_exact",
+      "discrepancy": null,
+      "ledger_entry_ids": [
+        "JE-2026-0044"
+      ]
+    },
+    {
+      "file": "bank_b_statement_2026Q1.pdf",
+      "account_id": "200-554-781-903",
+      "seq": 10,
+      "page": 1,
+      "excel_row": null,
+      "date": "2026-01-15",
+      "ref_id": "AKB675462",
+      "description": "Card purchase Muhazi Fuel Station Kigali",
+      "amount": "-81200.00",
+      "balance": "15857150.00",
+      "expected_status": "matched",
+      "expected_tier": "tier2_amount_date",
+      "discrepancy": null,
+      "ledger_entry_ids": [
+        "JE-2026-0045"
+      ]
+    },
+    {
+      "file": "bank_b_statement_2026Q1.pdf",
+      "account_id": "200-554-781-903",
+      "seq": 11,
+      "page": 1,
+      "excel_row": null,
+      "date": "2026-01-15",
+      "ref_id": "AKB543814",
+      "description": "Inward transfer from Musanze Tours Ltd inv 1107",
+      "amount": "1849400.00",
+      "balance": "17706550.00",
+      "expected_status": "matched",
+      "expected_tier": "tier1_exact",
+      "discrepancy": null,
+      "ledger_entry_ids": [
+        "JE-2026-0041"
+      ]
+    },
+    {
+      "file": "bank_b_statement_2026Q1.pdf",
+      "account_id": "200-554-781-903",
+      "seq": 12,
+      "page": 1,
+      "excel_row": null,
+      "date": "2026-01-15",
+      "ref_id": "AKB349183",
+      "description": "Card purchase Simba Supermarket Kigali",
+      "amount": "-67000.00",
+      "balance": "17639550.00",
+      "expected_status": "matched",
+      "expected_tier": "tier1_exact",
+      "discrepancy": null,
+      "ledger_entry_ids": [
+        "JE-2026-0036"
+      ]
+    },
+    {
+      "file": "bank_b_statement_2026Q1.pdf",
+      "account_id": "200-554-781-903",
+      "seq": 13,
+      "page": 1,
+      "excel_row": null,
+      "date": "2026-01-16",
+      "ref_id": "AKB350021",
+      "description": "Outward transfer Akagera Office Supplies Ltd ref inv 1108",
+      "amount": "-138200.00",
+      "balance": "17501350.00",
+      "expected_status": "matched",
+      "expected_tier": "tier1_exact",
+      "discrepancy": null,
+      "ledger_entry_ids": [
+        "JE-2026-0054"
+      ]
+    },
+    {
+      "file": "bank_b_statement_2026Q1.pdf",
+      "account_id": "200-554-781-903",
+      "seq": 14,
+      "page": 1,
+      "excel_row": null,
+      "date": "2026-01-16",
+      "ref_id": "AKB753064",
+      "description": "Outward transfer Kigali Fresh Logistics Ltd ref inv 1109",
+      "amount": "-1390700.00",
+      "balance": "16110650.00",
+      "expected_status": "matched",
+      "expected_tier": "tier1_exact",
+      "discrepancy": null,
+      "ledger_entry_ids": [
+        "JE-2026-0042"
+      ]
+    },
+    {
+      "file": "bank_b_statement_2026Q1.pdf",
+      "account_id": "200-554-781-903",
+      "seq": 15,
+      "page": 1,
+      "excel_row": null,
+      "date": "2026-01-19",
+      "ref_id": "AKB977330",
+      "description": "Outward transfer Nyarutarama Property Management ref inv 1110",
+      "amount": "-1163250.00",
+      "balance": "14947400.00",
+      "expected_status": "matched",
+      "expected_tier": "tier1_exact",
+      "discrepancy": null,
+      "ledger_entry_ids": [
+        "JE-2026-0051"
+      ]
+    },
+    {
+      "file": "bank_b_statement_2026Q1.pdf",
+      "account_id": "200-554-781-903",
+      "seq": 16,
+      "page": 1,
+      "excel_row": null,
+      "date": "2026-01-19",
+      "ref_id": "AKB117233",
+      "description": "Inward transfer from Musanze Tours Ltd inv 1111",
+      "amount": "1876500.00",
+      "balance": "16823900.00",
+      "expected_status": "matched",
+      "expected_tier": "tier1_exact",
+      "discrepancy": null,
+      "ledger_entry_ids": [
+        "JE-2026-0058"
+      ]
+    },
+    {
+      "file": "bank_b_statement_2026Q1.pdf",
+      "account_id": "200-554-781-903",
+      "seq": 17,
+      "page": 1,
+      "excel_row": null,
+      "date": "2026-01-20",
+      "ref_id": "AKB353690",
+      "description": "Inward transfer from Kivu Hotels Group Ltd inv 1112",
+      "amount": "4018600.00",
+      "balance": "20842500.00",
+      "expected_status": "matched",
+      "expected_tier": "tier2_amount_date",
+      "discrepancy": null,
+      "ledger_entry_ids": [
+        "JE-2026-0059"
+      ]
+    },
+    {
+      "file": "bank_b_statement_2026Q1.pdf",
+      "account_id": "200-554-781-903",
+      "seq": 18,
+      "page": 1,
+      "excel_row": null,
+      "date": "2026-01-22",
+      "ref_id": "AKB550089",
+      "description": "Inward transfer from Kivu Hotels Group Ltd inv 1113",
+      "amount": "2158850.00",
+      "balance": "23001350.00",
+      "expected_status": "matched",
+      "expected_tier": "tier2_amount_date",
+      "discrepancy": null,
+      "ledger_entry_ids": [
+        "JE-2026-0069"
+      ]
+    },
+    {
+      "file": "bank_b_statement_2026Q1.pdf",
+      "account_id": "200-554-781-903",
+      "seq": 19,
+      "page": 1,
+      "excel_row": null,
+      "date": "2026-01-23",
+      "ref_id": "AKB352249",
+      "description": "Card purchase Simba Supermarket Kigali",
+      "amount": "-80250.00",
+      "balance": "22921100.00",
+      "expected_status": "matched",
+      "expected_tier": "tier1_exact",
+      "discrepancy": null,
+      "ledger_entry_ids": [
+        "JE-2026-0062"
+      ]
+    },
+    {
+      "file": "bank_b_statement_2026Q1.pdf",
+      "account_id": "200-554-781-903",
+      "seq": 20,
+      "page": 1,
+      "excel_row": null,
+      "date": "2026-01-23",
+      "ref_id": "AKB796643",
+      "description": "Bulk salary payment January 2026",
+      "amount": "-4227550.00",
+      "balance": "18693550.00",
+      "expected_status": "matched",
+      "expected_tier": "tier1_exact",
+      "discrepancy": null,
+      "ledger_entry_ids": [
+        "JE-2026-0071"
+      ]
+    },
+    {
+      "file": "bank_b_statement_2026Q1.pdf",
+      "account_id": "200-554-781-903",
+      "seq": 21,
+      "page": 1,
+      "excel_row": null,
+      "date": "2026-01-23",
+      "ref_id": "AKB478120",
+      "description": "Inward transfer from Kivu Hotels Group Ltd inv 1114",
+      "amount": "3680700.00",
+      "balance": "22374250.00",
+      "expected_status": "matched",
+      "expected_tier": "tier1_exact",
+      "discrepancy": null,
+      "ledger_entry_ids": [
+        "JE-2026-0066"
+      ]
+    },
+    {
+      "file": "bank_b_statement_2026Q1.pdf",
+      "account_id": "200-554-781-903",
+      "seq": 22,
+      "page": 1,
+      "excel_row": null,
+      "date": "2026-01-26",
+      "ref_id": "AKB670511",
+      "description": "Card purchase Simba Supermarket Kigali",
+      "amount": "-115700.00",
+      "balance": "22258550.00",
+      "expected_status": "matched",
+      "expected_tier": "tier1_exact",
+      "discrepancy": null,
+      "ledger_entry_ids": [
+        "JE-2026-0088"
+      ]
+    },
+    {
+      "file": "bank_b_statement_2026Q1.pdf",
+      "account_id": "200-554-781-903",
+      "seq": 23,
+      "page": 1,
+      "excel_row": null,
+      "date": "2026-01-26",
+      "ref_id": "AKB681070",
+      "description": "Direct debit Ishema Power Utility",
+      "amount": "-247900.00",
+      "balance": "22010650.00",
+      "expected_status": "matched",
+      "expected_tier": "tier2_amount_date",
+      "discrepancy": null,
+      "ledger_entry_ids": [
+        "JE-2026-0080"
+      ]
+    },
+    {
+      "file": "bank_b_statement_2026Q1.pdf",
+      "account_id": "200-554-781-903",
+      "seq": 24,
+      "page": 1,
+      "excel_row": null,
+      "date": "2026-01-27",
+      "ref_id": "AKB145649",
+      "description": "Card purchase Simba Supermarket Kigali",
+      "amount": "-104250.00",
+      "balance": "21906400.00",
+      "expected_status": "matched",
+      "expected_tier": "tier1_exact",
+      "discrepancy": null,
+      "ledger_entry_ids": [
+        "JE-2026-0089"
+      ]
+    },
+    {
+      "file": "bank_b_statement_2026Q1.pdf",
+      "account_id": "200-554-781-903",
+      "seq": 25,
+      "page": 1,
+      "excel_row": null,
+      "date": "2026-01-27",
+      "ref_id": "AKB365971",
+      "description": "Inward transfer from Kivu Hotels Group Ltd inv 1115",
+      "amount": "2696450.00",
+      "balance": "24602850.00",
+      "expected_status": "matched",
+      "expected_tier": "tier2_amount_date",
+      "discrepancy": null,
+      "ledger_entry_ids": [
+        "JE-2026-0090"
+      ]
+    },
+    {
+      "file": "bank_b_statement_2026Q1.pdf",
+      "account_id": "200-554-781-903",
+      "seq": 26,
+      "page": 1,
+      "excel_row": null,
+      "date": "2026-01-28",
+      "ref_id": "AKB926823",
+      "description": "Inward transfer from Gisenyi Beach Resort inv 1116",
+      "amount": "1320100.00",
+      "balance": "25922950.00",
+      "expected_status": "matched",
+      "expected_tier": "tier1_exact",
+      "discrepancy": null,
+      "ledger_entry_ids": [
+        "JE-2026-0097"
+      ]
+    },
+    {
+      "file": "bank_b_statement_2026Q1.pdf",
+      "account_id": "200-554-781-903",
+      "seq": 27,
+      "page": 1,
+      "excel_row": null,
+      "date": "2026-01-28",
+      "ref_id": "AKB868544",
+      "description": "Card purchase Simba Supermarket Kigali",
+      "amount": "-57350.00",
+      "balance": "25865600.00",
+      "expected_status": "matched",
+      "expected_tier": "tier2_amount_date",
+      "discrepancy": null,
+      "ledger_entry_ids": [
+        "JE-2026-0098"
+      ]
+    },
+    {
+      "file": "bank_b_statement_2026Q1.pdf",
+      "account_id": "200-554-781-903",
+      "seq": 28,
+      "page": 1,
+      "excel_row": null,
+      "date": "2026-01-28",
+      "ref_id": "AKB908977",
+      "description": "Inward transfer from Kivu Hotels Group Ltd inv 1117",
+      "amount": "929350.00",
+      "balance": "26794950.00",
+      "expected_status": "matched",
+      "expected_tier": "tier1_exact",
+      "discrepancy": null,
+      "ledger_entry_ids": [
+        "JE-2026-0091"
+      ]
+    },
+    {
+      "file": "bank_b_statement_2026Q1.pdf",
+      "account_id": "200-554-781-903",
+      "seq": 29,
+      "page": 1,
+      "excel_row": null,
+      "date": "2026-01-29",
+      "ref_id": "AKB239890",
+      "description": "Bulk salary payment January 2026",
+      "amount": "-5179150.00",
+      "balance": "21615800.00",
+      "expected_status": "matched",
+      "expected_tier": "tier1_exact",
+      "discrepancy": null,
+      "ledger_entry_ids": [
+        "JE-2026-0092"
+      ]
+    },
+    {
+      "file": "bank_b_statement_2026Q1.pdf",
+      "account_id": "200-554-781-903",
+      "seq": 30,
+      "page": 1,
+      "excel_row": null,
+      "date": "2026-01-29",
+      "ref_id": "AKB454992",
+      "description": "Card purchase Simba Supermarket Kigali",
+      "amount": "-119800.00",
+      "balance": "21496000.00",
+      "expected_status": "matched",
+      "expected_tier": "tier3_fuzzy",
+      "discrepancy": "date_shift",
+      "ledger_entry_ids": [
+        "JE-2026-0072"
+      ]
+    },
+    {
+      "file": "bank_b_statement_2026Q1.pdf",
+      "account_id": "200-554-781-903",
+      "seq": 31,
+      "page": 1,
+      "excel_row": null,
+      "date": "2026-01-29",
+      "ref_id": "AKB970720",
+      "description": "Inward transfer from Gisenyi Beach Resort inv 1118",
+      "amount": "723700.00",
+      "balance": "22219700.00",
+      "expected_status": "amount_mismatch",
+      "expected_tier": null,
+      "discrepancy": "amount_typo",
+      "ledger_entry_ids": [
+        "JE-2026-0103"
+      ]
+    },
+    {
+      "file": "bank_b_statement_2026Q1.pdf",
+      "account_id": "200-554-781-903",
+      "seq": 32,
+      "page": 1,
+      "excel_row": null,
+      "date": "2026-01-29",
+      "ref_id": "AKB829168",
+      "description": "Inward transfer from Gisenyi Beach Resort inv 1119",
+      "amount": "1672450.00",
+      "balance": "23892150.00",
+      "expected_status": "matched",
+      "expected_tier": "tier1_exact",
+      "discrepancy": null,
+      "ledger_entry_ids": [
+        "JE-2026-0093"
+      ]
+    },
+    {
+      "file": "bank_b_statement_2026Q1.pdf",
+      "account_id": "200-554-781-903",
+      "seq": 33,
+      "page": 1,
+      "excel_row": null,
+      "date": "2026-01-30",
+      "ref_id": "AKB950916",
+      "description": "Direct debit Ishema Power Utility",
+      "amount": "-114650.00",
+      "balance": "23777500.00",
+      "expected_status": "matched",
+      "expected_tier": "tier2_amount_date",
+      "discrepancy": null,
+      "ledger_entry_ids": [
+        "JE-2026-0101"
+      ]
+    },
+    {
+      "file": "bank_b_statement_2026Q1.pdf",
+      "account_id": "200-554-781-903",
+      "seq": 34,
+      "page": 1,
+      "excel_row": null,
+      "date": "2026-02-03",
+      "ref_id": "AKB913894",
+      "description": "Card purchase Simba Supermarket Kigali",
+      "amount": "-154600.00",
+      "balance": "23622900.00",
+      "expected_status": "matched",
+      "expected_tier": "tier1_exact",
+      "discrepancy": null,
+      "ledger_entry_ids": [
+        "JE-2026-0107"
+      ]
+    },
+    {
+      "file": "bank_b_statement_2026Q1.pdf",
+      "account_id": "200-554-781-903",
+      "seq": 35,
+      "page": 1,
+      "excel_row": null,
+      "date": "2026-02-03",
+      "ref_id": "AKB407696",
+      "description": "Inward transfer from Musanze Tours Ltd inv 1120",
+      "amount": "241150.00",
+      "balance": "23864050.00",
+      "expected_status": "matched",
+      "expected_tier": "tier1_exact",
+      "discrepancy": null,
+      "ledger_entry_ids": [
+        "JE-2026-0117"
+      ]
+    },
+    {
+      "file": "bank_b_statement_2026Q1.pdf",
+      "account_id": "200-554-781-903",
+      "seq": 36,
+      "page": 1,
+      "excel_row": null,
+      "date": "2026-02-04",
+      "ref_id": "AKB143941",
+      "description": "Card purchase Muhazi Fuel Station Kigali",
+      "amount": "-101700.00",
+      "balance": "23762350.00",
+      "expected_status": "matched",
+      "expected_tier": "tier1_exact",
+      "discrepancy": null,
+      "ledger_entry_ids": [
+        "JE-2026-0111"
+      ]
+    },
+    {
+      "file": "bank_b_statement_2026Q1.pdf",
+      "account_id": "200-554-781-903",
+      "seq": 37,
+      "page": 1,
+      "excel_row": null,
+      "date": "2026-02-04",
+      "ref_id": "AKB640418",
+      "description": "Outward transfer Akagera Office Supplies Ltd ref inv 1121",
+      "amount": "-568000.00",
+      "balance": "23194350.00",
+      "expected_status": "matched",
+      "expected_tier": "tier1_exact",
+      "discrepancy": null,
+      "ledger_entry_ids": [
+        "JE-2026-0108"
+      ]
+    },
+    {
+      "file": "bank_b_statement_2026Q1.pdf",
+      "account_id": "200-554-781-903",
+      "seq": 38,
+      "page": 1,
+      "excel_row": null,
+      "date": "2026-02-05",
+      "ref_id": "AKB596395",
+      "description": "Outward transfer Kigali Fresh Logistics Ltd ref inv 1122",
+      "amount": "-979700.00",
+      "balance": "22214650.00",
+      "expected_status": "matched",
+      "expected_tier": "tier1_exact",
+      "discrepancy": null,
+      "ledger_entry_ids": [
+        "JE-2026-0122"
+      ]
+    },
+    {
+      "file": "bank_b_statement_2026Q1.pdf",
+      "account_id": "200-554-781-903",
+      "seq": 39,
+      "page": 1,
+      "excel_row": null,
+      "date": "2026-02-09",
+      "ref_id": "AKB400009",
+      "description": "Card purchase Muhazi Fuel Station Kigali",
+      "amount": "-98250.00",
+      "balance": "22116400.00",
+      "expected_status": "matched",
+      "expected_tier": "tier1_exact",
+      "discrepancy": null,
+      "ledger_entry_ids": [
+        "JE-2026-0128"
+      ]
+    },
+    {
+      "file": "bank_b_statement_2026Q1.pdf",
+      "account_id": "200-554-781-903",
+      "seq": 40,
+      "page": 2,
+      "excel_row": null,
+      "date": "2026-02-10",
+      "ref_id": "AKB150126",
+      "description": "Outward transfer Kigali Fresh Logistics Ltd ref inv 1123",
+      "amount": "-1369300.00",
+      "balance": "20747100.00",
+      "expected_status": "missing_in_ledger",
+      "expected_tier": null,
+      "discrepancy": "missing_in_ledger",
+      "ledger_entry_ids": []
+    },
+    {
+      "file": "bank_b_statement_2026Q1.pdf",
+      "account_id": "200-554-781-903",
+      "seq": 41,
+      "page": 2,
+      "excel_row": null,
+      "date": "2026-02-10",
+      "ref_id": "AKB386488",
+      "description": "Inward transfer from Huye Coffee Exporters Ltd inv 1124",
+      "amount": "2575300.00",
+      "balance": "23322400.00",
+      "expected_status": "matched",
+      "expected_tier": "tier1_exact",
+      "discrepancy": null,
+      "ledger_entry_ids": [
+        "JE-2026-0124"
+      ]
+    },
+    {
+      "file": "bank_b_statement_2026Q1.pdf",
+      "account_id": "200-554-781-903",
+      "seq": 42,
+      "page": 2,
+      "excel_row": null,
+      "date": "2026-02-11",
+      "ref_id": "AKB558176",
+      "description": "Card purchase Simba Supermarket Kigali",
+      "amount": "-83350.00",
+      "balance": "23239050.00",
+      "expected_status": "matched",
+      "expected_tier": "tier1_exact",
+      "discrepancy": null,
+      "ledger_entry_ids": [
+        "JE-2026-0135"
+      ]
+    },
+    {
+      "file": "bank_b_statement_2026Q1.pdf",
+      "account_id": "200-554-781-903",
+      "seq": 43,
+      "page": 2,
+      "excel_row": null,
+      "date": "2026-02-12",
+      "ref_id": "AKB561097",
+      "description": "Inward transfer from Huye Coffee Exporters Ltd inv 1125",
+      "amount": "5271300.00",
+      "balance": "28510350.00",
+      "expected_status": "matched",
+      "expected_tier": "tier1_exact",
+      "discrepancy": null,
+      "ledger_entry_ids": [
+        "JE-2026-0145"
+      ]
+    },
+    {
+      "file": "bank_b_statement_2026Q1.pdf",
+      "account_id": "200-554-781-903",
+      "seq": 44,
+      "page": 2,
+      "excel_row": null,
+      "date": "2026-02-12",
+      "ref_id": "AKB455505",
+      "description": "Inward transfer from Huye Coffee Exporters Ltd inv 1126",
+      "amount": "2933900.00",
+      "balance": "31444250.00",
+      "expected_status": "matched",
+      "expected_tier": "tier2_amount_date",
+      "discrepancy": null,
+      "ledger_entry_ids": [
+        "JE-2026-0146"
+      ]
+    },
+    {
+      "file": "bank_b_statement_2026Q1.pdf",
+      "account_id": "200-554-781-903",
+      "seq": 45,
+      "page": 2,
+      "excel_row": null,
+      "date": "2026-02-16",
+      "ref_id": "AKB825686",
+      "description": "Inward transfer from Musanze Tours Ltd inv 1127",
+      "amount": "1745950.00",
+      "balance": "33190200.00",
+      "expected_status": "matched",
+      "expected_tier": "tier1_exact",
+      "discrepancy": null,
+      "ledger_entry_ids": [
+        "JE-2026-0153"
+      ]
+    },
+    {
+      "file": "bank_b_statement_2026Q1.pdf",
+      "account_id": "200-554-781-903",
+      "seq": 46,
+      "page": 2,
+      "excel_row": null,
+      "date": "2026-02-16",
+      "ref_id": "AKB379676",
+      "description": "Direct debit Ishema Power Utility",
+      "amount": "-252650.00",
+      "balance": "32937550.00",
+      "expected_status": "matched",
+      "expected_tier": "tier2_amount_date",
+      "discrepancy": null,
+      "ledger_entry_ids": [
+        "JE-2026-0154"
+      ]
+    },
+    {
+      "file": "bank_b_statement_2026Q1.pdf",
+      "account_id": "200-554-781-903",
+      "seq": 47,
+      "page": 2,
+      "excel_row": null,
+      "date": "2026-02-18",
+      "ref_id": "AKB545120",
+      "description": "Inward transfer from Gisenyi Beach Resort inv 1128",
+      "amount": "2532500.00",
+      "balance": "35470050.00",
+      "expected_status": "amount_mismatch",
+      "expected_tier": null,
+      "discrepancy": "amount_typo",
+      "ledger_entry_ids": [
+        "JE-2026-0169"
+      ]
+    },
+    {
+      "file": "bank_b_statement_2026Q1.pdf",
+      "account_id": "200-554-781-903",
+      "seq": 48,
+      "page": 2,
+      "excel_row": null,
+      "date": "2026-02-20",
+      "ref_id": "AKB962287",
+      "description": "Card purchase Simba Supermarket Kigali",
+      "amount": "-131350.00",
+      "balance": "35338700.00",
+      "expected_status": "matched",
+      "expected_tier": "tier1_exact",
+      "discrepancy": null,
+      "ledger_entry_ids": [
+        "JE-2026-0175"
+      ]
+    },
+    {
+      "file": "bank_b_statement_2026Q1.pdf",
+      "account_id": "200-554-781-903",
+      "seq": 49,
+      "page": 2,
+      "excel_row": null,
+      "date": "2026-02-20",
+      "ref_id": "AKB436814",
+      "description": "Card purchase Muhazi Fuel Station Kigali",
+      "amount": "-140300.00",
+      "balance": "35198400.00",
+      "expected_status": "matched",
+      "expected_tier": "tier1_exact",
+      "discrepancy": null,
+      "ledger_entry_ids": [
+        "JE-2026-0170"
+      ]
+    },
+    {
+      "file": "bank_b_statement_2026Q1.pdf",
+      "account_id": "200-554-781-903",
+      "seq": 50,
+      "page": 2,
+      "excel_row": null,
+      "date": "2026-02-20",
+      "ref_id": "AKB793024",
+      "description": "Card purchase Simba Supermarket Kigali",
+      "amount": "-75150.00",
+      "balance": "35123250.00",
+      "expected_status": "matched",
+      "expected_tier": "tier1_exact",
+      "discrepancy": null,
+      "ledger_entry_ids": [
+        "JE-2026-0172"
+      ]
+    },
+    {
+      "file": "bank_b_statement_2026Q1.pdf",
+      "account_id": "200-554-781-903",
+      "seq": 51,
+      "page": 2,
+      "excel_row": null,
+      "date": "2026-02-20",
+      "ref_id": "AKB731894",
+      "description": "Outward transfer Akagera Office Supplies Ltd ref inv 1129",
+      "amount": "-790550.00",
+      "balance": "34332700.00",
+      "expected_status": "matched",
+      "expected_tier": "tier3_fuzzy",
+      "discrepancy": "date_shift",
+      "ledger_entry_ids": [
+        "JE-2026-0147"
+      ]
+    },
+    {
+      "file": "bank_b_statement_2026Q1.pdf",
+      "account_id": "200-554-781-903",
+      "seq": 52,
+      "page": 2,
+      "excel_row": null,
+      "date": "2026-02-20",
+      "ref_id": "AKB823270",
+      "description": "Inward transfer from Kivu Hotels Group Ltd inv 1130",
+      "amount": "1342100.00",
+      "balance": "35674800.00",
+      "expected_status": "matched",
+      "expected_tier": "tier1_exact",
+      "discrepancy": null,
+      "ledger_entry_ids": [
+        "JE-2026-0162"
+      ]
+    },
+    {
+      "file": "bank_b_statement_2026Q1.pdf",
+      "account_id": "200-554-781-903",
+      "seq": 53,
+      "page": 2,
+      "excel_row": null,
+      "date": "2026-02-23",
+      "ref_id": "AKB144412",
+      "description": "Outward transfer Nyarutarama Property Management ref inv 1131",
+      "amount": "-2265150.00",
+      "balance": "33409650.00",
+      "expected_status": "matched",
+      "expected_tier": "tier1_exact",
+      "discrepancy": null,
+      "ledger_entry_ids": [
+        "JE-2026-0173"
+      ]
+    },
+    {
+      "file": "bank_b_statement_2026Q1.pdf",
+      "account_id": "200-554-781-903",
+      "seq": 54,
+      "page": 2,
+      "excel_row": null,
+      "date": "2026-02-25",
+      "ref_id": "AKB744718",
+      "description": "Inward transfer from Kivu Hotels Group Ltd inv 1132",
+      "amount": "2560500.00",
+      "balance": "35970150.00",
+      "expected_status": "matched",
+      "expected_tier": "tier2_amount_date",
+      "discrepancy": null,
+      "ledger_entry_ids": [
+        "JE-2026-0186"
+      ]
+    },
+    {
+      "file": "bank_b_statement_2026Q1.pdf",
+      "account_id": "200-554-781-903",
+      "seq": 55,
+      "page": 2,
+      "excel_row": null,
+      "date": "2026-02-25",
+      "ref_id": null,
+      "description": "Interest credited",
+      "amount": "4000.00",
+      "balance": "35974150.00",
+      "expected_status": "matched",
+      "expected_tier": "tier2_amount_date",
+      "discrepancy": null,
+      "ledger_entry_ids": [
+        "JE-2026-0187"
+      ]
+    },
+    {
+      "file": "bank_b_statement_2026Q1.pdf",
+      "account_id": "200-554-781-903",
+      "seq": 56,
+      "page": 2,
+      "excel_row": null,
+      "date": "2026-02-25",
+      "ref_id": "AKB178686",
+      "description": "Inward transfer from Kivu Hotels Group Ltd inv 1133",
+      "amount": "625900.00",
+      "balance": "36600050.00",
+      "expected_status": "matched",
+      "expected_tier": "tier1_exact",
+      "discrepancy": null,
+      "ledger_entry_ids": [
+        "JE-2026-0179"
+      ]
+    },
+    {
+      "file": "bank_b_statement_2026Q1.pdf",
+      "account_id": "200-554-781-903",
+      "seq": 57,
+      "page": 2,
+      "excel_row": null,
+      "date": "2026-02-25",
+      "ref_id": "AKB480959",
+      "description": "Inward transfer from Kivu Hotels Group Ltd inv 1134",
+      "amount": "2912100.00",
+      "balance": "39512150.00",
+      "expected_status": "matched",
+      "expected_tier": "tier1_exact",
+      "discrepancy": null,
+      "ledger_entry_ids": [
+        "JE-2026-0180"
+      ]
+    },
+    {
+      "file": "bank_b_statement_2026Q1.pdf",
+      "account_id": "200-554-781-903",
+      "seq": 58,
+      "page": 2,
+      "excel_row": null,
+      "date": "2026-03-02",
+      "ref_id": "AKB267758",
+      "description": "Direct debit Rugali Telecom",
+      "amount": "-169100.00",
+      "balance": "39343050.00",
+      "expected_status": "matched",
+      "expected_tier": "tier1_exact",
+      "discrepancy": null,
+      "ledger_entry_ids": [
+        "JE-2026-0205"
+      ]
+    },
+    {
+      "file": "bank_b_statement_2026Q1.pdf",
+      "account_id": "200-554-781-903",
+      "seq": 59,
+      "page": 2,
+      "excel_row": null,
+      "date": "2026-03-02",
+      "ref_id": "AKB989894",
+      "description": "Inward transfer from Musanze Tours Ltd inv 1135",
+      "amount": "587850.00",
+      "balance": "39930900.00",
+      "expected_status": "matched",
+      "expected_tier": "tier1_exact",
+      "discrepancy": null,
+      "ledger_entry_ids": [
+        "JE-2026-0206"
+      ]
+    },
+    {
+      "file": "bank_b_statement_2026Q1.pdf",
+      "account_id": "200-554-781-903",
+      "seq": 60,
+      "page": 2,
+      "excel_row": null,
+      "date": "2026-03-02",
+      "ref_id": null,
+      "description": "Service charge",
+      "amount": "-13200.00",
+      "balance": "39917700.00",
+      "expected_status": "matched",
+      "expected_tier": "tier2_amount_date",
+      "discrepancy": null,
+      "ledger_entry_ids": [
+        "JE-2026-0202"
+      ]
+    },
+    {
+      "file": "bank_b_statement_2026Q1.pdf",
+      "account_id": "200-554-781-903",
+      "seq": 61,
+      "page": 2,
+      "excel_row": null,
+      "date": "2026-03-02",
+      "ref_id": "AKB347459",
+      "description": "Card purchase Simba Supermarket Kigali",
+      "amount": "-21750.00",
+      "balance": "39895950.00",
+      "expected_status": "matched",
+      "expected_tier": "tier1_exact",
+      "discrepancy": null,
+      "ledger_entry_ids": [
+        "JE-2026-0207"
+      ]
+    },
+    {
+      "file": "bank_b_statement_2026Q1.pdf",
+      "account_id": "200-554-781-903",
+      "seq": 62,
+      "page": 2,
+      "excel_row": null,
+      "date": "2026-03-03",
+      "ref_id": "AKB479742",
+      "description": "Inward transfer from Gisenyi Beach Resort inv 1136",
+      "amount": "1350350.00",
+      "balance": "41246300.00",
+      "expected_status": "matched",
+      "expected_tier": "tier1_exact",
+      "discrepancy": null,
+      "ledger_entry_ids": [
+        "JE-2026-0196"
+      ]
+    },
+    {
+      "file": "bank_b_statement_2026Q1.pdf",
+      "account_id": "200-554-781-903",
+      "seq": 63,
+      "page": 2,
+      "excel_row": null,
+      "date": "2026-03-03",
+      "ref_id": "AKB133958",
+      "description": "Outward transfer Kigali Fresh Logistics Ltd ref inv 1137",
+      "amount": "-1019350.00",
+      "balance": "40226950.00",
+      "expected_status": "matched",
+      "expected_tier": "tier1_exact",
+      "discrepancy": null,
+      "ledger_entry_ids": [
+        "JE-2026-0212"
+      ]
+    },
+    {
+      "file": "bank_b_statement_2026Q1.pdf",
+      "account_id": "200-554-781-903",
+      "seq": 64,
+      "page": 2,
+      "excel_row": null,
+      "date": "2026-03-03",
+      "ref_id": null,
+      "description": "Service charge",
+      "amount": "-13500.00",
+      "balance": "40213450.00",
+      "expected_status": "matched",
+      "expected_tier": "tier2_amount_date",
+      "discrepancy": null,
+      "ledger_entry_ids": [
+        "JE-2026-0203"
+      ]
+    },
+    {
+      "file": "bank_b_statement_2026Q1.pdf",
+      "account_id": "200-554-781-903",
+      "seq": 65,
+      "page": 2,
+      "excel_row": null,
+      "date": "2026-03-04",
+      "ref_id": "AKB565504",
+      "description": "Inward transfer from Musanze Tours Ltd inv 1138",
+      "amount": "1339000.00",
+      "balance": "41552450.00",
+      "expected_status": "matched",
+      "expected_tier": "tier1_exact",
+      "discrepancy": null,
+      "ledger_entry_ids": [
+        "JE-2026-0199"
+      ]
+    },
+    {
+      "file": "bank_b_statement_2026Q1.pdf",
+      "account_id": "200-554-781-903",
+      "seq": 66,
+      "page": 2,
+      "excel_row": null,
+      "date": "2026-03-04",
+      "ref_id": "AKB244383",
+      "description": "Inward transfer from Gisenyi Beach Resort inv 1139",
+      "amount": "2030600.00",
+      "balance": "43583050.00",
+      "expected_status": "matched",
+      "expected_tier": "tier1_exact",
+      "discrepancy": null,
+      "ledger_entry_ids": [
+        "JE-2026-0213"
+      ]
+    },
+    {
+      "file": "bank_b_statement_2026Q1.pdf",
+      "account_id": "200-554-781-903",
+      "seq": 67,
+      "page": 2,
+      "excel_row": null,
+      "date": "2026-03-06",
+      "ref_id": "AKB429657",
+      "description": "Direct debit Rugali Telecom",
+      "amount": "-111500.00",
+      "balance": "43471550.00",
+      "expected_status": "matched",
+      "expected_tier": "tier1_exact",
+      "discrepancy": null,
+      "ledger_entry_ids": [
+        "JE-2026-0220"
+      ]
+    },
+    {
+      "file": "bank_b_statement_2026Q1.pdf",
+      "account_id": "200-554-781-903",
+      "seq": 68,
+      "page": 2,
+      "excel_row": null,
+      "date": "2026-03-06",
+      "ref_id": "AKB218959",
+      "description": "Inward transfer from Kivu Hotels Group Ltd inv 1140",
+      "amount": "1885850.00",
+      "balance": "45357400.00",
+      "expected_status": "matched",
+      "expected_tier": "tier1_exact",
+      "discrepancy": null,
+      "ledger_entry_ids": [
+        "JE-2026-0217"
+      ]
+    },
+    {
+      "file": "bank_b_statement_2026Q1.pdf",
+      "account_id": "200-554-781-903",
+      "seq": 69,
+      "page": 2,
+      "excel_row": null,
+      "date": "2026-03-06",
+      "ref_id": "AKB623285",
+      "description": "Card purchase Simba Supermarket Kigali",
+      "amount": "-46100.00",
+      "balance": "45311300.00",
+      "expected_status": "matched",
+      "expected_tier": "tier1_exact",
+      "discrepancy": null,
+      "ledger_entry_ids": [
+        "JE-2026-0219"
+      ]
+    },
+    {
+      "file": "bank_b_statement_2026Q1.pdf",
+      "account_id": "200-554-781-903",
+      "seq": 70,
+      "page": 2,
+      "excel_row": null,
+      "date": "2026-03-06",
+      "ref_id": "AKB223481",
+      "description": "Direct debit Rugali Telecom",
+      "amount": "-145000.00",
+      "balance": "45166300.00",
+      "expected_status": "matched",
+      "expected_tier": "tier1_exact",
+      "discrepancy": null,
+      "ledger_entry_ids": [
+        "JE-2026-0208"
+      ]
+    },
+    {
+      "file": "bank_b_statement_2026Q1.pdf",
+      "account_id": "200-554-781-903",
+      "seq": 71,
+      "page": 2,
+      "excel_row": null,
+      "date": "2026-03-09",
+      "ref_id": "AKB838237",
+      "description": "Outward transfer Akagera Office Supplies Ltd ref inv 1141",
+      "amount": "-486450.00",
+      "balance": "44679850.00",
+      "expected_status": "matched",
+      "expected_tier": "tier2_amount_date",
+      "discrepancy": null,
+      "ledger_entry_ids": [
+        "JE-2026-0229"
+      ]
+    },
+    {
+      "file": "bank_b_statement_2026Q1.pdf",
+      "account_id": "200-554-781-903",
+      "seq": 72,
+      "page": 2,
+      "excel_row": null,
+      "date": "2026-03-09",
+      "ref_id": "AKB827691",
+      "description": "Outward transfer Nyarutarama Property Management ref inv 1142",
+      "amount": "-1735750.00",
+      "balance": "42944100.00",
+      "expected_status": "missing_in_ledger",
+      "expected_tier": null,
+      "discrepancy": "missing_in_ledger",
+      "ledger_entry_ids": []
+    },
+    {
+      "file": "bank_b_statement_2026Q1.pdf",
+      "account_id": "200-554-781-903",
+      "seq": 73,
+      "page": 2,
+      "excel_row": null,
+      "date": "2026-03-09",
+      "ref_id": "AKB309902",
+      "description": "Inward transfer from Musanze Tours Ltd inv 1143",
+      "amount": "1729550.00",
+      "balance": "44673650.00",
+      "expected_status": "matched",
+      "expected_tier": "tier1_exact",
+      "discrepancy": null,
+      "ledger_entry_ids": [
+        "JE-2026-0230"
+      ]
+    },
+    {
+      "file": "bank_b_statement_2026Q1.pdf",
+      "account_id": "200-554-781-903",
+      "seq": 74,
+      "page": 2,
+      "excel_row": null,
+      "date": "2026-03-10",
+      "ref_id": "AKB574001",
+      "description": "Card purchase Simba Supermarket Kigali",
+      "amount": "-23150.00",
+      "balance": "44650500.00",
+      "expected_status": "matched",
+      "expected_tier": "tier1_exact",
+      "discrepancy": null,
+      "ledger_entry_ids": [
+        "JE-2026-0231"
+      ]
+    },
+    {
+      "file": "bank_b_statement_2026Q1.pdf",
+      "account_id": "200-554-781-903",
+      "seq": 75,
+      "page": 2,
+      "excel_row": null,
+      "date": "2026-03-10",
+      "ref_id": "AKB192055",
+      "description": "Card purchase Muhazi Fuel Station Kigali",
+      "amount": "-202300.00",
+      "balance": "44448200.00",
+      "expected_status": "matched",
+      "expected_tier": "tier1_exact",
+      "discrepancy": null,
+      "ledger_entry_ids": [
+        "JE-2026-0224"
+      ]
+    },
+    {
+      "file": "bank_b_statement_2026Q1.pdf",
+      "account_id": "200-554-781-903",
+      "seq": 76,
+      "page": 2,
+      "excel_row": null,
+      "date": "2026-03-10",
+      "ref_id": "AKB800280",
+      "description": "Inward transfer from Gisenyi Beach Resort inv 1144",
+      "amount": "1197200.00",
+      "balance": "45645400.00",
+      "expected_status": "matched",
+      "expected_tier": "tier2_amount_date",
+      "discrepancy": null,
+      "ledger_entry_ids": [
+        "JE-2026-0237"
+      ]
+    },
+    {
+      "file": "bank_b_statement_2026Q1.pdf",
+      "account_id": "200-554-781-903",
+      "seq": 77,
+      "page": 2,
+      "excel_row": null,
+      "date": "2026-03-11",
+      "ref_id": "AKB676713",
+      "description": "Outward transfer Akagera Office Supplies Ltd ref inv 1145",
+      "amount": "-166350.00",
+      "balance": "45479050.00",
+      "expected_status": "matched",
+      "expected_tier": "tier2_amount_date",
+      "discrepancy": null,
+      "ledger_entry_ids": [
+        "JE-2026-0241"
+      ]
+    },
+    {
+      "file": "bank_b_statement_2026Q1.pdf",
+      "account_id": "200-554-781-903",
+      "seq": 78,
+      "page": 2,
+      "excel_row": null,
+      "date": "2026-03-11",
+      "ref_id": "AKB992717",
+      "description": "Direct debit Rugali Telecom",
+      "amount": "-91400.00",
+      "balance": "45387650.00",
+      "expected_status": "matched",
+      "expected_tier": "tier1_exact",
+      "discrepancy": null,
+      "ledger_entry_ids": [
+        "JE-2026-0238"
+      ]
+    },
+    {
+      "file": "bank_b_statement_2026Q1.pdf",
+      "account_id": "200-554-781-903",
+      "seq": 79,
+      "page": 2,
+      "excel_row": null,
+      "date": "2026-03-12",
+      "ref_id": "AKB834233",
+      "description": "Card purchase Simba Supermarket Kigali",
+      "amount": "-153300.00",
+      "balance": "45234350.00",
+      "expected_status": "matched",
+      "expected_tier": "tier1_exact",
+      "discrepancy": null,
+      "ledger_entry_ids": [
+        "JE-2026-0242"
+      ]
+    },
+    {
+      "file": "bank_b_statement_2026Q1.pdf",
+      "account_id": "200-554-781-903",
+      "seq": 80,
+      "page": 3,
+      "excel_row": null,
+      "date": "2026-03-16",
+      "ref_id": "AKB633469",
+      "description": "Inward transfer from Kivu Hotels Group Ltd inv 1146",
+      "amount": "2619050.00",
+      "balance": "47853400.00",
+      "expected_status": "matched",
+      "expected_tier": "tier1_exact",
+      "discrepancy": null,
+      "ledger_entry_ids": [
+        "JE-2026-0249"
+      ]
+    },
+    {
+      "file": "bank_b_statement_2026Q1.pdf",
+      "account_id": "200-554-781-903",
+      "seq": 81,
+      "page": 3,
+      "excel_row": null,
+      "date": "2026-03-16",
+      "ref_id": "AKB930541",
+      "description": "Card purchase Muhazi Fuel Station Kigali",
+      "amount": "-102300.00",
+      "balance": "47751100.00",
+      "expected_status": "matched",
+      "expected_tier": "tier1_exact",
+      "discrepancy": null,
+      "ledger_entry_ids": [
+        "JE-2026-0250"
+      ]
+    },
+    {
+      "file": "bank_b_statement_2026Q1.pdf",
+      "account_id": "200-554-781-903",
+      "seq": 82,
+      "page": 3,
+      "excel_row": null,
+      "date": "2026-03-17",
+      "ref_id": "AKB618019",
+      "description": "Card purchase Simba Supermarket Kigali",
+      "amount": "-169850.00",
+      "balance": "47581250.00",
+      "expected_status": "matched",
+      "expected_tier": "tier1_exact",
+      "discrepancy": null,
+      "ledger_entry_ids": [
+        "JE-2026-0251"
+      ]
+    },
+    {
+      "file": "bank_b_statement_2026Q1.pdf",
+      "account_id": "200-554-781-903",
+      "seq": 83,
+      "page": 3,
+      "excel_row": null,
+      "date": "2026-03-17",
+      "ref_id": "AKB700076",
+      "description": "Card purchase Simba Supermarket Kigali",
+      "amount": "-121450.00",
+      "balance": "47459800.00",
+      "expected_status": "matched",
+      "expected_tier": "tier1_exact",
+      "discrepancy": null,
+      "ledger_entry_ids": [
+        "JE-2026-0252"
+      ]
+    },
+    {
+      "file": "bank_b_statement_2026Q1.pdf",
+      "account_id": "200-554-781-903",
+      "seq": 84,
+      "page": 3,
+      "excel_row": null,
+      "date": "2026-03-18",
+      "ref_id": "AKB236074",
+      "description": "Outward transfer Kigali Fresh Logistics Ltd ref inv 1147",
+      "amount": "-993800.00",
+      "balance": "46466000.00",
+      "expected_status": "matched",
+      "expected_tier": "tier1_exact",
+      "discrepancy": null,
+      "ledger_entry_ids": [
+        "JE-2026-0246"
+      ]
+    },
+    {
+      "file": "bank_b_statement_2026Q1.pdf",
+      "account_id": "200-554-781-903",
+      "seq": 85,
+      "page": 3,
+      "excel_row": null,
+      "date": "2026-03-19",
+      "ref_id": null,
+      "description": "Service charge",
+      "amount": "-4200.00",
+      "balance": "46461800.00",
+      "expected_status": "matched",
+      "expected_tier": "tier2_amount_date",
+      "discrepancy": null,
+      "ledger_entry_ids": [
+        "JE-2026-0262"
+      ]
+    },
+    {
+      "file": "bank_b_statement_2026Q1.pdf",
+      "account_id": "200-554-781-903",
+      "seq": 86,
+      "page": 3,
+      "excel_row": null,
+      "date": "2026-03-20",
+      "ref_id": "AKB851759",
+      "description": "Card purchase Simba Supermarket Kigali",
+      "amount": "-89500.00",
+      "balance": "46372300.00",
+      "expected_status": "matched",
+      "expected_tier": "tier2_amount_date",
+      "discrepancy": null,
+      "ledger_entry_ids": [
+        "JE-2026-0264"
+      ]
+    },
+    {
+      "file": "bank_b_statement_2026Q1.pdf",
+      "account_id": "200-554-781-903",
+      "seq": 87,
+      "page": 3,
+      "excel_row": null,
+      "date": "2026-03-20",
+      "ref_id": "AKB530749",
+      "description": "Inward transfer from Kivu Hotels Group Ltd inv 1148",
+      "amount": "3695150.00",
+      "balance": "50067450.00",
+      "expected_status": "matched",
+      "expected_tier": "tier1_exact",
+      "discrepancy": null,
+      "ledger_entry_ids": [
+        "JE-2026-0263"
+      ]
+    },
+    {
+      "file": "bank_b_statement_2026Q1.pdf",
+      "account_id": "200-554-781-903",
+      "seq": 88,
+      "page": 3,
+      "excel_row": null,
+      "date": "2026-03-20",
+      "ref_id": "AKB177333",
+      "description": "Inward transfer from Gisenyi Beach Resort inv 1149",
+      "amount": "2033800.00",
+      "balance": "52101250.00",
+      "expected_status": "matched",
+      "expected_tier": "tier1_exact",
+      "discrepancy": null,
+      "ledger_entry_ids": [
+        "JE-2026-0259"
+      ]
+    },
+    {
+      "file": "bank_b_statement_2026Q1.pdf",
+      "account_id": "200-554-781-903",
+      "seq": 89,
+      "page": 3,
+      "excel_row": null,
+      "date": "2026-03-23",
+      "ref_id": "AKB773540",
+      "description": "Card purchase Simba Supermarket Kigali",
+      "amount": "-72900.00",
+      "balance": "52028350.00",
+      "expected_status": "matched",
+      "expected_tier": "tier1_exact",
+      "discrepancy": null,
+      "ledger_entry_ids": [
+        "JE-2026-0266"
+      ]
+    },
+    {
+      "file": "bank_b_statement_2026Q1.pdf",
+      "account_id": "200-554-781-903",
+      "seq": 90,
+      "page": 3,
+      "excel_row": null,
+      "date": "2026-03-23",
+      "ref_id": "AKB813145",
+      "description": "Card purchase Simba Supermarket Kigali",
+      "amount": "-103400.00",
+      "balance": "51924950.00",
+      "expected_status": "matched",
+      "expected_tier": "tier1_exact",
+      "discrepancy": null,
+      "ledger_entry_ids": [
+        "JE-2026-0265"
+      ]
+    },
+    {
+      "file": "bank_b_statement_2026Q1.pdf",
+      "account_id": "200-554-781-903",
+      "seq": 91,
+      "page": 3,
+      "excel_row": null,
+      "date": "2026-03-23",
+      "ref_id": "AKB969325",
+      "description": "Direct debit Rugali Telecom",
+      "amount": "-56250.00",
+      "balance": "51868700.00",
+      "expected_status": "matched",
+      "expected_tier": "tier2_amount_date",
+      "discrepancy": null,
+      "ledger_entry_ids": [
+        "JE-2026-0272"
+      ]
+    },
+    {
+      "file": "bank_b_statement_2026Q1.pdf",
+      "account_id": "200-554-781-903",
+      "seq": 92,
+      "page": 3,
+      "excel_row": null,
+      "date": "2026-03-25",
+      "ref_id": "AKB716338",
+      "description": "Inward transfer from Gisenyi Beach Resort inv 1150",
+      "amount": "2246450.00",
+      "balance": "54115150.00",
+      "expected_status": "matched",
+      "expected_tier": "tier1_exact",
+      "discrepancy": null,
+      "ledger_entry_ids": [
+        "JE-2026-0285"
+      ]
+    },
+    {
+      "file": "bank_b_statement_2026Q1.pdf",
+      "account_id": "200-554-781-903",
+      "seq": 93,
+      "page": 3,
+      "excel_row": null,
+      "date": "2026-03-26",
+      "ref_id": "AKB553633",
+      "description": "Card purchase Muhazi Fuel Station Kigali",
+      "amount": "-72850.00",
+      "balance": "54042300.00",
+      "expected_status": "matched",
+      "expected_tier": "tier1_exact",
+      "discrepancy": null,
+      "ledger_entry_ids": [
+        "JE-2026-0286"
+      ]
+    },
+    {
+      "file": "bank_b_statement_2026Q1.pdf",
+      "account_id": "200-554-781-903",
+      "seq": 94,
+      "page": 3,
+      "excel_row": null,
+      "date": "2026-03-27",
+      "ref_id": "AKB971776",
+      "description": "Direct debit Ishema Power Utility",
+      "amount": "-62650.00",
+      "balance": "53979650.00",
+      "expected_status": "matched",
+      "expected_tier": "tier1_exact",
+      "discrepancy": null,
+      "ledger_entry_ids": [
+        "JE-2026-0278"
+      ]
+    },
+    {
+      "file": "bank_b_statement_2026Q1.pdf",
+      "account_id": "200-554-781-903",
+      "seq": 95,
+      "page": 3,
+      "excel_row": null,
+      "date": "2026-03-30",
+      "ref_id": "AKB418897",
+      "description": "Card purchase Simba Supermarket Kigali",
+      "amount": "-39300.00",
+      "balance": "53940350.00",
+      "expected_status": "matched",
+      "expected_tier": "tier1_exact",
+      "discrepancy": null,
+      "ledger_entry_ids": [
+        "JE-2026-0295"
+      ]
+    },
+    {
+      "file": "bank_c_statement_2026Q1.xlsx",
+      "account_id": "NCB-7781-0042",
+      "seq": 1,
+      "page": null,
+      "excel_row": 8,
+      "date": "2026-01-01",
+      "ref_id": "TX60147077",
+      "description": "Receipt: Gisenyi Beach Resort / INV-1151",
+      "amount": "2134850.00",
+      "balance": "6045100.00",
+      "expected_status": "amount_mismatch",
+      "expected_tier": null,
+      "discrepancy": "amount_typo",
+      "ledger_entry_ids": [
+        "JE-2026-0005"
+      ]
+    },
+    {
+      "file": "bank_c_statement_2026Q1.xlsx",
+      "account_id": "NCB-7781-0042",
+      "seq": 2,
+      "page": null,
+      "excel_row": 9,
+      "date": "2026-01-01",
+      "ref_id": "TX73193474",
+      "description": "Payment: Kigali Fresh Logistics Ltd / INV-1152",
+      "amount": "-989850.00",
+      "balance": "5055250.00",
+      "expected_status": "matched",
+      "expected_tier": "tier1_exact",
+      "discrepancy": null,
+      "ledger_entry_ids": [
+        "JE-2026-0001"
+      ]
+    },
+    {
+      "file": "bank_c_statement_2026Q1.xlsx",
+      "account_id": "NCB-7781-0042",
+      "seq": 3,
+      "page": null,
+      "excel_row": 10,
+      "date": "2026-01-02",
+      "ref_id": "TX39314711",
+      "description": "Receipt: Gisenyi Beach Resort / INV-1153",
+      "amount": "2326100.00",
+      "balance": "7381350.00",
+      "expected_status": "matched",
+      "expected_tier": "tier1_exact",
+      "discrepancy": null,
+      "ledger_entry_ids": [
+        "JE-2026-0003"
+      ]
+    },
+    {
+      "file": "bank_c_statement_2026Q1.xlsx",
+      "account_id": "NCB-7781-0042",
+      "seq": 4,
+      "page": null,
+      "excel_row": 11,
+      "date": "2026-01-02",
+      "ref_id": "TX89968863",
+      "description": "Receipt: Gisenyi Beach Resort / INV-1154",
+      "amount": "2379300.00",
+      "balance": "9760650.00",
+      "expected_status": "matched",
+      "expected_tier": "tier1_exact",
+      "discrepancy": null,
+      "ledger_entry_ids": [
+        "JE-2026-0004"
+      ]
+    },
+    {
+      "file": "bank_c_statement_2026Q1.xlsx",
+      "account_id": "NCB-7781-0042",
+      "seq": 5,
+      "page": null,
+      "excel_row": 12,
+      "date": "2026-01-02",
+      "ref_id": "TX80532309",
+      "description": "Receipt: Huye Coffee Exporters Ltd / INV-1155",
+      "amount": "936500.00",
+      "balance": "10697150.00",
+      "expected_status": "matched",
+      "expected_tier": "tier1_exact",
+      "discrepancy": null,
+      "ledger_entry_ids": [
+        "JE-2026-0008"
+      ]
+    },
+    {
+      "file": "bank_c_statement_2026Q1.xlsx",
+      "account_id": "NCB-7781-0042",
+      "seq": 6,
+      "page": null,
+      "excel_row": 13,
+      "date": "2026-01-07",
+      "ref_id": "TX20482769",
+      "description": "Payment: Nyarutarama Property Management / INV-1156",
+      "amount": "-1985450.00",
+      "balance": "8711700.00",
+      "expected_status": "matched",
+      "expected_tier": "tier1_exact",
+      "discrepancy": null,
+      "ledger_entry_ids": [
+        "JE-2026-0012"
+      ]
+    },
+    {
+      "file": "bank_c_statement_2026Q1.xlsx",
+      "account_id": "NCB-7781-0042",
+      "seq": 7,
+      "page": null,
+      "excel_row": 14,
+      "date": "2026-01-07",
+      "ref_id": "TX18289024",
+      "description": "Receipt: Musanze Tours Ltd / INV-1157",
+      "amount": "487650.00",
+      "balance": "9199350.00",
+      "expected_status": "amount_mismatch",
+      "expected_tier": null,
+      "discrepancy": "amount_typo",
+      "ledger_entry_ids": [
+        "JE-2026-0027"
+      ]
+    },
+    {
+      "file": "bank_c_statement_2026Q1.xlsx",
+      "account_id": "NCB-7781-0042",
+      "seq": 8,
+      "page": null,
+      "excel_row": 15,
+      "date": "2026-01-07",
+      "ref_id": "TX37133023",
+      "description": "Receipt: Huye Coffee Exporters Ltd / INV-1158",
+      "amount": "3712750.00",
+      "balance": "12912100.00",
+      "expected_status": "matched",
+      "expected_tier": "tier2_amount_date",
+      "discrepancy": null,
+      "ledger_entry_ids": [
+        "JE-2026-0016"
+      ]
+    },
+    {
+      "file": "bank_c_statement_2026Q1.xlsx",
+      "account_id": "NCB-7781-0042",
+      "seq": 9,
+      "page": null,
+      "excel_row": 16,
+      "date": "2026-01-12",
+      "ref_id": "TX32083803",
+      "description": "Payroll run JAN-2026",
+      "amount": "-3982050.00",
+      "balance": "8930050.00",
+      "expected_status": "matched",
+      "expected_tier": "tier1_exact",
+      "discrepancy": null,
+      "ledger_entry_ids": [
+        "JE-2026-0031"
+      ]
+    },
+    {
+      "file": "bank_c_statement_2026Q1.xlsx",
+      "account_id": "NCB-7781-0042",
+      "seq": 10,
+      "page": null,
+      "excel_row": 17,
+      "date": "2026-01-12",
+      "ref_id": "TX25601471",
+      "description": "Payment: Akagera Office Supplies Ltd / INV-1159",
+      "amount": "-783900.00",
+      "balance": "8146150.00",
+      "expected_status": "matched",
+      "expected_tier": "tier1_exact",
+      "discrepancy": null,
+      "ledger_entry_ids": [
+        "JE-2026-0037"
+      ]
+    },
+    {
+      "file": "bank_c_statement_2026Q1.xlsx",
+      "account_id": "NCB-7781-0042",
+      "seq": 11,
+      "page": null,
+      "excel_row": 18,
+      "date": "2026-01-16",
+      "ref_id": "TX75609379",
+      "description": "Receipt: Kivu Hotels Group Ltd / INV-1160",
+      "amount": "4071700.00",
+      "balance": "12217850.00",
+      "expected_status": "matched",
+      "expected_tier": "tier1_exact",
+      "discrepancy": null,
+      "ledger_entry_ids": [
+        "JE-2026-0052"
+      ]
+    },
+    {
+      "file": "bank_c_statement_2026Q1.xlsx",
+      "account_id": "NCB-7781-0042",
+      "seq": 12,
+      "page": null,
+      "excel_row": 19,
+      "date": "2026-01-16",
+      "ref_id": "TX69791674",
+      "description": "Card: Simba Supermarket",
+      "amount": "-112500.00",
+      "balance": "12105350.00",
+      "expected_status": "matched",
+      "expected_tier": "tier1_exact",
+      "discrepancy": null,
+      "ledger_entry_ids": [
+        "JE-2026-0046"
+      ]
+    },
+    {
+      "file": "bank_c_statement_2026Q1.xlsx",
+      "account_id": "NCB-7781-0042",
+      "seq": 13,
+      "page": null,
+      "excel_row": 20,
+      "date": "2026-01-19",
+      "ref_id": "TX27709269",
+      "description": "Receipt: Gisenyi Beach Resort / INV-1161",
+      "amount": "1635800.00",
+      "balance": "13741150.00",
+      "expected_status": "matched",
+      "expected_tier": "tier1_exact",
+      "discrepancy": null,
+      "ledger_entry_ids": [
+        "JE-2026-0063"
+      ]
+    },
+    {
+      "file": "bank_c_statement_2026Q1.xlsx",
+      "account_id": "NCB-7781-0042",
+      "seq": 14,
+      "page": null,
+      "excel_row": 21,
+      "date": "2026-01-19",
+      "ref_id": "TX85686878",
+      "description": "Debit order: Rugali Telecom",
+      "amount": "-123550.00",
+      "balance": "13617600.00",
+      "expected_status": "matched",
+      "expected_tier": "tier3_fuzzy",
+      "discrepancy": "date_shift",
+      "ledger_entry_ids": [
+        "JE-2026-0038"
+      ]
+    },
+    {
+      "file": "bank_c_statement_2026Q1.xlsx",
+      "account_id": "NCB-7781-0042",
+      "seq": 15,
+      "page": null,
+      "excel_row": 22,
+      "date": "2026-01-20",
+      "ref_id": "TX51361818",
+      "description": "Card: Simba Supermarket",
+      "amount": "-102650.00",
+      "balance": "13514950.00",
+      "expected_status": "matched",
+      "expected_tier": "tier1_exact",
+      "discrepancy": null,
+      "ledger_entry_ids": [
+        "JE-2026-0064"
+      ]
+    },
+    {
+      "file": "bank_c_statement_2026Q1.xlsx",
+      "account_id": "NCB-7781-0042",
+      "seq": 16,
+      "page": null,
+      "excel_row": 23,
+      "date": "2026-01-21",
+      "ref_id": "TX44152669",
+      "description": "Receipt: Kivu Hotels Group Ltd / INV-1162",
+      "amount": "2844850.00",
+      "balance": "16359800.00",
+      "expected_status": "matched",
+      "expected_tier": "tier1_exact",
+      "discrepancy": null,
+      "ledger_entry_ids": [
+        "JE-2026-0070"
+      ]
+    },
+    {
+      "file": "bank_c_statement_2026Q1.xlsx",
+      "account_id": "NCB-7781-0042",
+      "seq": 17,
+      "page": null,
+      "excel_row": 24,
+      "date": "2026-01-22",
+      "ref_id": "TX39246218",
+      "description": "Receipt: Gisenyi Beach Resort / INV-1163",
+      "amount": "2593850.00",
+      "balance": "18953650.00",
+      "expected_status": "matched",
+      "expected_tier": "tier2_amount_date",
+      "discrepancy": null,
+      "ledger_entry_ids": [
+        "JE-2026-0067"
+      ]
+    },
+    {
+      "file": "bank_c_statement_2026Q1.xlsx",
+      "account_id": "NCB-7781-0042",
+      "seq": 18,
+      "page": null,
+      "excel_row": 25,
+      "date": "2026-01-22",
+      "ref_id": "TX66867700",
+      "description": "Payroll run JAN-2026",
+      "amount": "-3296800.00",
+      "balance": "15656850.00",
+      "expected_status": "matched",
+      "expected_tier": "tier1_exact",
+      "discrepancy": null,
+      "ledger_entry_ids": [
+        "JE-2026-0073"
+      ]
+    },
+    {
+      "file": "bank_c_statement_2026Q1.xlsx",
+      "account_id": "NCB-7781-0042",
+      "seq": 19,
+      "page": null,
+      "excel_row": 26,
+      "date": "2026-01-26",
+      "ref_id": "TX82633735",
+      "description": "Payment: Akagera Office Supplies Ltd / INV-1164",
+      "amount": "-164450.00",
+      "balance": "15492400.00",
+      "expected_status": "matched",
+      "expected_tier": "tier1_exact",
+      "discrepancy": null,
+      "ledger_entry_ids": [
+        "JE-2026-0074"
+      ]
+    },
+    {
+      "file": "bank_c_statement_2026Q1.xlsx",
+      "account_id": "NCB-7781-0042",
+      "seq": 20,
+      "page": null,
+      "excel_row": 27,
+      "date": "2026-01-26",
+      "ref_id": null,
+      "description": "Interest",
+      "amount": "1350.00",
+      "balance": "15493750.00",
+      "expected_status": "matched",
+      "expected_tier": "tier2_amount_date",
+      "discrepancy": null,
+      "ledger_entry_ids": [
+        "JE-2026-0081"
+      ]
+    },
+    {
+      "file": "bank_c_statement_2026Q1.xlsx",
+      "account_id": "NCB-7781-0042",
+      "seq": 21,
+      "page": null,
+      "excel_row": 28,
+      "date": "2026-01-26",
+      "ref_id": null,
+      "description": "Interest",
+      "amount": "6500.00",
+      "balance": "15500250.00",
+      "expected_status": "missing_in_ledger",
+      "expected_tier": null,
+      "discrepancy": "missing_in_ledger",
+      "ledger_entry_ids": []
+    },
+    {
+      "file": "bank_c_statement_2026Q1.xlsx",
+      "account_id": "NCB-7781-0042",
+      "seq": 22,
+      "page": null,
+      "excel_row": 29,
+      "date": "2026-01-26",
+      "ref_id": "TX34156684",
+      "description": "Card: Simba Supermarket",
+      "amount": "-91700.00",
+      "balance": "15408550.00",
+      "expected_status": "matched",
+      "expected_tier": "tier1_exact",
+      "discrepancy": null,
+      "ledger_entry_ids": [
+        "JE-2026-0082"
+      ]
+    },
+    {
+      "file": "bank_c_statement_2026Q1.xlsx",
+      "account_id": "NCB-7781-0042",
+      "seq": 23,
+      "page": null,
+      "excel_row": 30,
+      "date": "2026-01-28",
+      "ref_id": "TX96688655",
+      "description": "Receipt: Gisenyi Beach Resort / INV-1165",
+      "amount": "2252100.00",
+      "balance": "17660650.00",
+      "expected_status": "matched",
+      "expected_tier": "tier1_exact",
+      "discrepancy": null,
+      "ledger_entry_ids": [
+        "JE-2026-0083"
+      ]
+    },
+    {
+      "file": "bank_c_statement_2026Q1.xlsx",
+      "account_id": "NCB-7781-0042",
+      "seq": 24,
+      "page": null,
+      "excel_row": 31,
+      "date": "2026-01-29",
+      "ref_id": "TX61335545",
+      "description": "Receipt: Musanze Tours Ltd / INV-1166",
+      "amount": "1347000.00",
+      "balance": "19007650.00",
+      "expected_status": "matched",
+      "expected_tier": "tier1_exact",
+      "discrepancy": null,
+      "ledger_entry_ids": [
+        "JE-2026-0084"
+      ]
+    },
+    {
+      "file": "bank_c_statement_2026Q1.xlsx",
+      "account_id": "NCB-7781-0042",
+      "seq": 25,
+      "page": null,
+      "excel_row": 32,
+      "date": "2026-01-29",
+      "ref_id": "TX60418290",
+      "description": "Payment: Nyarutarama Property Management / INV-1167",
+      "amount": "-2036950.00",
+      "balance": "16970700.00",
+      "expected_status": "matched",
+      "expected_tier": "tier2_amount_date",
+      "discrepancy": null,
+      "ledger_entry_ids": [
+        "JE-2026-0104"
+      ]
+    },
+    {
+      "file": "bank_c_statement_2026Q1.xlsx",
+      "account_id": "NCB-7781-0042",
+      "seq": 26,
+      "page": null,
+      "excel_row": 33,
+      "date": "2026-01-29",
+      "ref_id": "TX82383656",
+      "description": "Card: Simba Supermarket",
+      "amount": "-143500.00",
+      "balance": "16827200.00",
+      "expected_status": "matched",
+      "expected_tier": "tier1_exact",
+      "discrepancy": null,
+      "ledger_entry_ids": [
+        "JE-2026-0085"
+      ]
+    },
+    {
+      "file": "bank_c_statement_2026Q1.xlsx",
+      "account_id": "NCB-7781-0042",
+      "seq": 27,
+      "page": null,
+      "excel_row": 34,
+      "date": "2026-02-02",
+      "ref_id": "TX25922674",
+      "description": "Card: Simba Supermarket",
+      "amount": "-79200.00",
+      "balance": "16748000.00",
+      "expected_status": "matched",
+      "expected_tier": "tier1_exact",
+      "discrepancy": null,
+      "ledger_entry_ids": [
+        "JE-2026-0112"
+      ]
+    },
+    {
+      "file": "bank_c_statement_2026Q1.xlsx",
+      "account_id": "NCB-7781-0042",
+      "seq": 28,
+      "page": null,
+      "excel_row": 35,
+      "date": "2026-02-02",
+      "ref_id": "TX62755436",
+      "description": "Card: Muhazi Fuel Station",
+      "amount": "-240050.00",
+      "balance": "16507950.00",
+      "expected_status": "matched",
+      "expected_tier": "tier2_amount_date",
+      "discrepancy": null,
+      "ledger_entry_ids": [
+        "JE-2026-0105"
+      ]
+    },
+    {
+      "file": "bank_c_statement_2026Q1.xlsx",
+      "account_id": "NCB-7781-0042",
+      "seq": 29,
+      "page": null,
+      "excel_row": 36,
+      "date": "2026-02-02",
+      "ref_id": "TX39888974",
+      "description": "Debit order: Rugali Telecom",
+      "amount": "-179050.00",
+      "balance": "16328900.00",
+      "expected_status": "matched",
+      "expected_tier": "tier1_exact",
+      "discrepancy": null,
+      "ledger_entry_ids": [
+        "JE-2026-0113"
+      ]
+    },
+    {
+      "file": "bank_c_statement_2026Q1.xlsx",
+      "account_id": "NCB-7781-0042",
+      "seq": 30,
+      "page": null,
+      "excel_row": 37,
+      "date": "2026-02-03",
+      "ref_id": "TX13051483",
+      "description": "Receipt: Huye Coffee Exporters Ltd / INV-1168",
+      "amount": "5355650.00",
+      "balance": "21684550.00",
+      "expected_status": "matched",
+      "expected_tier": "tier2_amount_date",
+      "discrepancy": null,
+      "ledger_entry_ids": [
+        "JE-2026-0118"
+      ]
+    },
+    {
+      "file": "bank_c_statement_2026Q1.xlsx",
+      "account_id": "NCB-7781-0042",
+      "seq": 31,
+      "page": null,
+      "excel_row": 38,
+      "date": "2026-02-03",
+      "ref_id": null,
+      "description": "Interest",
+      "amount": "6400.00",
+      "balance": "21690950.00",
+      "expected_status": "matched",
+      "expected_tier": "tier2_amount_date",
+      "discrepancy": null,
+      "ledger_entry_ids": [
+        "JE-2026-0114"
+      ]
+    },
+    {
+      "file": "bank_c_statement_2026Q1.xlsx",
+      "account_id": "NCB-7781-0042",
+      "seq": 32,
+      "page": null,
+      "excel_row": 39,
+      "date": "2026-02-03",
+      "ref_id": "TX66925500",
+      "description": "Receipt: Kivu Hotels Group Ltd / INV-1169",
+      "amount": "3818050.00",
+      "balance": "25509000.00",
+      "expected_status": "matched",
+      "expected_tier": "tier2_amount_date",
+      "discrepancy": null,
+      "ledger_entry_ids": [
+        "JE-2026-0119"
+      ]
+    },
+    {
+      "file": "bank_c_statement_2026Q1.xlsx",
+      "account_id": "NCB-7781-0042",
+      "seq": 33,
+      "page": null,
+      "excel_row": 40,
+      "date": "2026-02-04",
+      "ref_id": "TX43220503",
+      "description": "Debit order: Rugali Telecom",
+      "amount": "-77000.00",
+      "balance": "25432000.00",
+      "expected_status": "matched",
+      "expected_tier": "tier1_exact",
+      "discrepancy": null,
+      "ledger_entry_ids": [
+        "JE-2026-0109"
+      ]
+    },
+    {
+      "file": "bank_c_statement_2026Q1.xlsx",
+      "account_id": "NCB-7781-0042",
+      "seq": 34,
+      "page": null,
+      "excel_row": 41,
+      "date": "2026-02-04",
+      "ref_id": "TX46997080",
+      "description": "Payment: Nyarutarama Property Management / INV-1170",
+      "amount": "-1308300.00",
+      "balance": "24123700.00",
+      "expected_status": "matched",
+      "expected_tier": "tier1_exact",
+      "discrepancy": null,
+      "ledger_entry_ids": [
+        "JE-2026-0106"
+      ]
+    },
+    {
+      "file": "bank_c_statement_2026Q1.xlsx",
+      "account_id": "NCB-7781-0042",
+      "seq": 35,
+      "page": null,
+      "excel_row": 42,
+      "date": "2026-02-05",
+      "ref_id": "TX14324134",
+      "description": "Card: Muhazi Fuel Station",
+      "amount": "-66200.00",
+      "balance": "24057500.00",
+      "expected_status": "matched",
+      "expected_tier": "tier1_exact",
+      "discrepancy": null,
+      "ledger_entry_ids": [
+        "JE-2026-0115"
+      ]
+    },
+    {
+      "file": "bank_c_statement_2026Q1.xlsx",
+      "account_id": "NCB-7781-0042",
+      "seq": 36,
+      "page": null,
+      "excel_row": 43,
+      "date": "2026-02-10",
+      "ref_id": "TX92533595",
+      "description": "Receipt: Gisenyi Beach Resort / INV-1171",
+      "amount": "1523750.00",
+      "balance": "25581250.00",
+      "expected_status": "matched",
+      "expected_tier": "tier2_amount_date",
+      "discrepancy": null,
+      "ledger_entry_ids": [
+        "JE-2026-0132"
+      ]
+    },
+    {
+      "file": "bank_c_statement_2026Q1.xlsx",
+      "account_id": "NCB-7781-0042",
+      "seq": 37,
+      "page": null,
+      "excel_row": 44,
+      "date": "2026-02-10",
+      "ref_id": "TX42301683",
+      "description": "Receipt: Gisenyi Beach Resort / INV-1172",
+      "amount": "201250.00",
+      "balance": "25782500.00",
+      "expected_status": "matched",
+      "expected_tier": "tier1_exact",
+      "discrepancy": null,
+      "ledger_entry_ids": [
+        "JE-2026-0136"
+      ]
+    },
+    {
+      "file": "bank_c_statement_2026Q1.xlsx",
+      "account_id": "NCB-7781-0042",
+      "seq": 38,
+      "page": null,
+      "excel_row": 45,
+      "date": "2026-02-11",
+      "ref_id": "TX89717834",
+      "description": "Card: Muhazi Fuel Station",
+      "amount": "-61300.00",
+      "balance": "25721200.00",
+      "expected_status": "matched",
+      "expected_tier": "tier1_exact",
+      "discrepancy": null,
+      "ledger_entry_ids": [
+        "JE-2026-0129"
+      ]
+    },
+    {
+      "file": "bank_c_statement_2026Q1.xlsx",
+      "account_id": "NCB-7781-0042",
+      "seq": 39,
+      "page": null,
+      "excel_row": 46,
+      "date": "2026-02-12",
+      "ref_id": "TX16533225",
+      "description": "Card: Simba Supermarket",
+      "amount": "-130400.00",
+      "balance": "25590800.00",
+      "expected_status": "matched",
+      "expected_tier": "tier2_amount_date",
+      "discrepancy": null,
+      "ledger_entry_ids": [
+        "JE-2026-0141"
+      ]
+    },
+    {
+      "file": "bank_c_statement_2026Q1.xlsx",
+      "account_id": "NCB-7781-0042",
+      "seq": 40,
+      "page": null,
+      "excel_row": 47,
+      "date": "2026-02-12",
+      "ref_id": "TX63991141",
+      "description": "Card: Muhazi Fuel Station",
+      "amount": "-38100.00",
+      "balance": "25552700.00",
+      "expected_status": "matched",
+      "expected_tier": "tier1_exact",
+      "discrepancy": null,
+      "ledger_entry_ids": [
+        "JE-2026-0144"
+      ]
+    },
+    {
+      "file": "bank_c_statement_2026Q1.xlsx",
+      "account_id": "NCB-7781-0042",
+      "seq": 41,
+      "page": null,
+      "excel_row": 48,
+      "date": "2026-02-13",
+      "ref_id": "TX17575790",
+      "description": "Payment: Nyarutarama Property Management / INV-1173",
+      "amount": "-1511900.00",
+      "balance": "24040800.00",
+      "expected_status": "matched",
+      "expected_tier": "tier1_exact",
+      "discrepancy": null,
+      "ledger_entry_ids": [
+        "JE-2026-0137"
+      ]
+    },
+    {
+      "file": "bank_c_statement_2026Q1.xlsx",
+      "account_id": "NCB-7781-0042",
+      "seq": 42,
+      "page": null,
+      "excel_row": 49,
+      "date": "2026-02-16",
+      "ref_id": "TX41428626",
+      "description": "Card: Simba Supermarket",
+      "amount": "-67200.00",
+      "balance": "23973600.00",
+      "expected_status": "matched",
+      "expected_tier": "tier1_exact",
+      "discrepancy": null,
+      "ledger_entry_ids": [
+        "JE-2026-0155"
+      ]
+    },
+    {
+      "file": "bank_c_statement_2026Q1.xlsx",
+      "account_id": "NCB-7781-0042",
+      "seq": 43,
+      "page": null,
+      "excel_row": 50,
+      "date": "2026-02-17",
+      "ref_id": "TX87324220",
+      "description": "Receipt: Gisenyi Beach Resort / INV-1174",
+      "amount": "2547000.00",
+      "balance": "26520600.00",
+      "expected_status": "matched",
+      "expected_tier": "tier1_exact",
+      "discrepancy": null,
+      "ledger_entry_ids": [
+        "JE-2026-0156"
+      ]
+    },
+    {
+      "file": "bank_c_statement_2026Q1.xlsx",
+      "account_id": "NCB-7781-0042",
+      "seq": 44,
+      "page": null,
+      "excel_row": 51,
+      "date": "2026-02-17",
+      "ref_id": "TX41796721",
+      "description": "Payment: Akagera Office Supplies Ltd / INV-1175",
+      "amount": "-585350.00",
+      "balance": "25935250.00",
+      "expected_status": "matched",
+      "expected_tier": "tier1_exact",
+      "discrepancy": null,
+      "ledger_entry_ids": [
+        "JE-2026-0149"
+      ]
+    },
+    {
+      "file": "bank_c_statement_2026Q1.xlsx",
+      "account_id": "NCB-7781-0042",
+      "seq": 45,
+      "page": null,
+      "excel_row": 52,
+      "date": "2026-02-18",
+      "ref_id": "TX98612211",
+      "description": "Payment: Akagera Office Supplies Ltd / INV-1176",
+      "amount": "-294700.00",
+      "balance": "25640550.00",
+      "expected_status": "matched",
+      "expected_tier": "tier1_exact",
+      "discrepancy": null,
+      "ledger_entry_ids": [
+        "JE-2026-0157"
+      ]
+    },
+    {
+      "file": "bank_c_statement_2026Q1.xlsx",
+      "account_id": "NCB-7781-0042",
+      "seq": 46,
+      "page": null,
+      "excel_row": 53,
+      "date": "2026-02-18",
+      "ref_id": "TX50332555",
+      "description": "Debit order: Rugali Telecom",
+      "amount": "-114650.00",
+      "balance": "25525900.00",
+      "expected_status": "matched",
+      "expected_tier": "tier1_exact",
+      "discrepancy": null,
+      "ledger_entry_ids": [
+        "JE-2026-0158"
+      ]
+    },
+    {
+      "file": "bank_c_statement_2026Q1.xlsx",
+      "account_id": "NCB-7781-0042",
+      "seq": 47,
+      "page": null,
+      "excel_row": 54,
+      "date": "2026-02-20",
+      "ref_id": "TX94019376",
+      "description": "Payment: Akagera Office Supplies Ltd / INV-1177",
+      "amount": "-346900.00",
+      "balance": "25179000.00",
+      "expected_status": "matched",
+      "expected_tier": "tier1_exact",
+      "discrepancy": null,
+      "ledger_entry_ids": [
+        "JE-2026-0176"
+      ]
+    },
+    {
+      "file": "bank_c_statement_2026Q1.xlsx",
+      "account_id": "NCB-7781-0042",
+      "seq": 48,
+      "page": null,
+      "excel_row": 55,
+      "date": "2026-02-20",
+      "ref_id": "TX76521096",
+      "description": "Receipt: Kivu Hotels Group Ltd / INV-1178",
+      "amount": "3892800.00",
+      "balance": "29071800.00",
+      "expected_status": "matched",
+      "expected_tier": "tier1_exact",
+      "discrepancy": null,
+      "ledger_entry_ids": [
+        "JE-2026-0166"
+      ]
+    },
+    {
+      "file": "bank_c_statement_2026Q1.xlsx",
+      "account_id": "NCB-7781-0042",
+      "seq": 49,
+      "page": null,
+      "excel_row": 56,
+      "date": "2026-02-20",
+      "ref_id": "TX96344420",
+      "description": "Card: Simba Supermarket",
+      "amount": "-78500.00",
+      "balance": "28993300.00",
+      "expected_status": "matched",
+      "expected_tier": "tier1_exact",
+      "discrepancy": null,
+      "ledger_entry_ids": [
+        "JE-2026-0174"
+      ]
+    },
+    {
+      "file": "bank_c_statement_2026Q1.xlsx",
+      "account_id": "NCB-7781-0042",
+      "seq": 50,
+      "page": null,
+      "excel_row": 57,
+      "date": "2026-02-23",
+      "ref_id": "TX52779814",
+      "description": "Receipt: Kivu Hotels Group Ltd / INV-1179",
+      "amount": "3687100.00",
+      "balance": "32680400.00",
+      "expected_status": "matched",
+      "expected_tier": "tier1_exact",
+      "discrepancy": null,
+      "ledger_entry_ids": [
+        "JE-2026-0181"
+      ]
+    },
+    {
+      "file": "bank_c_statement_2026Q1.xlsx",
+      "account_id": "NCB-7781-0042",
+      "seq": 51,
+      "page": null,
+      "excel_row": 58,
+      "date": "2026-02-23",
+      "ref_id": "TX30027648",
+      "description": "Receipt: Kivu Hotels Group Ltd / INV-1180",
+      "amount": "2925550.00",
+      "balance": "35605950.00",
+      "expected_status": "matched",
+      "expected_tier": "tier1_exact",
+      "discrepancy": null,
+      "ledger_entry_ids": [
+        "JE-2026-0182"
+      ]
+    },
+    {
+      "file": "bank_c_statement_2026Q1.xlsx",
+      "account_id": "NCB-7781-0042",
+      "seq": 52,
+      "page": null,
+      "excel_row": 59,
+      "date": "2026-02-23",
+      "ref_id": "TX82199509",
+      "description": "Payment: Akagera Office Supplies Ltd / INV-1181",
+      "amount": "-361250.00",
+      "balance": "35244700.00",
+      "expected_status": "matched",
+      "expected_tier": "tier1_exact",
+      "discrepancy": null,
+      "ledger_entry_ids": [
+        "JE-2026-0183"
+      ]
+    },
+    {
+      "file": "bank_c_statement_2026Q1.xlsx",
+      "account_id": "NCB-7781-0042",
+      "seq": 53,
+      "page": null,
+      "excel_row": 60,
+      "date": "2026-02-24",
+      "ref_id": "TX50364158",
+      "description": "Debit order: Ishema Power Utility",
+      "amount": "-132300.00",
+      "balance": "35112400.00",
+      "expected_status": "matched",
+      "expected_tier": "tier1_exact",
+      "discrepancy": null,
+      "ledger_entry_ids": [
+        "JE-2026-0188"
+      ]
+    },
+    {
+      "file": "bank_c_statement_2026Q1.xlsx",
+      "account_id": "NCB-7781-0042",
+      "seq": 54,
+      "page": null,
+      "excel_row": 61,
+      "date": "2026-02-24",
+      "ref_id": "TX72146184",
+      "description": "Receipt: Huye Coffee Exporters Ltd / INV-1182",
+      "amount": "1346000.00",
+      "balance": "36458400.00",
+      "expected_status": "matched",
+      "expected_tier": "tier1_exact",
+      "discrepancy": null,
+      "ledger_entry_ids": [
+        "JE-2026-0177"
+      ]
+    },
+    {
+      "file": "bank_c_statement_2026Q1.xlsx",
+      "account_id": "NCB-7781-0042",
+      "seq": 55,
+      "page": null,
+      "excel_row": 62,
+      "date": "2026-02-25",
+      "ref_id": "TX65902739",
+      "description": "Receipt: Musanze Tours Ltd / INV-1183",
+      "amount": "1472250.00",
+      "balance": "37930650.00",
+      "expected_status": "matched",
+      "expected_tier": "tier1_exact",
+      "discrepancy": null,
+      "ledger_entry_ids": [
+        "JE-2026-0193"
+      ]
+    },
+    {
+      "file": "bank_c_statement_2026Q1.xlsx",
+      "account_id": "NCB-7781-0042",
+      "seq": 56,
+      "page": null,
+      "excel_row": 63,
+      "date": "2026-02-25",
+      "ref_id": "TX62132722",
+      "description": "Payroll run FEB-2026",
+      "amount": "-3878750.00",
+      "balance": "34051900.00",
+      "expected_status": "missing_in_ledger",
+      "expected_tier": null,
+      "discrepancy": "missing_in_ledger",
+      "ledger_entry_ids": []
+    },
+    {
+      "file": "bank_c_statement_2026Q1.xlsx",
+      "account_id": "NCB-7781-0042",
+      "seq": 57,
+      "page": null,
+      "excel_row": 64,
+      "date": "2026-02-27",
+      "ref_id": "TX54327148",
+      "description": "Card: Muhazi Fuel Station",
+      "amount": "-103250.00",
+      "balance": "33948650.00",
+      "expected_status": "matched",
+      "expected_tier": "tier1_exact",
+      "discrepancy": null,
+      "ledger_entry_ids": [
+        "JE-2026-0189"
+      ]
+    },
+    {
+      "file": "bank_c_statement_2026Q1.xlsx",
+      "account_id": "NCB-7781-0042",
+      "seq": 58,
+      "page": null,
+      "excel_row": 65,
+      "date": "2026-02-27",
+      "ref_id": "TX59805178",
+      "description": "Receipt: Kivu Hotels Group Ltd / INV-1184",
+      "amount": "3197700.00",
+      "balance": "37146350.00",
+      "expected_status": "matched",
+      "expected_tier": "tier1_exact",
+      "discrepancy": null,
+      "ledger_entry_ids": [
+        "JE-2026-0190"
+      ]
+    },
+    {
+      "file": "bank_c_statement_2026Q1.xlsx",
+      "account_id": "NCB-7781-0042",
+      "seq": 59,
+      "page": null,
+      "excel_row": 66,
+      "date": "2026-02-27",
+      "ref_id": "TX35566010",
+      "description": "Card: Simba Supermarket",
+      "amount": "-156350.00",
+      "balance": "36990000.00",
+      "expected_status": "matched",
+      "expected_tier": "tier1_exact",
+      "discrepancy": null,
+      "ledger_entry_ids": [
+        "JE-2026-0191"
+      ]
+    },
+    {
+      "file": "bank_c_statement_2026Q1.xlsx",
+      "account_id": "NCB-7781-0042",
+      "seq": 60,
+      "page": null,
+      "excel_row": 67,
+      "date": "2026-03-02",
+      "ref_id": "TX91197624",
+      "description": "Card: Simba Supermarket",
+      "amount": "-85200.00",
+      "balance": "36904800.00",
+      "expected_status": "matched",
+      "expected_tier": "tier1_exact",
+      "discrepancy": null,
+      "ledger_entry_ids": [
+        "JE-2026-0194"
+      ]
+    },
+    {
+      "file": "bank_c_statement_2026Q1.xlsx",
+      "account_id": "NCB-7781-0042",
+      "seq": 61,
+      "page": null,
+      "excel_row": 68,
+      "date": "2026-03-02",
+      "ref_id": null,
+      "description": "Ledger fee",
+      "amount": "-3850.00",
+      "balance": "36900950.00",
+      "expected_status": "matched",
+      "expected_tier": "tier2_amount_date",
+      "discrepancy": null,
+      "ledger_entry_ids": [
+        "JE-2026-0209"
+      ]
+    },
+    {
+      "file": "bank_c_statement_2026Q1.xlsx",
+      "account_id": "NCB-7781-0042",
+      "seq": 62,
+      "page": null,
+      "excel_row": 69,
+      "date": "2026-03-02",
+      "ref_id": "TX39127464",
+      "description": "Card: Muhazi Fuel Station",
+      "amount": "-248900.00",
+      "balance": "36652050.00",
+      "expected_status": "matched",
+      "expected_tier": "tier1_exact",
+      "discrepancy": null,
+      "ledger_entry_ids": [
+        "JE-2026-0197"
+      ]
+    },
+    {
+      "file": "bank_c_statement_2026Q1.xlsx",
+      "account_id": "NCB-7781-0042",
+      "seq": 63,
+      "page": null,
+      "excel_row": 70,
+      "date": "2026-03-03",
+      "ref_id": "TX50693207",
+      "description": "Debit order: Ishema Power Utility",
+      "amount": "-176350.00",
+      "balance": "36475700.00",
+      "expected_status": "matched",
+      "expected_tier": "tier1_exact",
+      "discrepancy": null,
+      "ledger_entry_ids": [
+        "JE-2026-0204"
+      ]
+    },
+    {
+      "file": "bank_c_statement_2026Q1.xlsx",
+      "account_id": "NCB-7781-0042",
+      "seq": 64,
+      "page": null,
+      "excel_row": 71,
+      "date": "2026-03-06",
+      "ref_id": "TX38428357",
+      "description": "Receipt: Musanze Tours Ltd / INV-1185",
+      "amount": "170200.00",
+      "balance": "36645900.00",
+      "expected_status": "matched",
+      "expected_tier": "tier1_exact",
+      "discrepancy": null,
+      "ledger_entry_ids": [
+        "JE-2026-0222"
+      ]
+    },
+    {
+      "file": "bank_c_statement_2026Q1.xlsx",
+      "account_id": "NCB-7781-0042",
+      "seq": 65,
+      "page": null,
+      "excel_row": 72,
+      "date": "2026-03-09",
+      "ref_id": "TX74279671",
+      "description": "Receipt: Musanze Tours Ltd / INV-1186",
+      "amount": "504400.00",
+      "balance": "37150300.00",
+      "expected_status": "matched",
+      "expected_tier": "tier1_exact",
+      "discrepancy": null,
+      "ledger_entry_ids": [
+        "JE-2026-0223"
+      ]
+    },
+    {
+      "file": "bank_c_statement_2026Q1.xlsx",
+      "account_id": "NCB-7781-0042",
+      "seq": 66,
+      "page": null,
+      "excel_row": 73,
+      "date": "2026-03-11",
+      "ref_id": "TX63235053",
+      "description": "Receipt: Musanze Tours Ltd / INV-1187",
+      "amount": "790100.00",
+      "balance": "37940400.00",
+      "expected_status": "matched",
+      "expected_tier": "tier1_exact",
+      "discrepancy": null,
+      "ledger_entry_ids": [
+        "JE-2026-0243"
+      ]
+    },
+    {
+      "file": "bank_c_statement_2026Q1.xlsx",
+      "account_id": "NCB-7781-0042",
+      "seq": 67,
+      "page": null,
+      "excel_row": 74,
+      "date": "2026-03-12",
+      "ref_id": "TX47991562",
+      "description": "Receipt: Musanze Tours Ltd / INV-1188",
+      "amount": "1173850.00",
+      "balance": "39114250.00",
+      "expected_status": "matched",
+      "expected_tier": "tier1_exact",
+      "discrepancy": null,
+      "ledger_entry_ids": [
+        "JE-2026-0244"
+      ]
+    },
+    {
+      "file": "bank_c_statement_2026Q1.xlsx",
+      "account_id": "NCB-7781-0042",
+      "seq": 68,
+      "page": null,
+      "excel_row": 75,
+      "date": "2026-03-13",
+      "ref_id": "TX97069904",
+      "description": "Payment: Kigali Fresh Logistics Ltd / INV-1189",
+      "amount": "-964300.00",
+      "balance": "38149950.00",
+      "expected_status": "matched",
+      "expected_tier": "tier1_exact",
+      "discrepancy": null,
+      "ledger_entry_ids": [
+        "JE-2026-0239"
+      ]
+    },
+    {
+      "file": "bank_c_statement_2026Q1.xlsx",
+      "account_id": "NCB-7781-0042",
+      "seq": 69,
+      "page": null,
+      "excel_row": 76,
+      "date": "2026-03-13",
+      "ref_id": "TX58270683",
+      "description": "Payment: Kigali Fresh Logistics Ltd / INV-1190",
+      "amount": "-518500.00",
+      "balance": "37631450.00",
+      "expected_status": "matched",
+      "expected_tier": "tier1_exact",
+      "discrepancy": null,
+      "ledger_entry_ids": [
+        "JE-2026-0245"
+      ]
+    },
+    {
+      "file": "bank_c_statement_2026Q1.xlsx",
+      "account_id": "NCB-7781-0042",
+      "seq": 70,
+      "page": null,
+      "excel_row": 77,
+      "date": "2026-03-13",
+      "ref_id": "TX72546007",
+      "description": "Debit order: Rugali Telecom",
+      "amount": "-131800.00",
+      "balance": "37499650.00",
+      "expected_status": "matched",
+      "expected_tier": "tier3_fuzzy",
+      "discrepancy": "date_shift",
+      "ledger_entry_ids": [
+        "JE-2026-0225"
+      ]
+    },
+    {
+      "file": "bank_c_statement_2026Q1.xlsx",
+      "account_id": "NCB-7781-0042",
+      "seq": 71,
+      "page": null,
+      "excel_row": 78,
+      "date": "2026-03-16",
+      "ref_id": "TX73013937",
+      "description": "Card: Simba Supermarket",
+      "amount": "-155950.00",
+      "balance": "37343700.00",
+      "expected_status": "matched",
+      "expected_tier": "tier2_amount_date",
+      "discrepancy": null,
+      "ledger_entry_ids": [
+        "JE-2026-0256"
+      ]
+    },
+    {
+      "file": "bank_c_statement_2026Q1.xlsx",
+      "account_id": "NCB-7781-0042",
+      "seq": 72,
+      "page": null,
+      "excel_row": 79,
+      "date": "2026-03-17",
+      "ref_id": "TX37263310",
+      "description": "Receipt: Gisenyi Beach Resort / INV-1191",
+      "amount": "1199300.00",
+      "balance": "38543000.00",
+      "expected_status": "matched",
+      "expected_tier": "tier2_amount_date",
+      "discrepancy": null,
+      "ledger_entry_ids": [
+        "JE-2026-0257"
+      ]
+    },
+    {
+      "file": "bank_c_statement_2026Q1.xlsx",
+      "account_id": "NCB-7781-0042",
+      "seq": 73,
+      "page": null,
+      "excel_row": 80,
+      "date": "2026-03-18",
+      "ref_id": "TX16135823",
+      "description": "Payment: Kigali Fresh Logistics Ltd / INV-1192",
+      "amount": "-768150.00",
+      "balance": "37774850.00",
+      "expected_status": "matched",
+      "expected_tier": "tier2_amount_date",
+      "discrepancy": null,
+      "ledger_entry_ids": [
+        "JE-2026-0260"
+      ]
+    },
+    {
+      "file": "bank_c_statement_2026Q1.xlsx",
+      "account_id": "NCB-7781-0042",
+      "seq": 74,
+      "page": null,
+      "excel_row": 81,
+      "date": "2026-03-23",
+      "ref_id": "TX29585415",
+      "description": "Payroll run MAR-2026",
+      "amount": "-4450100.00",
+      "balance": "33324750.00",
+      "expected_status": "matched",
+      "expected_tier": "tier1_exact",
+      "discrepancy": null,
+      "ledger_entry_ids": [
+        "JE-2026-0267"
+      ]
+    },
+    {
+      "file": "bank_c_statement_2026Q1.xlsx",
+      "account_id": "NCB-7781-0042",
+      "seq": 75,
+      "page": null,
+      "excel_row": 82,
+      "date": "2026-03-24",
+      "ref_id": "TX88387434",
+      "description": "Card: Simba Supermarket",
+      "amount": "-121300.00",
+      "balance": "33203450.00",
+      "expected_status": "matched",
+      "expected_tier": "tier2_amount_date",
+      "discrepancy": null,
+      "ledger_entry_ids": [
+        "JE-2026-0273"
+      ]
+    },
+    {
+      "file": "bank_c_statement_2026Q1.xlsx",
+      "account_id": "NCB-7781-0042",
+      "seq": 76,
+      "page": null,
+      "excel_row": 83,
+      "date": "2026-03-24",
+      "ref_id": "TX49620038",
+      "description": "Payroll run MAR-2026",
+      "amount": "-5736600.00",
+      "balance": "27466850.00",
+      "expected_status": "matched",
+      "expected_tier": "tier1_exact",
+      "discrepancy": null,
+      "ledger_entry_ids": [
+        "JE-2026-0268"
+      ]
+    },
+    {
+      "file": "bank_c_statement_2026Q1.xlsx",
+      "account_id": "NCB-7781-0042",
+      "seq": 77,
+      "page": null,
+      "excel_row": 84,
+      "date": "2026-03-24",
+      "ref_id": "TX40872577",
+      "description": "Card: Simba Supermarket",
+      "amount": "-75550.00",
+      "balance": "27391300.00",
+      "expected_status": "matched",
+      "expected_tier": "tier1_exact",
+      "discrepancy": null,
+      "ledger_entry_ids": [
+        "JE-2026-0274"
+      ]
+    },
+    {
+      "file": "bank_c_statement_2026Q1.xlsx",
+      "account_id": "NCB-7781-0042",
+      "seq": 78,
+      "page": null,
+      "excel_row": 85,
+      "date": "2026-03-25",
+      "ref_id": "TX77015110",
+      "description": "Payment: Kigali Fresh Logistics Ltd / INV-1193",
+      "amount": "-492600.00",
+      "balance": "26898700.00",
+      "expected_status": "matched",
+      "expected_tier": "tier1_exact",
+      "discrepancy": "one_to_many",
+      "ledger_entry_ids": [
+        "JE-2026-0287",
+        "JE-2026-0288",
+        "JE-2026-0289"
+      ]
+    },
+    {
+      "file": "bank_c_statement_2026Q1.xlsx",
+      "account_id": "NCB-7781-0042",
+      "seq": 79,
+      "page": null,
+      "excel_row": 86,
+      "date": "2026-03-25",
+      "ref_id": "TX55307111",
+      "description": "Debit order: Rugali Telecom",
+      "amount": "-170250.00",
+      "balance": "26728450.00",
+      "expected_status": "matched",
+      "expected_tier": "tier1_exact",
+      "discrepancy": null,
+      "ledger_entry_ids": [
+        "JE-2026-0275"
+      ]
+    },
+    {
+      "file": "bank_c_statement_2026Q1.xlsx",
+      "account_id": "NCB-7781-0042",
+      "seq": 80,
+      "page": null,
+      "excel_row": 87,
+      "date": "2026-03-26",
+      "ref_id": "TX96126771",
+      "description": "Card: Muhazi Fuel Station",
+      "amount": "-220100.00",
+      "balance": "26508350.00",
+      "expected_status": "matched",
+      "expected_tier": "tier1_exact",
+      "discrepancy": null,
+      "ledger_entry_ids": [
+        "JE-2026-0281"
+      ]
+    },
+    {
+      "file": "bank_c_statement_2026Q1.xlsx",
+      "account_id": "NCB-7781-0042",
+      "seq": 81,
+      "page": null,
+      "excel_row": 88,
+      "date": "2026-03-27",
+      "ref_id": "TX32579937",
+      "description": "Receipt: Gisenyi Beach Resort / INV-1194",
+      "amount": "1660000.00",
+      "balance": "28168350.00",
+      "expected_status": "matched",
+      "expected_tier": "tier1_exact",
+      "discrepancy": null,
+      "ledger_entry_ids": [
+        "JE-2026-0282"
+      ]
+    },
+    {
+      "file": "bank_c_statement_2026Q1.xlsx",
+      "account_id": "NCB-7781-0042",
+      "seq": 82,
+      "page": null,
+      "excel_row": 89,
+      "date": "2026-03-27",
+      "ref_id": "TX32718459",
+      "description": "Receipt: Gisenyi Beach Resort / INV-1195",
+      "amount": "1304000.00",
+      "balance": "29472350.00",
+      "expected_status": "matched",
+      "expected_tier": "tier1_exact",
+      "discrepancy": null,
+      "ledger_entry_ids": [
+        "JE-2026-0279"
+      ]
+    },
+    {
+      "file": "bank_c_statement_2026Q1.xlsx",
+      "account_id": "NCB-7781-0042",
+      "seq": 83,
+      "page": null,
+      "excel_row": 90,
+      "date": "2026-03-27",
+      "ref_id": "TX75540707",
+      "description": "Card: Simba Supermarket",
+      "amount": "-119900.00",
+      "balance": "29352450.00",
+      "expected_status": "matched",
+      "expected_tier": "tier1_exact",
+      "discrepancy": null,
+      "ledger_entry_ids": [
+        "JE-2026-0280"
+      ]
+    },
+    {
+      "file": "bank_c_statement_2026Q1.xlsx",
+      "account_id": "NCB-7781-0042",
+      "seq": 84,
+      "page": null,
+      "excel_row": 91,
+      "date": "2026-03-31",
+      "ref_id": "TX96142207",
+      "description": "Card: Muhazi Fuel Station",
+      "amount": "-242050.00",
+      "balance": "29110400.00",
+      "expected_status": "matched",
+      "expected_tier": "tier1_exact",
+      "discrepancy": null,
+      "ledger_entry_ids": [
+        "JE-2026-0290"
+      ]
+    },
+    {
+      "file": "bank_c_statement_2026Q1.xlsx",
+      "account_id": "NCB-7781-0042",
+      "seq": 85,
+      "page": null,
+      "excel_row": 92,
+      "date": "2026-03-31",
+      "ref_id": "TX14539747",
+      "description": "Receipt: Musanze Tours Ltd / INV-1196",
+      "amount": "1836850.00",
+      "balance": "30947250.00",
+      "expected_status": "matched",
+      "expected_tier": "tier2_amount_date",
+      "discrepancy": null,
+      "ledger_entry_ids": [
+        "JE-2026-0296"
+      ]
+    }
+  ],
+  "ledger_only": [
+    {
+      "entry_id": "JE-2026-0017",
+      "account_id": "0040-1187342-01",
+      "date": "2026-01-06",
+      "ref_id": "FT26007GK9WQ",
+      "amount": "2410550.00",
+      "expected_status": "duplicate_suspected",
+      "duplicate_of": "JE-2026-0020"
+    },
+    {
+      "entry_id": "JE-2026-0040",
+      "account_id": "200-554-781-903",
+      "date": "2026-01-13",
+      "ref_id": "AKB753064",
+      "amount": "-1390700.00",
+      "expected_status": "duplicate_suspected",
+      "duplicate_of": "JE-2026-0042"
+    },
+    {
+      "entry_id": "JE-2026-0221",
+      "account_id": "NCB-7781-0042",
+      "date": "2026-03-06",
+      "ref_id": "TX74279671",
+      "amount": "504400.00",
+      "expected_status": "duplicate_suspected",
+      "duplicate_of": "JE-2026-0223"
+    },
+    {
+      "entry_id": "JE-2026-0283",
+      "account_id": "0040-1187342-01",
+      "date": "2026-03-25",
+      "ref_id": "CHQ100549",
+      "amount": "-777200.00",
+      "expected_status": "missing_in_bank",
+      "duplicate_of": null
+    },
+    {
+      "entry_id": "JE-2026-0291",
+      "account_id": "200-554-781-903",
+      "date": "2026-03-28",
+      "ref_id": "CHQ100583",
+      "amount": "-1265300.00",
+      "expected_status": "missing_in_bank",
+      "duplicate_of": null
+    },
+    {
+      "entry_id": "JE-2026-0293",
+      "account_id": "NCB-7781-0042",
+      "date": "2026-03-29",
+      "ref_id": "CHQ100916",
+      "amount": "-2236700.00",
+      "expected_status": "missing_in_bank",
+      "duplicate_of": null
+    }
+  ]
+}
