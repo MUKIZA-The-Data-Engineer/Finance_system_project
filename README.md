@@ -2,7 +2,7 @@
 
 Bank statement → ledger reconciliation pipeline.
 
-> Work in progress: day 11 of a 16-day build (26 Oct – 10 Nov 2026).
+> Work in progress: day 12 of a 16-day build (26 Oct – 10 Nov 2026).
 > The full README with the architecture, metrics and design decisions lands on day 15.
 
 ## Architecture
@@ -41,6 +41,19 @@ python -m reconpipe                     # everything: parse -> validate -> load 
 person must look at, with the file and row on both sides), `reports/matched.csv` and
 `reports/run_summary.json`. To run only the dbt part again:
 `dbt build --project-dir dbt --profiles-dir dbt`.
+
+## Orchestration
+
+[`orchestration/`](orchestration/) runs the same pipeline as six Dagster assets with
+asset checks (only expected files skipped, quarantine rate, every validated row
+loaded, match rate above 90%) and a daily 06:00 schedule (Africa/Kigali).
+
+```bash
+dagster dev                                                     # UI on http://localhost:3000
+dagster asset materialize -m orchestration.definitions --select "*"   # one command, whole DAG
+```
+
+![Dagster asset graph](docs/img/dagster_graph.png)
 
 ## Result
 

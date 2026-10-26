@@ -20,7 +20,7 @@ from dataclasses import dataclass
 from datetime import UTC, date, datetime
 from pathlib import Path
 
-from reconpipe.extract import default_registry
+from reconpipe.extract import ExtractResult, default_registry
 from reconpipe.extract.ledger import read_ledger
 from reconpipe.load import LoadResult, RunInfo, connect, load_warehouse
 from reconpipe.report import ReportResult, build_reports
@@ -48,11 +48,27 @@ def run_ingestion(
     run_id: str | None = None,
 ) -> IngestionResult:
     started = time.perf_counter()
+    extracted = default_registry().parse_directory(Path(raw_dir))
+    return validate_extracted(
+        extracted, raw_dir, quarantine_dir, reports_dir, today, run_id, started
+    )
+
+
+def validate_extracted(
+    extracted: ExtractResult,
+    raw_dir: Path,
+    quarantine_dir: Path,
+    reports_dir: Path,
+    today: date | None = None,
+    run_id: str | None = None,
+    started: float | None = None,
+) -> IngestionResult:
+    """Standardise and validate parsed rows, write the quarantine file and run summary."""
+    started = time.perf_counter() if started is None else started
     now = datetime.now(UTC)
     run_id = run_id or now.strftime("%Y%m%dT%H%M%SZ")
     today = today or now.date()
 
-    extracted = default_registry().parse_directory(Path(raw_dir))
     standardized = standardize(extracted.transactions)
     validated = validate(standardized.clean, today)
 
@@ -123,7 +139,20 @@ def run_pipeline(
     """Ingest the statements, read the ledger, and load both into the warehouse."""
     started_at = datetime.now(UTC).replace(tzinfo=None)
     ingestion = run_ingestion(raw_dir, quarantine_dir, reports_dir, today, run_id)
-    ledger = read_ledger(ledger_file or Path(raw_dir) / "ledger.xlsx")
+    return load_ingestion(
+        ingestion, ledger_file or Path(raw_dir) / "ledger.xlsx", db_path, started_at
+    )
+
+
+def load_ingestion(
+    ingestion: IngestionResult,
+    ledger_file: Path,
+    db_path: Path,
+    started_at: datetime | None = None,
+) -> PipelineResult:
+    """Read the ledger and load it with the validated statement rows into the warehouse."""
+    started_at = started_at or datetime.now(UTC).replace(tzinfo=None)
+    ledger = read_ledger(ledger_file)
 
     s = ingestion.summary
     run = RunInfo(

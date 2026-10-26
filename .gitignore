@@ -41,3 +41,6 @@ logs/
 data/gl_raw/
 data/processed/
 output/
+
+# Dagster local instance (dagster dev without DAGSTER_HOME)
+.tmp_dagster_home*/
