@@ -2,173 +2,201 @@
 
 [![CI](https://github.com/MUKIZA-The-Data-Engineer/Finance_system_project/actions/workflows/ci.yml/badge.svg)](https://github.com/MUKIZA-The-Data-Engineer/Finance_system_project/actions/workflows/ci.yml)
 
-Bank statement → ledger reconciliation pipeline.
+**Reconciles 288 bank transactions across 3 bank statement formats in about 10 seconds,
+auto-matches 96.5% of them, and turns the other 16 into a reviewable exception report.
+Every item is classified correctly against ground truth (294/294).**
 
-> Work in progress: day 14 of a 16-day build (26 Oct – 10 Nov 2026).
-> The full README with the architecture, metrics and design decisions lands on day 15.
+## The problem
 
-## Architecture
-
-Each layer reads only from the layer below it, writes only to the layer above
-it, and never edits anything in place.
-
-```
-data/raw/          original PDFs and Excel files, immutable
-   |  extract/     one parser per bank layout, all emitting RawTransaction
-   v
-data/staging/      one row per transaction, still dirty, source file tracked
-   |  transform/   dates, amounts, text normalisation, de-duplication
-   |  validate/    CleanTransaction contract; failures go to data/quarantine/
-   v
-warehouse.duckdb   fact_transactions, dim_account, dim_counterparty
-   |  dbt/         matching cascade: exact ref -> amount+date -> fuzzy description
-   v
-reports/           matched.csv, exceptions.csv, run_summary.json
-```
-
-The contract between layers lives in [`src/reconpipe/schemas.py`](src/reconpipe/schemas.py).
-
-## Quickstart
-
-```bash
-python -m venv .venv
-source .venv/bin/activate        # Windows Git Bash: source .venv/Scripts/activate
-pip install -e ".[dev]"
-python scripts/generate_statements.py   # writes data/raw/ + tests/expected_results.json
-pytest
-python -m reconpipe                     # everything: parse -> validate -> load -> dbt -> reports
-```
-
-`python -m reconpipe` prints the headline and writes `reports/exceptions.csv` (what a
-person must look at, with the file and row on both sides), `reports/matched.csv` and
-`reports/run_summary.json`. To run only the dbt part again:
-`dbt build --project-dir dbt --profiles-dir dbt`.
-
-## Docker
-
-```bash
-docker compose up          # reconcile data/raw/, then the review app on http://localhost:8501
-```
-
-The `pipeline` service runs `python -m reconpipe` and exits (reports land in
-`./reports`); the `app` service starts once it has succeeded. The image needs no
-network at run time.
-
-CI (GitHub Actions) lints with ruff, runs pytest with coverage, runs the whole
-reconciliation and `dbt build`, and builds and runs the Docker image.
-
-## Orchestration
-
-[`orchestration/`](orchestration/) runs the same pipeline as six Dagster assets with
-asset checks (only expected files skipped, quarantine rate, every validated row
-loaded, match rate above 90%) and a daily 06:00 schedule (Africa/Kigali).
-
-```bash
-dagster dev                                                     # UI on http://localhost:3000
-dagster asset materialize -m orchestration.definitions --select "*"   # one command, whole DAG
-```
-
-![Dagster asset graph](docs/img/dagster_graph.png)
-
-## Review app
-
-```bash
-streamlit run app/dashboard.py        # after python -m reconpipe
-```
-
-Four things, read straight from DuckDB: the run's headline numbers, a filterable
-exceptions table that downloads as CSV (the handoff to an accountant), the match
-rate by tier, and the rows quarantined for data quality.
+At month end, a finance team checks every line on every bank statement against the
+company's books. The statements arrive as PDFs and spreadsheets in a different layout
+from each bank, and the books use different references, wording and dates, so the
+check is done by hand, line by line. ReconPipe reads the statements as they are,
+matches what it can with evidence, and hands a person only what genuinely needs a
+person, each item pointing back to the exact file and row on both sides.
 
 ![Review app demo](docs/img/demo.gif)
 
-## Result
+## Architecture
 
-> Reconciles 288 bank transactions across 3 bank formats in about 9 s, auto-matching
-> 96.5%, and surfaces the other 16 items as a reviewable exception report.
+Each layer reads only from the layer below it, writes only to the layer above it, and
+never edits anything in place. Every row carries its source file and row number, so
+any number in a report can be walked back to the line it came from.
 
-Checked against the generator's ground truth, every item is classified correctly
-(294/294): 219 exact-reference matches, 53 amount + date, 6 fuzzy, and the 16 planted
-exceptions (6 amount mismatches, 4 missing in the books, 3 missing on the statement,
-3 double postings). 3 malformed statement lines are quarantined before matching.
+```mermaid
+flowchart LR
+    raw["data/raw/<br/>2 PDF + 1 Excel statements<br/>+ ledger.xlsx<br/><i>immutable</i>"]
+    extract["extract/<br/>one parser per layout<br/>→ RawTransaction"]
+    transform["transform/<br/>dates · Decimal amounts<br/>text · de-duplication"]
+    validate["validate/<br/>business rules<br/>→ CleanTransaction"]
+    quarantine[("data/quarantine/<br/>failed rows + reason")]
+    warehouse[("warehouse.duckdb<br/>facts + dimensions<br/>pipeline_runs")]
+    dbt["dbt<br/>staging → tier 1 exact ref<br/>→ tier 2 amount+date<br/>→ tier 3 fuzzy text"]
+    reports["reports/<br/>exceptions.csv · matched.csv<br/>run_summary.json"]
+    app["Streamlit<br/>review app"]
 
-Then ask the warehouse a question, for example total debits per account per month:
-
-```sql
-SELECT account_id, strftime(date_key, '%Y-%m') AS month,
-       sum(-amount) FILTER (WHERE amount < 0) AS total_debits
-FROM fact_bank_transactions
-GROUP BY ALL ORDER BY ALL;
+    raw --> extract --> transform --> validate --> warehouse --> dbt --> reports
+    validate -.-> quarantine
+    dbt --> app
 ```
 
-From Python (or any DuckDB client):
-
-```bash
-python -c "import duckdb; print(duckdb.connect('warehouse.duckdb').sql('SELECT * FROM pipeline_runs'))"
-```
-
-## Warehouse
-
-Star schema in DuckDB ([`src/reconpipe/load/schema.sql`](src/reconpipe/load/schema.sql)).
-**Grain: one row per bank statement transaction per source file**, and one row per
-ledger journal line. Bank and ledger stay in separate fact tables until matching.
-
-| Table | Holds |
-|---|---|
-| `fact_bank_transactions` | validated statement rows (quarantined rows never arrive) |
-| `fact_ledger_entries` | the company ledger |
-| `dim_account`, `dim_counterparty`, `dim_date` | accounts, counterparty names, calendar |
-| `pipeline_runs` | one row per run: counts and duration |
-
-## dbt
-
-[`dbt/`](dbt/) builds on the warehouse: staging views (`stg_bank_transactions`,
-`stg_ledger_entries`) do renaming and casting only, and `schema.yml` tests them with
-`unique`, `not_null`, `accepted_values`, `relationships`, a custom generic test
-(`not_zero`) and a singular test (every ledger account has a statement).
-
-![dbt lineage graph](docs/img/dbt_lineage.png)
+| Layer | Tool | Where |
+|---|---|---|
+| Extraction | pdfplumber, openpyxl | [`src/reconpipe/extract/`](src/reconpipe/extract/) |
+| Transformation | Python, `Decimal` | [`src/reconpipe/transform/`](src/reconpipe/transform/) |
+| Validation | Pydantic + business rules | [`src/reconpipe/schemas.py`](src/reconpipe/schemas.py), [`validate/`](src/reconpipe/validate/) |
+| Warehouse | DuckDB (star schema) | [`src/reconpipe/load/schema.sql`](src/reconpipe/load/schema.sql) |
+| Matching | dbt-duckdb | [`dbt/`](dbt/) |
+| Orchestration | Dagster | [`orchestration/`](orchestration/) |
+| Serving | Streamlit | [`app/dashboard.py`](app/dashboard.py) |
+| Engineering | pytest, ruff, Docker, GitHub Actions | [`tests/`](tests/), [`.github/workflows/ci.yml`](.github/workflows/ci.yml) |
 
 ### The matching cascade
 
-Each tier only sees what the tiers before it could not match, and a ledger line
-is never used twice.
+Each tier only sees what the tiers before it could not match, and a pairing is kept
+only when it is the best candidate for both sides, so no line is ever used twice.
 
-| Tier | Model | Pairs a bank line with ledger lines when… |
+| Tier | Pairs a bank line with ledger lines when… | Matched |
 |---|---|---|
-| 1 | `recon_tier1_exact` | the reference is identical; several ledger lines sharing it are summed (one-to-many). Same reference, different total → `amount_mismatch` |
-| 2 | `recon_tier2_amount_date` | same account and amount, at most 2 days apart, and each is the other's closest candidate |
-| 3 | `recon_tier3_fuzzy` | same account and amount, up to 14 days apart, and similarity ≥ 0.4, where similarity = 0.5 × word overlap + 0.5 × same counterparty |
+| 1 · exact reference | the reference is identical; ledger lines sharing it are summed (one transfer, several invoices) | 219 |
+| 2 · amount + date | same account and amount, at most 2 days apart | 53 |
+| 3 · fuzzy | same account and amount, up to 14 days apart, and similar text: 0.5 × word overlap + 0.5 × same counterparty ≥ 0.4 | 6 |
 
-Before matching, `int_ledger_entries` flags exact double postings (the later copy is the
-duplicate). `recon_results` then gives every item one status: `matched`,
-`amount_mismatch`, `missing_in_ledger`, `missing_in_bank` or `duplicate_suspected`,
-with the match tier, a confidence and the source file and row on both sides.
-Thresholds live in `dbt/dbt_project.yml` under `vars`.
+Everything else gets one of four exception statuses, each with a plain-English reason:
+`amount_mismatch` (same reference, different amount), `missing_in_ledger`,
+`missing_in_bank` (for example an uncleared cheque) and `duplicate_suspected`
+(a double posting in the books).
 
-Loading is idempotent: each run replaces the rows of the files it loaded, in one
-transaction, so re-running never double-loads and a failed load rolls back.
+![dbt lineage graph](docs/img/dbt_lineage.png)
 
-The bank statements are confidential, so ReconPipe ships a seeded generator: three
-deliberately different bank layouts (two PDF, one Excel), a ledger with planted
-discrepancies, and the ground truth in `tests/expected_results.json`. Your own
-real files belong in `data/real/`, which the pipeline never reads.
+## Results
 
-## Repository layout
+On the committed data (Q1 2026, three fictional banks, one company ledger):
 
-| Path | Purpose |
+| | |
 |---|---|
-| `src/reconpipe/` | The pipeline package: `extract/`, `transform/`, `validate/`, `load/`, `report/` |
-| `scripts/` | Synthetic bank statement and ledger generator |
-| `dbt/` | Staging models and the reconciliation matching cascade |
-| `orchestration/` | Dagster assets and schedule |
-| `app/` | Streamlit review app |
-| `tests/` | pytest suite |
+| Statement lines read | 292 (110 + 96 + 85 printed, plus 1 planted 0.00 line) |
+| Removed as a reprint at a page break | 1 |
+| Quarantined, with the rule broken | 3 (zero amount, broken balance chain, date in the future) |
+| Loaded and reconciled | 288 bank lines against 296 ledger lines |
+| Auto-matched | **278 (96.5%)**: 219 exact, 53 amount + date, 6 fuzzy |
+| Exceptions for review | 16: 6 amount mismatches, 4 missing in the books, 3 missing on the statement, 3 double postings |
+| Accuracy against ground truth | **294 / 294 items** |
+| Value auto-reconciled / in exception | RWF 318,125,150 / RWF 19,450,550 |
+
+## Quickstart
+
+Python 3.11+.
+
+```bash
+python -m venv .venv
+source .venv/bin/activate            # Windows Git Bash: source .venv/Scripts/activate
+pip install -e ".[dev]"
+python -m reconpipe                  # parse → validate → load → dbt build → reports
+streamlit run app/dashboard.py       # review the exceptions
+```
+
+Or, with nothing but Docker:
+
+```bash
+docker compose up                    # reconcile, then the app on http://localhost:8501
+```
+
+Other entry points:
+
+```bash
+pytest                                                           # 155 tests
+dbt build --project-dir dbt --profiles-dir dbt                   # matching + data tests only
+dagster dev                                                      # the DAG in the Dagster UI
+dagster asset materialize -m orchestration.definitions --select "*"
+python scripts/generate_statements.py                            # regenerate the test data
+```
+
+`python -m reconpipe` writes `reports/exceptions.csv` (the handoff to an accountant),
+`reports/matched.csv`, `reports/run_summary.json` and `data/quarantine/quarantine_<run>.csv`.
+
+## Orchestration
+
+Six Dagster assets, one per stage, calling the same functions as
+`python -m reconpipe`, with asset checks so a bad run is a failed run rather than a
+quiet one: only expected files skipped, quarantine rate under 5%, every validated row
+loaded, match rate above 90%. A daily schedule runs at 06:00 Africa/Kigali.
+
+![Dagster asset graph](docs/img/dagster_graph.png)
+
+## Test data
+
+Real bank statements are confidential, so ReconPipe ships a seeded generator
+([`scripts/generate_statements.py`](scripts/generate_statements.py)) that writes three
+deliberately different layouts:
+
+- **Bank A (PDF):** a ruled table, `DD/MM/YYYY` dates, debit and credit columns, and descriptions that wrap onto a second table line.
+- **Bank B (PDF):** unruled columns, `15 Mar 2026` dates, one signed `RWF -1,250.00` amount column, brought/carried-forward lines, and one row reprinted across a page break.
+- **Bank C (Excel):** junk rows above the header, `YYYY-MM-DD` dates, and Money Out / Money In columns.
+
+It also writes a ledger with planted problems (amount typos, missing entries on both
+sides, double postings, date shifts beyond the tier-2 window, one-to-many settlements)
+and one data-quality defect per validation rule in the statements. The expected
+outcome of every line is in `tests/expected_results.json`, and the tests check the
+pipeline against it item by item. Output is byte-identical for a given seed.
+
+## Project structure
+
+```
+src/reconpipe/
+  schemas.py          RawTransaction, CleanTransaction, LedgerEntry: the contracts between layers
+  extract/            base.py (parser interface), registry.py, one parser per layout, ledger.py
+  transform/          standardize.py: dates, Decimal amounts, descriptions, de-duplication
+  validate/           contracts.py (business rules), quarantine.py
+  load/               schema.sql, warehouse.py (idempotent loader)
+  report/             builder.py: exceptions.csv, matched.csv, run_summary.json
+  pipeline.py         python -m reconpipe
+dbt/                  staging, intermediate and marts models, generic and singular tests
+orchestration/        Dagster assets, checks, job and schedule
+app/dashboard.py      Streamlit review app
+scripts/              synthetic statement and ledger generator
+tests/                155 tests, incl. an end-to-end run against ground truth
+docs/                 DESIGN_DECISIONS.md, PORTFOLIO.md, images
+CHANGELOG.md          release notes
+```
+
+## Design decisions
+
+The full reasoning is in [docs/DESIGN_DECISIONS.md](docs/DESIGN_DECISIONS.md). In short:
+
+- **DuckDB, not Postgres; no Spark.** Kilobytes of analytical data: an in-process columnar engine runs everywhere with nothing to operate.
+- **One parser per layout behind one interface.** The second PDF layout needed one new file; nothing else changed. Two parsers claiming one file is an error, never a guess.
+- **Quarantine, never drop.** A failed row is kept with its rule, reason and source, and counted in the run summary.
+- **`Decimal`, never float; ambiguous dates fail loudly.** A reconciliation is an equality test to the cent, and a swapped day and month breaks every match after it.
+- **The duplicate key includes the running balance,** so two genuine identical purchases on one day are both kept.
+- **Matching in SQL, strictest evidence first, and every match says how it was made** (tier, confidence, detail).
+
+## Limitations
+
+- **Synthetic data only.** The parsers are proven on generated statements, not on a real bank's PDFs. A real layout needs its own parser and fixture.
+- **Equal amounts only.** Tiers 2 and 3 need the same amount on both sides. Bank fees netted out of a payment, partial payments and foreign-currency conversion are reported as exceptions, not matched.
+- **One-to-many only.** One bank line can settle several ledger lines (by shared reference), but several bank lines settling one ledger line are not combined.
+- **Thresholds tuned on synthetic text.** The tier-3 similarity threshold and date windows were chosen by measuring the generated data and may need re-tuning on real descriptions.
+- **Duplicates are exact copies.** A double posting with a slightly different description or date is not flagged as a duplicate. It surfaces as missing on the statement instead.
+- **Single currency and single writer.** Everything is RWF, and DuckDB allows one writer, so a load and the review app should not run at the same moment.
+
+## Roadmap
+
+Deliberately out of scope for v1.0, and the natural next steps:
+
+- **Odoo column mapping**, to read ledger exports straight from the accounting system.
+- **An AI-assisted column mapper** for unseen statement layouts (prototyped separately in `ai_ingestion/`).
+- **A BI reporting layer** on top of `recon_results`.
+- **Multi-tenant support and a login** for more than one company.
+- **Near-real-time ingestion** of statements as they arrive, instead of a daily batch.
+- **Many-to-one and fee-netted matching** as additional cascade tiers.
+
+## Other projects in this repository
 
 The older general-ledger reporting engine (`adapters.py`, `etl_pipeline.py`,
-`reports.py`, `run_pipeline.py`, see `system.md`) and the AI-assisted Excel
-mapper (`ai_ingestion/`) are separate projects kept at the repository root.
-They are not part of ReconPipe.
+`reports.py`, `run_pipeline.py`, documented in `system.md`) and the AI-assisted Excel
+mapper (`ai_ingestion/`) are separate projects kept at the repository root. They are
+not part of ReconPipe.
 
 ## Licence
 
