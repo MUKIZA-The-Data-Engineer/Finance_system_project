@@ -1,0 +1,19 @@
+# ReconPipe dbt project. Run from the repository root:
+#   dbt build --project-dir dbt --profiles-dir dbt
+name: reconpipe
+version: "1.0.0"
+config-version: 2
+profile: reconpipe
+
+model-paths: ["models"]
+macro-paths: ["macros"]
+test-paths: ["tests"]
+target-path: "target"
+clean-targets: ["target", "dbt_packages"]
+
+models:
+  reconpipe:
+    staging:
+      +materialized: view
+    marts:
+      +materialized: table

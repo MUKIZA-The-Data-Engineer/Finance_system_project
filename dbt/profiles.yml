@@ -1,0 +1,9 @@
+# The warehouse file the Python loader writes. Paths are relative to where dbt
+# is run from (the repository root); override with RECONPIPE_DB.
+reconpipe:
+  target: dev
+  outputs:
+    dev:
+      type: duckdb
+      path: "{{ env_var('RECONPIPE_DB', 'warehouse.duckdb') }}"
+      threads: 4

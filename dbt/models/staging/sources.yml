@@ -1,0 +1,21 @@
+version: 2
+
+sources:
+  - name: warehouse
+    description: Tables written by the Python load layer (src/reconpipe/load).
+    schema: main
+    tables:
+      - name: fact_bank_transactions
+        description: One row per bank statement transaction per source file.
+        columns:
+          - name: txn_hash
+            data_tests: [unique, not_null]
+      - name: fact_ledger_entries
+        description: One row per ledger journal line.
+        columns:
+          - name: entry_id
+            data_tests: [unique, not_null]
+      - name: dim_account
+      - name: dim_counterparty
+      - name: dim_date
+      - name: pipeline_runs

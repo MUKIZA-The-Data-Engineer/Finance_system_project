@@ -2,7 +2,7 @@
 
 Bank statement → ledger reconciliation pipeline.
 
-> Work in progress: day 8 of a 16-day build (26 Oct – 10 Nov 2026).
+> Work in progress: day 9 of a 16-day build (26 Oct – 10 Nov 2026).
 > The full README with the architecture, metrics and design decisions lands on day 15.
 
 ## Architecture
@@ -35,6 +35,7 @@ pip install -e ".[dev]"
 python scripts/generate_statements.py   # writes data/raw/ + tests/expected_results.json
 pytest
 python -m reconpipe                     # parse, standardise, validate, load warehouse.duckdb
+dbt build --project-dir dbt --profiles-dir dbt   # staging models + data tests
 ```
 
 Then ask the warehouse a question, for example total debits per account per month:
@@ -64,6 +65,15 @@ ledger journal line. Bank and ledger stay in separate fact tables until matching
 | `fact_ledger_entries` | the company ledger |
 | `dim_account`, `dim_counterparty`, `dim_date` | accounts, counterparty names, calendar |
 | `pipeline_runs` | one row per run: counts and duration |
+
+## dbt
+
+[`dbt/`](dbt/) builds on the warehouse: staging views (`stg_bank_transactions`,
+`stg_ledger_entries`) do renaming and casting only, and `schema.yml` tests them with
+`unique`, `not_null`, `accepted_values`, `relationships`, a custom generic test
+(`not_zero`) and a singular test (every ledger account has a statement).
+
+![dbt lineage graph](docs/img/dbt_lineage.png)
 
 Loading is idempotent: each run replaces the rows of the files it loaded, in one
 transaction, so re-running never double-loads and a failed load rolls back.

@@ -1,0 +1,59 @@
+version: 2
+
+models:
+  - name: stg_bank_transactions
+    description: >
+      Validated bank statement transactions, renamed for matching.
+      Grain: one row per bank transaction per source file.
+    columns:
+      - name: bank_txn_id
+        description: SHA-256 of the transaction (see src/reconpipe/transform/standardize.py).
+        data_tests: [unique, not_null]
+      - name: account_id
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: source('warehouse', 'dim_account')
+                field: account_id
+      - name: txn_date
+        data_tests: [not_null]
+      - name: amount
+        description: Signed, money in positive.
+        data_tests: [not_null, not_zero]
+      - name: direction
+        data_tests:
+          - accepted_values:
+              arguments:
+                values: ["in", "out"]
+      - name: source_file
+        data_tests: [not_null]
+      - name: source_row
+        description: Row in the source file, for tracing back to the original statement.
+        data_tests: [not_null]
+
+  - name: stg_ledger_entries
+    description: >
+      Company ledger lines on bank accounts, renamed for matching.
+      Grain: one row per journal line.
+    columns:
+      - name: ledger_entry_id
+        data_tests: [unique, not_null]
+      - name: account_id
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: source('warehouse', 'dim_account')
+                field: account_id
+      - name: txn_date
+        data_tests: [not_null]
+      - name: amount
+        data_tests: [not_null, not_zero]
+      - name: direction
+        data_tests:
+          - accepted_values:
+              arguments:
+                values: ["in", "out"]
+      - name: description_clean
+        data_tests: [not_null]
