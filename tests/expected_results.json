@@ -452,7 +452,7 @@
       "expected_tier": "tier2_amount_date",
       "discrepancy": null,
       "ledger_entry_ids": [
-        "JE-2026-0018"
+        "JE-2026-0017"
       ]
     },
     {
@@ -496,7 +496,7 @@
       "expected_tier": "tier2_amount_date",
       "discrepancy": null,
       "ledger_entry_ids": [
-        "JE-2026-0019"
+        "JE-2026-0018"
       ]
     },
     {
@@ -518,7 +518,7 @@
       "expected_tier": "tier1_exact",
       "discrepancy": null,
       "ledger_entry_ids": [
-        "JE-2026-0020"
+        "JE-2026-0019"
       ]
     },
     {
@@ -3048,7 +3048,7 @@
       "expected_tier": "tier1_exact",
       "discrepancy": null,
       "ledger_entry_ids": [
-        "JE-2026-0041"
+        "JE-2026-0040"
       ]
     },
     {
@@ -3114,7 +3114,7 @@
       "expected_tier": "tier1_exact",
       "discrepancy": null,
       "ledger_entry_ids": [
-        "JE-2026-0042"
+        "JE-2026-0041"
       ]
     },
     {
@@ -6296,7 +6296,7 @@
       "expected_tier": "tier1_exact",
       "discrepancy": null,
       "ledger_entry_ids": [
-        "JE-2026-0222"
+        "JE-2026-0221"
       ]
     },
     {
@@ -6318,7 +6318,7 @@
       "expected_tier": "tier1_exact",
       "discrepancy": null,
       "ledger_entry_ids": [
-        "JE-2026-0223"
+        "JE-2026-0222"
       ]
     },
     {
@@ -6766,31 +6766,31 @@
   ],
   "ledger_only": [
     {
-      "entry_id": "JE-2026-0017",
+      "entry_id": "JE-2026-0020",
       "account_id": "0040-1187342-01",
       "date": "2026-01-06",
       "ref_id": "FT26007GK9WQ",
       "amount": "2410550.00",
       "expected_status": "duplicate_suspected",
-      "duplicate_of": "JE-2026-0020"
+      "duplicate_of": "JE-2026-0019"
     },
     {
-      "entry_id": "JE-2026-0040",
+      "entry_id": "JE-2026-0042",
       "account_id": "200-554-781-903",
       "date": "2026-01-13",
       "ref_id": "AKB753064",
       "amount": "-1390700.00",
       "expected_status": "duplicate_suspected",
-      "duplicate_of": "JE-2026-0042"
+      "duplicate_of": "JE-2026-0041"
     },
     {
-      "entry_id": "JE-2026-0221",
+      "entry_id": "JE-2026-0223",
       "account_id": "NCB-7781-0042",
       "date": "2026-03-06",
       "ref_id": "TX74279671",
       "amount": "504400.00",
       "expected_status": "duplicate_suspected",
-      "duplicate_of": "JE-2026-0223"
+      "duplicate_of": "JE-2026-0222"
     },
     {
       "entry_id": "JE-2026-0283",

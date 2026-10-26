@@ -2,7 +2,7 @@
 
 Bank statement → ledger reconciliation pipeline.
 
-> Work in progress: day 9 of a 16-day build (26 Oct – 10 Nov 2026).
+> Work in progress: day 10 of a 16-day build (26 Oct – 10 Nov 2026).
 > The full README with the architecture, metrics and design decisions lands on day 15.
 
 ## Architecture
@@ -74,6 +74,23 @@ ledger journal line. Bank and ledger stay in separate fact tables until matching
 (`not_zero`) and a singular test (every ledger account has a statement).
 
 ![dbt lineage graph](docs/img/dbt_lineage.png)
+
+### The matching cascade
+
+Each tier only sees what the tiers before it could not match, and a ledger line
+is never used twice.
+
+| Tier | Model | Pairs a bank line with ledger lines when… |
+|---|---|---|
+| 1 | `recon_tier1_exact` | the reference is identical; several ledger lines sharing it are summed (one-to-many). Same reference, different total → `amount_mismatch` |
+| 2 | `recon_tier2_amount_date` | same account and amount, at most 2 days apart, and each is the other's closest candidate |
+| 3 | `recon_tier3_fuzzy` | same account and amount, up to 14 days apart, and similarity ≥ 0.4, where similarity = 0.5 × word overlap + 0.5 × same counterparty |
+
+Before matching, `int_ledger_entries` flags exact double postings (the later copy is the
+duplicate). `recon_results` then gives every item one status: `matched`,
+`amount_mismatch`, `missing_in_ledger`, `missing_in_bank` or `duplicate_suspected`,
+with the match tier, a confidence and the source file and row on both sides.
+Thresholds live in `dbt/dbt_project.yml` under `vars`.
 
 Loading is idempotent: each run replaces the rows of the files it loaded, in one
 transaction, so re-running never double-loads and a failed load rolls back.

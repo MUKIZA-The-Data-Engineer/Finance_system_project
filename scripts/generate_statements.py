@@ -501,8 +501,18 @@ def split_amount(total: Decimal, rng: random.Random, used: set[Decimal]) -> list
 
 
 def number_ledger(entries: list[LedgerEntry], txns: list[BankTxn]) -> None:
-    """Sort by date and assign JE ids; replace temporary object ids with real ones."""
-    entries.sort(key=lambda e: (e.date, e.account_no, e.bank_seq or 0, e.status))
+    """Sort by date and assign JE ids; replace temporary object ids with real ones.
+
+    A double posting is numbered straight after its original (the later posting
+    is the duplicate), which is how an accountant reads a ledger.
+    """
+    by_object = {id(e): e for e in entries}
+
+    def order(e: LedgerEntry) -> tuple:
+        anchor = by_object[e.duplicate_of] if e.duplicate_of is not None else e
+        return (e.date, e.account_no, anchor.bank_seq or 0, e.duplicate_of is not None, e.status)
+
+    entries.sort(key=order)
     real_id = {}
     for i, e in enumerate(entries, start=1):
         e.entry_id = f"JE-2026-{i:04d}"

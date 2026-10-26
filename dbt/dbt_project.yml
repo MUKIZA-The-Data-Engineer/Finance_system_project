@@ -11,9 +11,16 @@ test-paths: ["tests"]
 target-path: "target"
 clean-targets: ["target", "dbt_packages"]
 
+vars:
+  tier2_window_days: 2       # amount + date: how many days apart bank and ledger may be
+  tier3_window_days: 14      # amount + fuzzy description: wider window, needs text evidence
+  tier3_min_similarity: 0.4  # 0.5 * word overlap + 0.5 * same counterparty
+
 models:
   reconpipe:
     staging:
+      +materialized: view
+    intermediate:
       +materialized: view
     marts:
       +materialized: table

@@ -1,0 +1,63 @@
+version: 2
+
+models:
+  - name: recon_tier1_exact
+    description: Bank lines paired with ledger lines by exact reference (one-to-many allowed).
+    columns:
+      - name: bank_txn_id
+        data_tests: [unique, not_null]
+      - name: status
+        data_tests:
+          - accepted_values:
+              arguments:
+                values: ["matched", "amount_mismatch"]
+
+  - name: recon_tier2_amount_date
+    description: Remaining bank lines paired by amount and a small date window.
+    columns:
+      - name: bank_txn_id
+        data_tests: [unique, not_null]
+      - name: confidence
+        data_tests:
+          - value_between:
+              arguments: {min_value: 0, max_value: 1}
+
+  - name: recon_tier3_fuzzy
+    description: Remaining bank lines paired by amount, a wider window and similar text.
+    columns:
+      - name: bank_txn_id
+        data_tests: [unique, not_null]
+      - name: confidence
+        data_tests:
+          - value_between:
+              arguments: {min_value: 0, max_value: 1}
+
+  - name: recon_results
+    description: >
+      One row per reconciliation item: every bank line, plus every ledger line no
+      tier consumed. Grain: one row per item.
+    columns:
+      - name: result_id
+        data_tests: [unique, not_null]
+      - name: status
+        data_tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values:
+                  - matched
+                  - amount_mismatch
+                  - missing_in_ledger
+                  - missing_in_bank
+                  - duplicate_suspected
+      - name: match_tier
+        data_tests:
+          - accepted_values:
+              arguments:
+                values: ["tier1_exact", "tier2_amount_date", "tier3_fuzzy"]
+      - name: confidence
+        data_tests:
+          - value_between:
+              arguments: {min_value: 0, max_value: 1}
+      - name: account_id
+        data_tests: [not_null]
