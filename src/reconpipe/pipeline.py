@@ -1,9 +1,9 @@
-"""Week-1 pipeline: raw files -> parsed -> standardised -> validated rows.
+"""The pipeline so far: raw files -> parsed -> standardised -> validated -> warehouse.
 
     python -m reconpipe            # run on data/raw/, print the one-line result
 
-Writes data/quarantine/quarantine_<run_id>.csv and reports/run_summary.json.
-Each stage reads only what the stage before it produced.
+Writes data/quarantine/quarantine_<run_id>.csv, reports/run_summary.json and
+loads warehouse.duckdb. Each stage reads only what the stage before it produced.
 """
 
 from __future__ import annotations
@@ -12,11 +12,14 @@ import json
 import logging
 import time
 from collections import Counter
+from contextlib import closing
 from dataclasses import dataclass
 from datetime import UTC, date, datetime
 from pathlib import Path
 
 from reconpipe.extract import default_registry
+from reconpipe.extract.ledger import read_ledger
+from reconpipe.load import LoadResult, RunInfo, connect, load_warehouse
 from reconpipe.schemas import CleanTransaction
 from reconpipe.transform import standardize
 from reconpipe.validate import CONTRACT, QuarantinedRow, Violation, validate, write_quarantine
@@ -97,6 +100,52 @@ def run_ingestion(
     return IngestionResult(validated.passed, quarantined, summary, quarantine_file, summary_file)
 
 
+@dataclass
+class PipelineResult:
+    ingestion: IngestionResult
+    load: LoadResult
+    db_path: Path
+
+
+def run_pipeline(
+    raw_dir: Path = Path("data/raw"),
+    quarantine_dir: Path = Path("data/quarantine"),
+    reports_dir: Path = Path("reports"),
+    db_path: Path = Path("warehouse.duckdb"),
+    ledger_file: Path | None = None,
+    today: date | None = None,
+    run_id: str | None = None,
+) -> PipelineResult:
+    """Ingest the statements, read the ledger, and load both into the warehouse."""
+    started_at = datetime.now(UTC).replace(tzinfo=None)
+    ingestion = run_ingestion(raw_dir, quarantine_dir, reports_dir, today, run_id)
+    ledger = read_ledger(ledger_file or Path(raw_dir) / "ledger.xlsx")
+
+    s = ingestion.summary
+    run = RunInfo(
+        run_id=s["run_id"],
+        started_at=started_at,
+        finished_at=datetime.now(UTC).replace(tzinfo=None),
+        files_parsed=len(s["files_parsed"]),
+        files_skipped=len(s["files_skipped"]),
+        rows_in=s["rows_in"],
+        duplicates_removed=s["duplicates_removed"],
+        rows_quarantined=s["rows_quarantined"],
+    )
+    with closing(connect(db_path)) as con:
+        loaded = load_warehouse(con, ingestion.rows, ledger, run)
+
+    s["warehouse"] = {
+        "db_path": Path(db_path).as_posix(),
+        "bank_rows_loaded": loaded.bank_rows,
+        "ledger_rows_loaded": loaded.ledger_rows,
+        "accounts": loaded.accounts,
+        "counterparties": loaded.counterparties,
+    }
+    ingestion.summary_file.write_text(json.dumps(s, indent=2) + "\n", encoding="utf-8")
+    return PipelineResult(ingestion, loaded, Path(db_path))
+
+
 def describe(summary: dict) -> str:
     """'Of N rows, M passed, D duplicates were removed and K were quarantined (...)'."""
     reasons = summary["quarantine_reasons"]
@@ -110,8 +159,12 @@ def describe(summary: dict) -> str:
 
 def main() -> int:
     logging.basicConfig(level=logging.INFO, format="%(levelname)s %(message)s")
-    result = run_ingestion()
-    print(describe(result.summary))
-    print(f"Summary:    {result.summary_file}")
-    print(f"Quarantine: {result.quarantine_file}")
+    result = run_pipeline()
+    print(describe(result.ingestion.summary))
+    print(
+        f"Warehouse:  {result.db_path} ({result.load.bank_rows} bank rows, "
+        f"{result.load.ledger_rows} ledger entries)"
+    )
+    print(f"Summary:    {result.ingestion.summary_file}")
+    print(f"Quarantine: {result.ingestion.quarantine_file}")
     return 0

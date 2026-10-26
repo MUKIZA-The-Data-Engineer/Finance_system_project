@@ -147,3 +147,30 @@ class CleanTransaction(BaseModel):
         if self.amount != expected:
             raise ValueError(f"amount {self.amount} does not equal credit - debit ({expected})")
         return self
+
+
+# --------------------------------------------------------------------------- #
+# Ledger
+# --------------------------------------------------------------------------- #
+
+
+class LedgerEntry(BaseModel):
+    """One journal line from the company's books, on a bank account.
+
+    The ledger is the other side of the reconciliation. It is exported from an
+    accounting system, so its dates and amounts arrive typed, not as printed
+    text; it goes straight to this model without a raw layer.
+    """
+
+    model_config = ConfigDict(frozen=True, extra="forbid", str_strip_whitespace=True)
+
+    entry_id: str = Field(min_length=1)
+    date: dt.date
+    account_id: AccountId
+    ref_id: OptionalText = None
+    description: str = Field(min_length=1)
+    counterparty: OptionalText = None
+    gl_account: OptionalText = None
+    amount: Money = Field(description="Signed, bank account's view: money in positive.")
+    source_file: SourceFile
+    row_number: RowNumber
