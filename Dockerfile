@@ -1,5 +1,6 @@
 # ReconPipe: run the whole reconciliation in a container.
 #   docker compose up      -> reconcile data/raw/, then serve the review app on :8501
+#                             and the upload toolkit on :8502
 FROM python:3.12-slim
 
 ENV PYTHONDONTWRITEBYTECODE=1 \
@@ -17,11 +18,13 @@ RUN pip install ".[app]"
 # Everything a run needs besides the package: dbt project, app, inputs, ground truth.
 COPY dbt ./dbt
 COPY app ./app
+COPY config ./config
+COPY templates ./templates
 COPY data/raw ./data/raw
 COPY tests/expected_results.json ./tests/expected_results.json
 
 ENV RECONPIPE_DB=/app/warehouse/warehouse.duckdb
-RUN mkdir -p warehouse reports data/quarantine
+RUN mkdir -p warehouse reports data/quarantine output inbox
 
-EXPOSE 8501
+EXPOSE 8501 8502
 CMD ["python", "-m", "reconpipe"]

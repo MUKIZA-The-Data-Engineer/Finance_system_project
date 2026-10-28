@@ -7,6 +7,9 @@
     reconpipe odoo-export     any file -> Odoo-ready import workbook (settings: config/odoo.toml)
     reconpipe ai              prompt library answered by Claude (list, show, run, map-columns)
 
+    reconpipe process FILE    any file(s) or a folder -> clean Excel + Odoo import, in one step
+    reconpipe workflow        --bank FILE --books FILE -> clean, Odoo-ready, reconciled, reported
+
 Run `reconpipe <command> --help` for each command's options.
 """
 
@@ -93,10 +96,8 @@ def _standardize(args: argparse.Namespace) -> int:
 
 @command("reconcile")
 def _reconcile(args: argparse.Namespace) -> int:
-    from decimal import Decimal
-
     from reconpipe.tools.columns import parse_overrides
-    from reconpipe.tools.reconcile import Tolerances, reconcile_files, write_report
+    from reconpipe.tools.reconcile import reconcile_files, write_report
 
     a_files, b_files = list(args.a or []), list(args.b or [])
     if len(args.files) == 2 and not a_files and not b_files:
@@ -110,17 +111,10 @@ def _reconcile(args: argparse.Namespace) -> int:
             file=sys.stderr,
         )
         return 2
-    tolerances = Tolerances(
-        amount=Decimal(str(args.amount_tolerance)),
-        days=args.date_tolerance,
-        description_days=args.description_days,
-        min_similarity=args.min_similarity,
-        group_days=args.group_days,
-    )
     result = reconcile_files(
         a_files,
         b_files,
-        tolerances,
+        _tolerances(args),
         args.a_label,
         args.b_label,
         parse_overrides(args.map_a),
@@ -144,6 +138,20 @@ def _reconcile(args: argparse.Namespace) -> int:
     )
     print(f"Excel: {out}")
     return 0
+
+
+def _tolerances(args: argparse.Namespace):
+    from decimal import Decimal
+
+    from reconpipe.tools.reconcile import Tolerances
+
+    return Tolerances(
+        amount=Decimal(str(args.amount_tolerance)),
+        days=args.date_tolerance,
+        description_days=args.description_days,
+        min_similarity=args.min_similarity,
+        group_days=args.group_days,
+    )
 
 
 @command("odoo-export")
@@ -174,6 +182,62 @@ def _odoo_export(args: argparse.Namespace) -> int:
         print("note: config/odoo.toml still has EXAMPLE codes; set your real Odoo codes first")
     for path in written:
         print(f"Wrote: {path}")
+    return 0
+
+
+@command("process")
+def _process(args: argparse.Namespace) -> int:
+    from reconpipe.tools.columns import parse_overrides
+    from reconpipe.tools.odoo import load_config
+    from reconpipe.tools.reader import UnreadableFileError
+    from reconpipe.tools.standardizer import MappingError
+    from reconpipe.tools.workflow import find_files, process_file
+
+    cfg = None if args.no_odoo else load_config(args.config, target=args.target)
+    files = find_files(args.files)
+    mapper, overrides = _mapper(args), parse_overrides(args.map)
+    failed = 0
+    for path in files:
+        out_dir = args.out_dir / path.stem
+        try:
+            result = process_file(path, out_dir, cfg, overrides, args.date_order, mapper, args.csv)
+        except (UnreadableFileError, MappingError) as exc:
+            print(f"{path.name}: FAILED - {exc}", file=sys.stderr)
+            failed += 1
+            continue
+        print(result.describe())
+        for written in result.files:
+            print(f"  wrote {written}")
+    if cfg and cfg.examples_in_use():
+        print("note: config/odoo.toml still has EXAMPLE codes; set your real Odoo codes first")
+    print(f"Done: {len(files) - failed} of {len(files)} file(s) processed into {args.out_dir}/")
+    return 0 if not failed else 2
+
+
+@command("workflow")
+def _workflow(args: argparse.Namespace) -> int:
+    from reconpipe.tools.odoo import load_config
+    from reconpipe.tools.workflow import find_files, run_workflow
+
+    if not args.bank or not args.books:
+        print(
+            "error: give both sides, e.g. reconpipe workflow --bank stmt.pdf --books ledger.xlsx",
+            file=sys.stderr,
+        )
+        return 2
+    result = run_workflow(
+        find_files(args.bank),
+        find_files(args.books),
+        args.out_dir,
+        None if args.no_odoo else load_config(args.config, target=args.target),
+        _tolerances(args),
+        args.a_label,
+        args.b_label,
+        args.date_order,
+        _mapper(args),
+    )
+    print("\n".join(result.summary_lines()))
+    print(f"\nEverything is in {result.folder}/ (start with reconciliation.xlsx)")
     return 0
 
 
@@ -252,6 +316,84 @@ def build_parser() -> argparse.ArgumentParser:
     )
     p.add_argument("--a-label", default="bank", help="name of side A in the report (default: bank)")
     p.add_argument("--b-label", default="books", help="name of side B (default: books)")
+    _tolerance_args(p)
+    p.add_argument("--map-a", action="append", metavar="COLUMN=FIELD", help="column hint for A")
+    p.add_argument("--map-b", action="append", metavar="COLUMN=FIELD", help="column hint for B")
+    p.add_argument("--date-order", choices=["auto", "day-first", "month-first"], default="auto")
+    p.add_argument("-o", "--output", type=Path, help="Excel file to write (default: output/)")
+    _ai_flags(p)
+
+    p = sub.add_parser("odoo-export", help="any file -> Odoo-ready import workbook")
+    p.add_argument("file", type=Path, nargs="?", help="the file to export")
+    p.add_argument(
+        "--target",
+        choices=["bank_statement_lines", "journal_entries"],
+        help="Odoo import to produce (default: from config/odoo.toml)",
+    )
+    p.add_argument("--journal", help="Odoo journal code, overriding config/odoo.toml")
+    p.add_argument("--config", type=Path, help="settings file (default: config/odoo.toml)")
+    p.add_argument("--csv", action="store_true", help="also write the import as CSV")
+    p.add_argument(
+        "--template",
+        action="store_true",
+        help="write empty import templates to templates/ and stop",
+    )
+    _common(p)
+
+    p = sub.add_parser("process", help="file(s) or a folder -> clean Excel + Odoo import")
+    p.add_argument("files", type=Path, nargs="+", help="PDF/Excel/CSV files, or a folder")
+    p.add_argument("--out-dir", type=Path, default=Path("output"), help="default: output/")
+    _odoo_args(p)
+    _common(p, output=False)
+
+    p = sub.add_parser("workflow", help="bank + books -> clean, Odoo-ready, reconciled")
+    p.add_argument(
+        "--bank",
+        type=Path,
+        action="append",
+        metavar="FILE",
+        help="statement file or folder (repeatable)",
+    )
+    p.add_argument(
+        "--books",
+        type=Path,
+        action="append",
+        metavar="FILE",
+        help="ledger file or folder (repeatable)",
+    )
+    p.add_argument("--out-dir", type=Path, help="default: output/workflow_<bank>_vs_<books>/")
+    p.add_argument("--a-label", default="bank", help=argparse.SUPPRESS)
+    p.add_argument("--b-label", default="books", help=argparse.SUPPRESS)
+    _tolerance_args(p)
+    _odoo_args(p)
+    _common(p, output=False, mapping=False)
+
+    p = sub.add_parser("ai", help="prompt library answered by Claude")
+    ai_sub = p.add_subparsers(dest="ai_command", metavar="<ai command>", required=True)
+    ai_sub.add_parser("list", help="the prompts available")
+    for name, text in [
+        ("show", "print a prompt filled in from a file (nothing is sent)"),
+        ("run", "send a prompt about a file to Claude and save the answer"),
+    ]:
+        q = ai_sub.add_parser(name, help=text)
+        q.add_argument("name", help="prompt name (see `reconpipe ai list`)")
+        q.add_argument("file", type=Path, help="the PDF, Excel or CSV file")
+        q.add_argument("-o", "--output", type=Path, help="file to write")
+        q.add_argument("--headers-only", action="store_true", help="share column names only")
+        if name == "run":
+            q.add_argument(
+                "--effort",
+                choices=["low", "medium", "high"],
+                default="medium",
+                help="how hard Claude thinks (default medium)",
+            )
+    q = ai_sub.add_parser("map-columns", help="let Claude map a file's columns, and remember it")
+    q.add_argument("file", type=Path, help="the PDF, Excel or CSV file")
+    q.add_argument("--headers-only", action="store_true", help="share column names only")
+    return parser
+
+
+def _tolerance_args(p: argparse.ArgumentParser) -> None:
     p.add_argument(
         "--amount-tolerance",
         type=float,
@@ -282,52 +424,6 @@ def build_parser() -> argparse.ArgumentParser:
         default=7,
         help="days apart for one-line-vs-several-lines matches (default 7)",
     )
-    p.add_argument("--map-a", action="append", metavar="COLUMN=FIELD", help="column hint for A")
-    p.add_argument("--map-b", action="append", metavar="COLUMN=FIELD", help="column hint for B")
-    p.add_argument("--date-order", choices=["auto", "day-first", "month-first"], default="auto")
-    p.add_argument("-o", "--output", type=Path, help="Excel file to write (default: output/)")
-    _ai_flags(p)
-
-    p = sub.add_parser("odoo-export", help="any file -> Odoo-ready import workbook")
-    p.add_argument("file", type=Path, nargs="?", help="the file to export")
-    p.add_argument(
-        "--target",
-        choices=["bank_statement_lines", "journal_entries"],
-        help="Odoo import to produce (default: from config/odoo.toml)",
-    )
-    p.add_argument("--journal", help="Odoo journal code, overriding config/odoo.toml")
-    p.add_argument("--config", type=Path, help="settings file (default: config/odoo.toml)")
-    p.add_argument("--csv", action="store_true", help="also write the import as CSV")
-    p.add_argument(
-        "--template",
-        action="store_true",
-        help="write empty import templates to templates/ and stop",
-    )
-    _common(p)
-
-    p = sub.add_parser("ai", help="prompt library answered by Claude")
-    ai_sub = p.add_subparsers(dest="ai_command", metavar="<ai command>", required=True)
-    ai_sub.add_parser("list", help="the prompts available")
-    for name, text in [
-        ("show", "print a prompt filled in from a file (nothing is sent)"),
-        ("run", "send a prompt about a file to Claude and save the answer"),
-    ]:
-        q = ai_sub.add_parser(name, help=text)
-        q.add_argument("name", help="prompt name (see `reconpipe ai list`)")
-        q.add_argument("file", type=Path, help="the PDF, Excel or CSV file")
-        q.add_argument("-o", "--output", type=Path, help="file to write")
-        q.add_argument("--headers-only", action="store_true", help="share column names only")
-        if name == "run":
-            q.add_argument(
-                "--effort",
-                choices=["low", "medium", "high"],
-                default="medium",
-                help="how hard Claude thinks (default medium)",
-            )
-    q = ai_sub.add_parser("map-columns", help="let Claude map a file's columns, and remember it")
-    q.add_argument("file", type=Path, help="the PDF, Excel or CSV file")
-    q.add_argument("--headers-only", action="store_true", help="share column names only")
-    return parser
 
 
 def _ai_flags(p: argparse.ArgumentParser) -> None:
@@ -343,14 +439,27 @@ def _ai_flags(p: argparse.ArgumentParser) -> None:
     )
 
 
-def _common(p: argparse.ArgumentParser) -> None:
-    p.add_argument("-o", "--output", type=Path, help="Excel file to write (default: output/)")
+def _odoo_args(p: argparse.ArgumentParser) -> None:
     p.add_argument(
-        "--map",
-        action="append",
-        metavar="COLUMN=FIELD",
-        help='say which column is which, e.g. --map "Txn Date=date" (repeatable)',
+        "--target",
+        choices=["bank_statement_lines", "journal_entries"],
+        help="Odoo import to produce (default: from config/odoo.toml)",
     )
+    p.add_argument("--config", type=Path, help="Odoo settings file (default: config/odoo.toml)")
+    p.add_argument("--no-odoo", action="store_true", help="skip the Odoo import file")
+    p.add_argument("--csv", action="store_true", help="also write the Odoo import as CSV")
+
+
+def _common(p: argparse.ArgumentParser, output: bool = True, mapping: bool = True) -> None:
+    if output:
+        p.add_argument("-o", "--output", type=Path, help="Excel file to write (default: output/)")
+    if mapping:
+        p.add_argument(
+            "--map",
+            action="append",
+            metavar="COLUMN=FIELD",
+            help='say which column is which, e.g. --map "Txn Date=date" (repeatable)',
+        )
     p.add_argument(
         "--date-order",
         choices=["auto", "day-first", "month-first"],

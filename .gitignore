@@ -41,6 +41,11 @@ logs/
 data/gl_raw/
 data/processed/
 output/
+# files dropped in for `reconpipe process inbox` (may be confidential)
+inbox/*
+!inbox/.gitkeep
+# column mappings remembered by `reconpipe ai map-columns` / --ai (yours to commit or not)
+# config/column_memory.json
 
 # Dagster local instance (dagster dev without DAGSTER_HOME)
 .tmp_dagster_home*/

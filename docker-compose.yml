@@ -1,6 +1,8 @@
 # docker compose up
 #   1. `pipeline` reconciles data/raw/ and exits; reports land in ./reports
 #   2. `app` then serves the review app on http://localhost:8501
+#   3. `toolkit` serves the upload app on http://localhost:8502 (results in ./output)
+#      set ANTHROPIC_API_KEY in your shell or a .env file to use the AI assistant
 services:
   pipeline:
     build: .
@@ -24,6 +26,27 @@ services:
       - warehouse:/app/warehouse
     ports:
       - "8501:8501"
+    depends_on:
+      pipeline:
+        condition: service_completed_successfully
+
+  toolkit:
+    image: reconpipe
+    command:
+      - streamlit
+      - run
+      - app/toolkit.py
+      - --server.address=0.0.0.0
+      - --server.port=8502
+      - --server.headless=true
+      - --browser.gatherUsageStats=false
+    environment:
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY:-}
+    volumes:
+      - ./output:/app/output
+      - ./config:/app/config
+    ports:
+      - "8502:8502"
     depends_on:
       pipeline:
         condition: service_completed_successfully

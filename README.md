@@ -105,7 +105,7 @@ docker compose up                    # reconcile, then the app on http://localho
 Other entry points:
 
 ```bash
-pytest                                                           # 155 tests
+pytest                                                           # 252 tests
 dbt build --project-dir dbt --profiles-dir dbt                   # matching + data tests only
 dagster dev                                                      # the DAG in the Dagster UI
 dagster asset materialize -m orchestration.definitions --select "*"
@@ -114,6 +114,30 @@ python scripts/generate_statements.py                            # regenerate th
 
 `python -m reconpipe` writes `reports/exceptions.csv` (the handoff to an accountant),
 `reports/matched.csv`, `reports/run_summary.json` and `data/quarantine/quarantine_<run>.csv`.
+
+## The toolkit: upload any file, get results
+
+Beyond the three known layouts, the same engine works on **any** bank statement
+or ledger, PDF, Excel or CSV, English or French, from a web page or one command:
+
+```bash
+streamlit run app/toolkit.py                                   # upload, then download the results
+reconpipe process statement.pdf                                # clean Excel + Odoo import
+reconpipe process inbox                                        # every file dropped in inbox/
+reconpipe workflow --bank statement.pdf --books ledger.xlsx    # clean, Odoo-ready, reconciled
+```
+
+| Tool | Command | Output |
+|---|---|---|
+| PDF bank statement → Excel | `reconpipe pdf-to-excel` | clean rows, raw extracted rows, issues |
+| Excel standardiser | `reconpipe standardize` | standard columns, signed `Decimal` amounts, ISO dates, issues |
+| Reconciliation engine | `reconpipe reconcile` | matched, mismatched, missing both ways, duplicates, with tolerances |
+| AI assistant / prompt library | `reconpipe ai` | Claude maps unknown columns and answers finance prompts about a file |
+| Odoo preparation | `reconpipe odoo-export` | validated bank-statement-line or journal-entry import |
+
+Run on the sample data, `reconpipe workflow` gives exactly the dbt engine's result
+(278 of 288 matched, the same exceptions item by item). The user guide is
+[docs/TOOLKIT.md](docs/TOOLKIT.md).
 
 ## Orchestration
 
@@ -151,12 +175,19 @@ src/reconpipe/
   load/               schema.sql, warehouse.py (idempotent loader)
   report/             builder.py: exceptions.csv, matched.csv, run_summary.json
   pipeline.py         python -m reconpipe
+  cli.py              reconpipe <command>: run, process, workflow and the five tools
+  tools/              the toolkit: reader, columns, standardizer, pdf_to_excel, reconcile,
+                      odoo, ai (+ prompts/), workflow
 dbt/                  staging, intermediate and marts models, generic and singular tests
 orchestration/        Dagster assets, checks, job and schedule
 app/dashboard.py      Streamlit review app
+app/toolkit.py        Streamlit upload app (process, reconcile, AI assistant)
+config/odoo.toml      Odoo journal and account codes for the imports
+templates/            empty Odoo import templates
+inbox/                drop files here for `reconpipe process inbox` (not committed)
 scripts/              synthetic statement and ledger generator
-tests/                155 tests, incl. an end-to-end run against ground truth
-docs/                 DESIGN_DECISIONS.md, PORTFOLIO.md, images
+tests/                252 tests, incl. an end-to-end run against ground truth
+docs/                 TOOLKIT.md (user guide), DESIGN_DECISIONS.md, PORTFOLIO.md, images
 CHANGELOG.md          release notes
 ```
 
@@ -184,12 +215,12 @@ The full reasoning is in [docs/DESIGN_DECISIONS.md](docs/DESIGN_DECISIONS.md). I
 
 Deliberately out of scope for v1.0, and the natural next steps:
 
-- **Odoo column mapping**, to read ledger exports straight from the accounting system.
-- **An AI-assisted column mapper** for unseen statement layouts (prototyped separately in `ai_ingestion/`).
 - **A BI reporting layer** on top of `recon_results`.
 - **Multi-tenant support and a login** for more than one company.
 - **Near-real-time ingestion** of statements as they arrive, instead of a daily batch.
-- **Many-to-one and fee-netted matching** as additional cascade tiers.
+- **Many-to-one and fee-netted matching** in the dbt cascade (the toolkit already
+  matches one line against a group of two or three, and takes an amount tolerance).
+- **Scanned PDFs** (OCR); today a PDF must contain text.
 
 ## Other projects in this repository
 

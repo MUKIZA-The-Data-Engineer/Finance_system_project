@@ -1,5 +1,23 @@
 # Changelog
 
+## Unreleased: the toolkit
+
+Any bank statement or ledger, not only the three known layouts.
+
+- **Any-file reader** for PDF (ruled tables or plain text), Excel (`.xlsx`, `.xls`)
+  and CSV (any delimiter and encoding); finds the header row in English or French.
+- **Five tools** behind one `reconpipe` command: `pdf-to-excel`, `standardize`,
+  `reconcile` (four matching tiers, tolerances, duplicates both sides), `odoo-export`
+  (bank statement lines or balanced journal entries, settings in `config/odoo.toml`)
+  and `ai` (a prompt library answered by Claude; `--ai` maps unknown columns and
+  remembers the mapping).
+- **One-step commands**: `reconpipe process FILE|FOLDER` and
+  `reconpipe workflow --bank ... --books ...`.
+- **Upload app** (`streamlit run app/toolkit.py`), also served by `docker compose up`
+  on port 8502.
+- On the sample data the toolkit reproduces the pipeline exactly: 288 bank lines,
+  the same 3 rows quarantined, 278 matched, every exception the same.
+
 ## v1.0.0 (10 November 2026)
 
 First release of ReconPipe: bank statement → ledger reconciliation, end to end.
