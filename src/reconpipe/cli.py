@@ -3,6 +3,7 @@
     reconpipe run             the full pipeline on data/raw/ (the default with no command)
     reconpipe pdf-to-excel    a PDF bank statement -> Excel
     reconpipe standardize     any messy PDF/Excel/CSV -> clean standard Excel + issues
+    reconpipe reconcile       two sets of files (e.g. bank vs books) -> reconciliation workbook
 
 Run `reconpipe <command> --help` for each command's options.
 """
@@ -70,6 +71,60 @@ def _standardize(args: argparse.Namespace) -> int:
     return 0
 
 
+@command("reconcile")
+def _reconcile(args: argparse.Namespace) -> int:
+    from decimal import Decimal
+
+    from reconpipe.tools.columns import parse_overrides
+    from reconpipe.tools.reconcile import Tolerances, reconcile_files, write_report
+
+    a_files, b_files = list(args.a or []), list(args.b or [])
+    if len(args.files) == 2 and not a_files and not b_files:
+        a_files, b_files = [args.files[0]], [args.files[1]]
+    elif args.files:
+        print("error: give exactly two files, or use --a and --b", file=sys.stderr)
+        return 2
+    if not a_files or not b_files:
+        print(
+            "error: need files on both sides (e.g. reconpipe reconcile bank.pdf books.xlsx)",
+            file=sys.stderr,
+        )
+        return 2
+    tolerances = Tolerances(
+        amount=Decimal(str(args.amount_tolerance)),
+        days=args.date_tolerance,
+        description_days=args.description_days,
+        min_similarity=args.min_similarity,
+        group_days=args.group_days,
+    )
+    result = reconcile_files(
+        a_files,
+        b_files,
+        tolerances,
+        args.a_label,
+        args.b_label,
+        parse_overrides(args.map_a),
+        parse_overrides(args.map_b),
+        args.date_order,
+    )
+    out = (
+        args.output
+        or Path("output") / f"reconciliation_{a_files[0].stem}_vs_{b_files[0].stem}.xlsx"
+    )
+    write_report(result, out)
+    s = result.summary
+    by_status = s["items_by_status"]
+    print(
+        f"{s['matched_a_lines']} of {s['a_lines']} {args.a_label} lines matched "
+        f"({s['match_rate']:.1%}); {by_status['amount_mismatch']} amount mismatches, "
+        f"{by_status['missing_in_b']} missing in {args.b_label}, "
+        f"{by_status['missing_in_a']} missing in {args.a_label}, "
+        f"{by_status['duplicate_suspected']} suspected duplicates"
+    )
+    print(f"Excel: {out}")
+    return 0
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         prog="reconpipe",
@@ -86,6 +141,51 @@ def build_parser() -> argparse.ArgumentParser:
     p = sub.add_parser("standardize", help="any messy PDF/Excel/CSV -> clean standard Excel")
     p.add_argument("file", type=Path, help="the file to clean")
     _common(p)
+
+    p = sub.add_parser("reconcile", help="side A files vs side B files -> reconciliation workbook")
+    p.add_argument("files", type=Path, nargs="*", help="shortcut: A_FILE B_FILE")
+    p.add_argument(
+        "--a", type=Path, action="append", metavar="FILE", help="side A file (repeatable)"
+    )
+    p.add_argument(
+        "--b", type=Path, action="append", metavar="FILE", help="side B file (repeatable)"
+    )
+    p.add_argument("--a-label", default="bank", help="name of side A in the report (default: bank)")
+    p.add_argument("--b-label", default="books", help="name of side B (default: books)")
+    p.add_argument(
+        "--amount-tolerance",
+        type=float,
+        default=0.0,
+        help="amounts this far apart still match (default 0)",
+    )
+    p.add_argument(
+        "--date-tolerance",
+        type=int,
+        default=2,
+        help="days apart for amount + date matches (default 2)",
+    )
+    p.add_argument(
+        "--description-days",
+        type=int,
+        default=14,
+        help="days apart for amount + description matches (default 14)",
+    )
+    p.add_argument(
+        "--min-similarity",
+        type=float,
+        default=0.4,
+        help="text similarity needed for description matches, 0-1 (default 0.4)",
+    )
+    p.add_argument(
+        "--group-days",
+        type=int,
+        default=7,
+        help="days apart for one-line-vs-several-lines matches (default 7)",
+    )
+    p.add_argument("--map-a", action="append", metavar="COLUMN=FIELD", help="column hint for A")
+    p.add_argument("--map-b", action="append", metavar="COLUMN=FIELD", help="column hint for B")
+    p.add_argument("--date-order", choices=["auto", "day-first", "month-first"], default="auto")
+    p.add_argument("-o", "--output", type=Path, help="Excel file to write (default: output/)")
     return parser
 
 
