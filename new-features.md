@@ -1,3 +1,3 @@
 1. The ETL should also be able to read the excel file that has multiple sheets.
 2. For proper recording and reporting, an Income statement should have each month expense and the total at the end.
-3. 
+3. The thing is that usually when I am getting excel files into Odoo expecially expenses I will have to make sure that chart of acoount number 

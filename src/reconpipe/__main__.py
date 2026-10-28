@@ -1,3 +1,3 @@
-from reconpipe.pipeline import main
+from reconpipe.cli import main
 
 raise SystemExit(main())

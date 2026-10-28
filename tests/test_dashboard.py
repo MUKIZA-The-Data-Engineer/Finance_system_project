@@ -1,8 +1,8 @@
 """The review app renders from the warehouse and its filters work (Streamlit AppTest)."""
 
-import shutil
 from pathlib import Path
 
+import duckdb
 import pytest
 
 pytest.importorskip("streamlit")
@@ -15,11 +15,18 @@ APP = Path(__file__).resolve().parent.parent / "app" / "dashboard.py"
 def warehouse_copy(built_warehouse, tmp_path, monkeypatch):
     # dbt keeps the built file open read-write in this process; the app opens
     # read-only, which DuckDB refuses on the same file, so the app gets a copy.
+    # The copy goes through DuckDB, not the file system: on Windows the open
+    # file is locked against plain reads, but this process's DuckDB can share it.
     _, db = built_warehouse
     copy = tmp_path / "warehouse.duckdb"
-    for suffix in ("", ".wal"):
-        if Path(f"{db}{suffix}").exists():
-            shutil.copy(f"{db}{suffix}", f"{copy}{suffix}")
+    con = duckdb.connect(str(db))  # same config as dbt's connection
+    try:
+        (source,) = con.execute("SELECT current_database()").fetchone()
+        con.execute(f"ATTACH '{copy.as_posix()}' AS app_copy")
+        con.execute(f'COPY FROM DATABASE "{source}" TO app_copy')
+        con.execute("DETACH app_copy")
+    finally:
+        con.close()
     monkeypatch.setenv("RECONPIPE_DB", str(copy))
     return copy
 
