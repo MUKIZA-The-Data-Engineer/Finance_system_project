@@ -4,6 +4,7 @@
     reconpipe pdf-to-excel    a PDF bank statement -> Excel
     reconpipe standardize     any messy PDF/Excel/CSV -> clean standard Excel + issues
     reconpipe reconcile       two sets of files (e.g. bank vs books) -> reconciliation workbook
+    reconpipe odoo-export     any file -> Odoo-ready import workbook (settings: config/odoo.toml)
 
 Run `reconpipe <command> --help` for each command's options.
 """
@@ -125,6 +126,37 @@ def _reconcile(args: argparse.Namespace) -> int:
     return 0
 
 
+@command("odoo-export")
+def _odoo_export(args: argparse.Namespace) -> int:
+    from reconpipe.tools.columns import parse_overrides
+    from reconpipe.tools.excel_out import default_output
+    from reconpipe.tools.odoo import TARGETS, export_file, load_config, write_export, write_template
+
+    if args.template:
+        targets = [args.target] if args.target else list(TARGETS)
+        for target in targets:
+            path = write_template(target, Path("templates") / f"odoo_{target}_template.xlsx")
+            print(f"Template: {path}")
+        return 0
+    if args.file is None:
+        print("error: give a file to export, or --template", file=sys.stderr)
+        return 2
+    cfg = load_config(args.config, target=args.target, journal=args.journal)
+    export = export_file(args.file, cfg, parse_overrides(args.map), args.date_order)
+    written = write_export(export, args.output or default_output(args.file, "odoo"), args.csv)
+    errors = sum(i.severity == "error" for i in export.issues)
+    warnings = sum(i.severity == "warning" for i in export.issues)
+    print(
+        f"{export.exported_rows} line(s) ready for Odoo ({cfg.target}); "
+        f"{errors} error(s), {warnings} warning(s) (see the 'issues' sheet)"
+    )
+    if cfg.examples_in_use():
+        print("note: config/odoo.toml still has EXAMPLE codes; set your real Odoo codes first")
+    for path in written:
+        print(f"Wrote: {path}")
+    return 0
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         prog="reconpipe",
@@ -186,6 +218,23 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("--map-b", action="append", metavar="COLUMN=FIELD", help="column hint for B")
     p.add_argument("--date-order", choices=["auto", "day-first", "month-first"], default="auto")
     p.add_argument("-o", "--output", type=Path, help="Excel file to write (default: output/)")
+
+    p = sub.add_parser("odoo-export", help="any file -> Odoo-ready import workbook")
+    p.add_argument("file", type=Path, nargs="?", help="the file to export")
+    p.add_argument(
+        "--target",
+        choices=["bank_statement_lines", "journal_entries"],
+        help="Odoo import to produce (default: from config/odoo.toml)",
+    )
+    p.add_argument("--journal", help="Odoo journal code, overriding config/odoo.toml")
+    p.add_argument("--config", type=Path, help="settings file (default: config/odoo.toml)")
+    p.add_argument("--csv", action="store_true", help="also write the import as CSV")
+    p.add_argument(
+        "--template",
+        action="store_true",
+        help="write empty import templates to templates/ and stop",
+    )
+    _common(p)
     return parser
 
 
@@ -212,11 +261,12 @@ def main(argv: list[str] | None = None) -> int:
         logging.getLogger().setLevel(logging.INFO)
         return COMMANDS["run"](args)
     from reconpipe.tools.columns import MappingInputError
+    from reconpipe.tools.odoo import OdooConfigError
     from reconpipe.tools.reader import UnreadableFileError
     from reconpipe.tools.standardizer import MappingError
 
     try:
         return COMMANDS[args.command](args)
-    except (UnreadableFileError, MappingError, MappingInputError) as exc:
+    except (UnreadableFileError, MappingError, MappingInputError, OdooConfigError) as exc:
         print(f"error: {exc}", file=sys.stderr)
         return 2

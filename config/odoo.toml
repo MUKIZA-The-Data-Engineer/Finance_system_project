@@ -1,0 +1,34 @@
+# ReconPipe -> Odoo import settings. Edit the EXAMPLE values to match your Odoo,
+# then run:  reconpipe odoo-export <file>
+#
+# Until you change them, every export carries a warning that example codes are
+# still in use.
+
+[odoo]
+# What to produce:
+#   "bank_statement_lines"  Accounting > Bank > Import (one line per transaction)
+#   "journal_entries"       Accounting > Journal Entries > Import (balanced debit/credit lines)
+target = "bank_statement_lines"
+
+# Default Odoo journal (its code or name, as shown in Odoo) for lines whose bank
+# account is not listed under [journals].
+journal = "EXAMPLE-BNK1"
+
+# Journal entries only: the bank's ledger account, and the suspense account the
+# other side of each line is posted to until it is reclassified in Odoo.
+bank_account_code = "EXAMPLE-1000"
+suspense_account_code = "EXAMPLE-499999"
+
+# Date format Odoo expects in the import file.
+date_format = "%Y-%m-%d"
+
+# true: a line without a partner is an error; false: it is a warning.
+partner_required = false
+
+# Bank account number (as printed on the statement) -> Odoo journal.
+[journals]
+# "0040-1187342-01" = "BNK1"
+
+# Bank account number -> Odoo ledger account code (journal entries only).
+[accounts]
+# "0040-1187342-01" = "512001"
