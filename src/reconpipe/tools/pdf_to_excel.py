@@ -61,13 +61,14 @@ def pdf_to_excel(
     overrides: dict[str, str] | None = None,
     date_order: str = "auto",
     today: dt.date | None = None,
+    mapper=None,
 ) -> PdfToExcelResult:
     source = Path(source)
     if source.suffix.lower() not in PDF_SUFFIXES:
         raise UnreadableFileError(f"{source.name}: pdf-to-excel needs a .pdf file")
     read = read_tables(source, hints=list(overrides or {}))
     try:
-        clean = standardize_tables(read, overrides, date_order, today)
+        clean = standardize_tables(read, overrides, date_order, today, mapper)
     except MappingError as exc:
         clean, problem = None, str(exc)
     else:

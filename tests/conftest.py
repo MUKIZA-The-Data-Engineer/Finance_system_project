@@ -32,3 +32,9 @@ def built_warehouse(tmp_path_factory):
     result = dbt_main.dbtRunner().invoke(args)
     mp.undo()
     return result, db
+
+
+@pytest.fixture(autouse=True)
+def _private_column_memory(tmp_path, monkeypatch):
+    """Tests never read or write the user's config/column_memory.json."""
+    monkeypatch.setenv("RECONPIPE_COLUMN_MEMORY", str(tmp_path / "column_memory.json"))

@@ -5,6 +5,7 @@
     reconpipe standardize     any messy PDF/Excel/CSV -> clean standard Excel + issues
     reconpipe reconcile       two sets of files (e.g. bank vs books) -> reconciliation workbook
     reconpipe odoo-export     any file -> Odoo-ready import workbook (settings: config/odoo.toml)
+    reconpipe ai              prompt library answered by Claude (list, show, run, map-columns)
 
 Run `reconpipe <command> --help` for each command's options.
 """
@@ -35,6 +36,16 @@ def _run(args: argparse.Namespace) -> int:
     return pipeline_main()
 
 
+def _mapper(args: argparse.Namespace):
+    """Remembered column mappings always apply; Claude is asked only with --ai."""
+    from reconpipe.tools.ai import make_mapper
+
+    def asking(table) -> None:
+        print(f"Asking Claude which column is which in {table.source_file} [{table.sheet}]...")
+
+    return make_mapper(args.ai, headers_only=args.headers_only, on_ask=asking)
+
+
 def _print_standardized(summary: dict) -> None:
     print(
         f"{summary['clean_rows']} clean rows from {summary['rows_read']} read; "
@@ -49,7 +60,13 @@ def _pdf_to_excel(args: argparse.Namespace) -> int:
     from reconpipe.tools.columns import parse_overrides
     from reconpipe.tools.pdf_to_excel import pdf_to_excel
 
-    result = pdf_to_excel(args.file, args.output, parse_overrides(args.map), args.date_order)
+    result = pdf_to_excel(
+        args.file,
+        args.output,
+        parse_overrides(args.map),
+        args.date_order,
+        mapper=_mapper(args),
+    )
     print(f"Read {args.file.name} ({result.read.tables[0].method})")
     if result.standardized:
         _print_standardized(result.standardized.summary)
@@ -65,7 +82,9 @@ def _standardize(args: argparse.Namespace) -> int:
     from reconpipe.tools.excel_out import default_output
     from reconpipe.tools.standardizer import standardize_file, write_standardized
 
-    result = standardize_file(args.file, parse_overrides(args.map), args.date_order)
+    result = standardize_file(
+        args.file, parse_overrides(args.map), args.date_order, mapper=_mapper(args)
+    )
     out = write_standardized(result, args.output or default_output(args.file, "standardized"))
     _print_standardized(result.summary)
     print(f"Excel: {out}")
@@ -107,6 +126,7 @@ def _reconcile(args: argparse.Namespace) -> int:
         parse_overrides(args.map_a),
         parse_overrides(args.map_b),
         args.date_order,
+        mapper=_mapper(args),
     )
     out = (
         args.output
@@ -142,7 +162,7 @@ def _odoo_export(args: argparse.Namespace) -> int:
         print("error: give a file to export, or --template", file=sys.stderr)
         return 2
     cfg = load_config(args.config, target=args.target, journal=args.journal)
-    export = export_file(args.file, cfg, parse_overrides(args.map), args.date_order)
+    export = export_file(args.file, cfg, parse_overrides(args.map), args.date_order, _mapper(args))
     written = write_export(export, args.output or default_output(args.file, "odoo"), args.csv)
     errors = sum(i.severity == "error" for i in export.issues)
     warnings = sum(i.severity == "warning" for i in export.issues)
@@ -154,6 +174,54 @@ def _odoo_export(args: argparse.Namespace) -> int:
         print("note: config/odoo.toml still has EXAMPLE codes; set your real Odoo codes first")
     for path in written:
         print(f"Wrote: {path}")
+    return 0
+
+
+@command("ai")
+def _ai(args: argparse.Namespace) -> int:
+    from reconpipe.tools import ai
+
+    if args.ai_command == "list":
+        for name, prompt in ai.prompts().items():
+            print(f"{name:18} {prompt.title}: {prompt.description}")
+        return 0
+    if args.ai_command == "show":
+        text = ai.render(args.name, args.file, args.headers_only)
+        if args.output:
+            args.output.parent.mkdir(parents=True, exist_ok=True)
+            args.output.write_text(text, encoding="utf-8")
+            print(f"Prompt: {args.output}")
+        else:
+            print(text)
+        return 0
+    if args.ai_command == "run":
+        answer = ai.run(args.name, args.file, args.headers_only, effort=args.effort)
+        out = args.output or Path("output") / f"{args.file.stem}_{args.name}.md"
+        out.parent.mkdir(parents=True, exist_ok=True)
+        out.write_text(answer + "\n", encoding="utf-8")
+        print(answer)
+        print(f"\nSaved: {out}")
+        return 0
+    # map-columns: ask Claude for every table, show the result, remember it
+    from reconpipe.tools.columns import map_columns
+    from reconpipe.tools.reader import read_tables
+
+    for table in read_tables(args.file).tables:
+        rules = map_columns(table.header)
+        suggestion = ai.suggest_mapping(table, headers_only=args.headers_only)
+        fields = {c: f for c, f, conf in suggestion if conf >= ai.MIN_CONFIDENCE}
+        merged = ai.merge(rules, fields)
+        print(f"{table.source_file} [{table.sheet}]")
+        confidence = {c: conf for c, _, conf in suggestion}
+        for choice in merged.choices:
+            conf = confidence.get(choice.source)
+            note = f"  (Claude {conf:.0%} sure)" if conf is not None else ""
+            print(f"  {choice.source:30} -> {choice.field:12} [{choice.how}]{note}")
+        if merged.missing:
+            print(f"  still missing: {', '.join(merged.missing)}; not remembered")
+        else:
+            saved = ai.remember(table.header, {c.source: c.field for c in merged.choices})
+            print(f"  remembered in {saved}: files with these columns now map automatically")
     return 0
 
 
@@ -218,6 +286,7 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("--map-b", action="append", metavar="COLUMN=FIELD", help="column hint for B")
     p.add_argument("--date-order", choices=["auto", "day-first", "month-first"], default="auto")
     p.add_argument("-o", "--output", type=Path, help="Excel file to write (default: output/)")
+    _ai_flags(p)
 
     p = sub.add_parser("odoo-export", help="any file -> Odoo-ready import workbook")
     p.add_argument("file", type=Path, nargs="?", help="the file to export")
@@ -235,7 +304,43 @@ def build_parser() -> argparse.ArgumentParser:
         help="write empty import templates to templates/ and stop",
     )
     _common(p)
+
+    p = sub.add_parser("ai", help="prompt library answered by Claude")
+    ai_sub = p.add_subparsers(dest="ai_command", metavar="<ai command>", required=True)
+    ai_sub.add_parser("list", help="the prompts available")
+    for name, text in [
+        ("show", "print a prompt filled in from a file (nothing is sent)"),
+        ("run", "send a prompt about a file to Claude and save the answer"),
+    ]:
+        q = ai_sub.add_parser(name, help=text)
+        q.add_argument("name", help="prompt name (see `reconpipe ai list`)")
+        q.add_argument("file", type=Path, help="the PDF, Excel or CSV file")
+        q.add_argument("-o", "--output", type=Path, help="file to write")
+        q.add_argument("--headers-only", action="store_true", help="share column names only")
+        if name == "run":
+            q.add_argument(
+                "--effort",
+                choices=["low", "medium", "high"],
+                default="medium",
+                help="how hard Claude thinks (default medium)",
+            )
+    q = ai_sub.add_parser("map-columns", help="let Claude map a file's columns, and remember it")
+    q.add_argument("file", type=Path, help="the PDF, Excel or CSV file")
+    q.add_argument("--headers-only", action="store_true", help="share column names only")
     return parser
+
+
+def _ai_flags(p: argparse.ArgumentParser) -> None:
+    p.add_argument(
+        "--ai",
+        action="store_true",
+        help="ask Claude which column is which when the built-in rules cannot tell",
+    )
+    p.add_argument(
+        "--headers-only",
+        action="store_true",
+        help="with --ai, share column names only (no sample rows)",
+    )
 
 
 def _common(p: argparse.ArgumentParser) -> None:
@@ -252,6 +357,7 @@ def _common(p: argparse.ArgumentParser) -> None:
         default="auto",
         help="how to read dates like 05/01/2026 when the file itself cannot tell",
     )
+    _ai_flags(p)
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -260,6 +366,7 @@ def main(argv: list[str] | None = None) -> int:
     if args.command is None:
         logging.getLogger().setLevel(logging.INFO)
         return COMMANDS["run"](args)
+    from reconpipe.tools.ai import AIError
     from reconpipe.tools.columns import MappingInputError
     from reconpipe.tools.odoo import OdooConfigError
     from reconpipe.tools.reader import UnreadableFileError
@@ -267,6 +374,12 @@ def main(argv: list[str] | None = None) -> int:
 
     try:
         return COMMANDS[args.command](args)
-    except (UnreadableFileError, MappingError, MappingInputError, OdooConfigError) as exc:
+    except (
+        UnreadableFileError,
+        MappingError,
+        MappingInputError,
+        OdooConfigError,
+        AIError,
+    ) as exc:
         print(f"error: {exc}", file=sys.stderr)
         return 2
