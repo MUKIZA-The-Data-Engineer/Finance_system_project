@@ -69,6 +69,7 @@ AMOUNT_TOKEN = re.compile(
 
 
 MONEY_SHAPE = re.compile(r"[.,]\d{2}(?:\D*)$|\d[,\s.]\d{3}")
+NUMERIC_TEXT = re.compile(r"[\d\s.,/:+()\-]+")  # "1,250.00", "05/01/2026": values, not names
 
 
 @dataclass
@@ -111,24 +112,40 @@ def normalise(text: object) -> str:
     return " ".join(re.sub(r"[^a-z0-9]+", " ", text).split())
 
 
-def _score(row: list[object]) -> tuple[int, float]:
+def _score(row: list[object], hints: frozenset[str] = frozenset()) -> tuple[int, float]:
     cells = [c for c in row if c is not None and str(c).strip()]
     if not cells:
         return 0, 0.0
     words = {w for c in cells for w in normalise(c).split()}
     hits = {k for k in HEADER_KEYWORDS if k in words}
+    hits |= {normalise(c) for c in cells if normalise(c) in hints}
     text_ratio = sum(isinstance(c, str) for c in cells) / len(cells)
     return len(hits), text_ratio
 
 
-def find_header(rows: list[list[object]], scan: int = HEADER_SCAN_ROWS) -> int | None:
-    """Index of the row that best looks like a header, or None."""
+def find_header(
+    rows: list[list[object]], scan: int = HEADER_SCAN_ROWS, hints: frozenset[str] = frozenset()
+) -> int | None:
+    """Index of the row that best looks like a header, or None.
+
+    hints are column names the user has named (e.g. in --map); each counts as a header word.
+    """
     best, best_score = None, (0, 0.0)
     for i, row in enumerate(rows[:scan]):
-        hits, ratio = _score(row)
+        hits, ratio = _score(row, hints)
         if hits >= MIN_HEADER_KEYWORDS and ratio >= MIN_TEXT_RATIO and (hits, ratio) > best_score:
             best, best_score = i, (hits, ratio)
     return best
+
+
+def _first_text_row(rows: list[list[object]], scan: int = HEADER_SCAN_ROWS) -> int | None:
+    """Fallback header: the first row of at least two text cells (and mostly text)."""
+    for i, row in enumerate(rows[:scan]):
+        cells = [c for c in row if c is not None and str(c).strip()]
+        words = [c for c in cells if isinstance(c, str) and not NUMERIC_TEXT.fullmatch(c.strip())]
+        if len(cells) >= 2 and len(words) / len(cells) >= MIN_TEXT_RATIO:
+            return i
+    return None
 
 
 def _header_names(row: list[object]) -> list[str]:
@@ -151,11 +168,20 @@ def find_account(lines: list[object]) -> str | None:
 
 
 def _table_from_grid(
-    source: str, sheet: str, grid: list[list[object]], numbers: list[int], method: str
+    source: str,
+    sheet: str,
+    grid: list[list[object]],
+    numbers: list[int],
+    method: str,
+    hints: frozenset[str] = frozenset(),
 ) -> Table | None:
-    header_idx = find_header(grid)
+    header_idx = find_header(grid, hints=hints)
+    notes = []
     if header_idx is None:
-        return None
+        header_idx = _first_text_row(grid)
+        if header_idx is None:
+            return None
+        notes.append(f"no recognised column names: row {numbers[header_idx]} used as the header")
     header = _header_names(grid[header_idx])
     width = len(header)
     rows, row_numbers = [], []
@@ -166,7 +192,7 @@ def _table_from_grid(
         rows.append(values)
         row_numbers.append(number)
     above = [c for row in grid[:header_idx] for c in row]
-    return Table(source, sheet, header, rows, row_numbers, method, find_account(above))
+    return Table(source, sheet, header, rows, row_numbers, method, find_account(above), notes)
 
 
 # --------------------------------------------------------------------------- #
@@ -231,7 +257,7 @@ def _excel_sheets(path: Path) -> list[tuple[str, list[list[object]]]]:
         wb.close()
 
 
-def _read_excel(path: Path) -> ReadResult:
+def _read_excel(path: Path, hints: frozenset[str] = frozenset()) -> ReadResult:
     result = ReadResult(path.name, "excel")
     try:
         sheets = _excel_sheets(path)
@@ -240,7 +266,7 @@ def _read_excel(path: Path) -> ReadResult:
     for name, grid in sheets:
         grid = [[v if not isinstance(v, float) else Decimal(str(v)) for v in row] for row in grid]
         table = _table_from_grid(
-            path.name, name, grid, list(range(1, len(grid) + 1)), "excel_header"
+            path.name, name, grid, list(range(1, len(grid) + 1)), "excel_header", hints
         )
         if table is None:
             result.notes.append(f"sheet '{name}': no header row found, skipped")
@@ -258,7 +284,7 @@ def _decode(data: bytes) -> str:
     raise UnreadableFileError("cannot decode text")  # pragma: no cover - latin-1 never fails
 
 
-def _read_csv(path: Path) -> ReadResult:
+def _read_csv(path: Path, hints: frozenset[str] = frozenset()) -> ReadResult:
     text = _decode(path.read_bytes())
     sample = text[:20000]
     try:
@@ -270,13 +296,14 @@ def _read_csv(path: Path) -> ReadResult:
     for row in reader:
         grid.append([c if c.strip() else None for c in row])
         numbers.append(reader.line_num)
-    table = _table_from_grid(path.name, "csv", grid, numbers, f"csv (delimiter {delimiter!r})")
+    method = f"csv (delimiter {delimiter!r})"
+    table = _table_from_grid(path.name, "csv", grid, numbers, method, hints)
     if table is None:
         raise UnreadableFileError(f"{path.name}: no header row found in the first lines")
     return ReadResult(path.name, "csv", [table])
 
 
-def _read_pdf(path: Path) -> ReadResult:
+def _read_pdf(path: Path, hints: frozenset[str] = frozenset()) -> ReadResult:
     import pdfplumber
     from pdfplumber.utils.exceptions import PdfminerException
 
@@ -295,10 +322,15 @@ def _read_pdf(path: Path) -> ReadResult:
             grid = [[c.replace("\n", " ") if isinstance(c, str) else c for c in r] for r in grid]
             if merged is None:
                 merged = _table_from_grid(
-                    path.name, "pdf tables", grid, list(range(1, len(grid) + 1)), "pdf_tables"
+                    path.name,
+                    "pdf tables",
+                    grid,
+                    list(range(1, len(grid) + 1)),
+                    "pdf_tables",
+                    hints,
                 )
                 continue
-            header_idx = find_header(grid)
+            header_idx = find_header(grid, hints=hints)
             same = header_idx is not None and _header_names(grid[header_idx]) == merged.header
             body = grid[header_idx + 1 :] if same else grid
             for values in body:
@@ -363,8 +395,12 @@ def _text_lines(text: str) -> list[list[object]]:
     return rows
 
 
-def read_tables(path: Path) -> ReadResult:
-    """Read every table in a PDF, Excel or CSV file."""
+def read_tables(path: Path, hints: list[str] | None = None) -> ReadResult:
+    """Read every table in a PDF, Excel or CSV file.
+
+    hints: column names the caller knows are in the header (e.g. from --map).
+    """
+    hint_set = frozenset(normalise(h) for h in hints or [])
     path = Path(path)
     if not path.exists():
         raise UnreadableFileError(f"{path}: file not found")
@@ -377,11 +413,11 @@ def read_tables(path: Path) -> ReadResult:
     if known is not None:
         return known
     if suffix in EXCEL_SUFFIXES:
-        result = _read_excel(path)
+        result = _read_excel(path, hint_set)
     elif suffix in CSV_SUFFIXES:
-        result = _read_csv(path)
+        result = _read_csv(path, hint_set)
     else:
-        result = _read_pdf(path)
+        result = _read_pdf(path, hint_set)
     if not result.tables:
         raise UnreadableFileError(f"{path.name}: no table with a recognisable header found")
     return result

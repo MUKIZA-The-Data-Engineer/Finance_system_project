@@ -99,9 +99,9 @@ def test_cli_pdf_to_excel(tmp_path, capsys):
     out = tmp_path / "out.xlsx"
     assert main(["pdf-to-excel", str(fx.ruled_pdf(tmp_path)), "-o", str(out)]) == 0
     wb = load_workbook(out)
-    assert wb.sheetnames == ["pdf tables", "about"]
-    assert wb["pdf tables"].max_row == 1 + len(fx.LINES)
-    assert "Read 4 rows" in capsys.readouterr().out
+    assert wb.sheetnames[0] == "clean" and wb.sheetnames[-1] == "about"
+    assert wb["extracted pdf tables"].max_row == 1 + len(fx.LINES)
+    assert "4 clean rows" in capsys.readouterr().out
 
 
 def test_cli_reports_unreadable_files(tmp_path, capsys):

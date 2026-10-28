@@ -71,7 +71,7 @@ class StandardizeError(ValueError):
 # --------------------------------------------------------------------------- #
 
 
-def infer_date_format(texts: list[str]) -> str:
+def infer_date_format(texts: list[str], formats: tuple[str, ...] = DATE_FORMATS) -> str:
     """Return the format that reads the most date texts in a file.
 
     Rows the winning format cannot read fail on their own later, so one typo
@@ -79,7 +79,7 @@ def infer_date_format(texts: list[str]) -> str:
     genuinely reads two ways and is rejected rather than guessed.
     """
     reads = {}
-    for fmt in DATE_FORMATS:
+    for fmt in formats:
         count = 0
         for text in texts:
             try:
